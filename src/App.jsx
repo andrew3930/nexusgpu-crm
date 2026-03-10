@@ -11,6 +11,7 @@ function useIsMobile() {
 }
 
 const PASSWORD = "Blonduos3930$!";
+const TECH_PASSWORD = "CanopyWave$!";
 
 function HorizonLogo({size=36, stop1="#0055ee", stop2="#00bbff"}) {
   return (
@@ -188,7 +189,8 @@ function PasswordGate({ onUnlock }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
   const submit = () => {
-    if (input === PASSWORD) { localStorage.setItem("nexus-auth", "1"); onUnlock(); }
+    if (input === PASSWORD) { localStorage.setItem("nexus-auth", "1"); onUnlock("admin"); }
+    else if (input === TECH_PASSWORD) { localStorage.setItem("nexus-auth", "tech"); onUnlock("tech"); }
     else { setError(true); setTimeout(() => setError(false), 1500); }
   };
   return (
@@ -254,13 +256,29 @@ const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bf
 const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
 
 export default function App() {
-  const [authed, setAuthed] = useState(() => localStorage.getItem("nexus-auth") === "1");
-  if (!authed) return <PasswordGate onUnlock={() => setAuthed(true)} />;
-  return <CRM />;
+  const [authed, setAuthed] = useState(() => {
+    const a = localStorage.getItem("nexus-auth");
+    return a === "1" || a === "tech";
+  });
+  const [role, setRole] = useState(() => localStorage.getItem("nexus-auth") === "tech" ? "tech" : "admin");
+
+  if (!authed) return <PasswordGate onUnlock={(r) => { setAuthed(true); setRole(r); }} />;
+  return <CRM role={role} setRole={setRole} />;
 }
 
-function CRM() {
+function CRM({ role = "admin", setRole }) {
   const { t, horizon, toggleTheme } = useTheme();
+  const isTech = role === "tech";
+  const [showTechModal, setShowTechModal] = useState(false);
+  const [techInput, setTechInput] = useState("");
+  const [techError, setTechError] = useState(false);
+  const switchToTech = () => {
+    if (techInput === TECH_PASSWORD) {
+      localStorage.setItem("nexus-auth","tech");
+      setRole("tech"); setShowTechModal(false); setTechInput("");
+    } else { setTechError(true); setTimeout(()=>setTechError(false),1500); }
+  };
+  const switchToAdmin = () => { localStorage.setItem("nexus-auth","1"); setRole("admin"); };
   const [fbReady, setFbReady]           = useState(false);
   const [fbError, setFbError]           = useState(null);
   const [deals, setDeals]               = useState([]);
@@ -418,6 +436,7 @@ function CRM() {
       editingId={editingId} modal30={modal30}
       addAlloc={addAlloc} removeAlloc={removeAlloc} updateAlloc={updateAlloc}
       MAX_H100={MAX_H100} MAX_H200={MAX_H200}
+      isTech={isTech} role={role} setRole={setRole}
     />
   );
 
@@ -481,13 +500,17 @@ function CRM() {
             <span className={fbReady?"livepulse":""} style={{fontSize:8}}>●</span>
             {fbReady?`LIVE · ${onlineUsers} ONLINE`:"CONNECTING…"}
           </span>
-          <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",transition:"all .2s"}}>
+          {isTech && <span style={{fontSize:10,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"4px 12px",letterSpacing:"0.1em",fontWeight:700}}>👷 TECH VIEW</span>}
+          {!isTech && <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",transition:"all .2s"}}>
             {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
-          </button>
+          </button>}
           <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#1e3550"}>
             🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#0099ff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
           </button>
-          <button className="btn-primary" onClick={openNew}>+ New Deal</button>
+          {!isTech && <button onClick={()=>setShowTechModal(true)} style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"}}>👷 Tech View</button>}
+          {isTech && <button onClick={switchToAdmin} style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"}}>⬡ Admin View</button>}
+          {!isTech && <button className="btn-primary" onClick={openNew}>+ New Deal</button>}
+          {isTech && <button className="btn-primary" onClick={openNew}>+ New Deal</button>}
         </div>
       </div>
 
@@ -551,7 +574,7 @@ function CRM() {
       {loadState==="ready"&&(
         <div style={{padding:"28px 32px"}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16,marginBottom:28}}>
-            {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
+            {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
               <div className="stat-card" key={s.label}>
                 <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>{s.label}</div>
                 <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:700,color:t.textBright,minHeight:34}}>
@@ -645,7 +668,13 @@ function CRM() {
               <thead>
                 <tr style={{borderBottom:`1px solid ${t.border}`,background:t.bgHeader}}>
                   <th style={{width:32,padding:"13px 8px 13px 16px"}}></th>
-                  {[["customer","Customer"],["startDate","Start Date"],["endDate","End Date"],[null,"GPU Allocations"],[null,"Nodes"],[null,"Storage"],["grand30","30-Day Total"],["fullContractValue","Full Contract"],["paymentTerms","Payment Terms"],["status","Status"],["totalCollected","Collected"],[null,"Actions"]].map(([key,label])=>(
+                  {[["customer","Customer"],["startDate","Start Date"],["endDate","End Date"],[null,"GPU Allocations"],[null,"Nodes"],
+                    ...(isTech?[]:[
+                      [null,"Storage"],["grand30","30-Day Total"],["fullContractValue","Full Contract"],
+                      ["paymentTerms","Payment Terms"],["totalCollected","Collected"]
+                    ]),
+                    ["status","Status"],[null,"Actions"]
+                  ].map(([key,label])=>(
                     <th key={label} onClick={()=>key&&toggleSort(key)} style={{padding:"13px 16px",textAlign:"left",fontSize:10,letterSpacing:"0.12em",textTransform:"uppercase",color:sortKey===key?t.accent:t.textDim,fontWeight:600,whiteSpace:"nowrap"}}>{label}{key&&sortKey===key?(sortDir===1?" ↑":" ↓"):""}</th>
                   ))}
                 </tr>
@@ -662,14 +691,14 @@ function CRM() {
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/></div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
                       <td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{fontSize:11,color:"#8aa8c8"}}><span style={{color:gs.color,fontWeight:600}}>{a.nodes||0}</span><span style={{color:"#3a5a7a"}}> nodes</span></div>;})}{allocs.length>1&&<div style={{fontSize:10,color:"#3a5a7a",borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={totalNodes} total</div>}</div></td>
-                      <td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:(deal.storageValue||deal.storage30Day)?<div style={{display:"flex",flexDirection:"column",gap:3}}>{deal.storageValue?<span style={{fontSize:11,color:"#c9d6e8"}}>{fmtShort(Number(deal.storageValue))}</span>:null}{deal.storage30Day?<span style={{fontSize:10,color:"#f59e0b"}}>{fmtShort(Number(deal.storage30Day))}<span style={{color:"#4a4020"}}>/30d</span></span>:null}</div>:<span style={{color:"#2a4060",fontSize:11}}>—</span>}</td>
-                      <td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<div style={{display:"flex",flexDirection:"column",gap:3}}>{allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#10b981"}}>{fmtShort(v)}</span></div>:null;})}{stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#10b981"}}>{fmtShort(stor30)}</span></div>}{grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#10b981",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}{grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#10b981",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}{grand30===0&&<span style={{color:"#2a4060"}}>—</span>}</div>}</td>
-                      <td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#c9d6e8"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>
-                      <td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11}}>{deal.paymentTerms}</td>
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:(deal.storageValue||deal.storage30Day)?<div style={{display:"flex",flexDirection:"column",gap:3}}>{deal.storageValue?<span style={{fontSize:11,color:"#c9d6e8"}}>{fmtShort(Number(deal.storageValue))}</span>:null}{deal.storage30Day?<span style={{fontSize:10,color:"#f59e0b"}}>{fmtShort(Number(deal.storage30Day))}<span style={{color:"#4a4020"}}>/30d</span></span>:null}</div>:<span style={{color:"#2a4060",fontSize:11}}>—</span>}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<div style={{display:"flex",flexDirection:"column",gap:3}}>{allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#10b981"}}>{fmtShort(v)}</span></div>:null;})}{stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#10b981"}}>{fmtShort(stor30)}</span></div>}{grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#10b981",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}{grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#10b981",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}{grand30===0&&<span style={{color:"#2a4060"}}>—</span>}</div>}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#c9d6e8"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11}}>{deal.paymentTerms}</td>}
                       <td style={{padding:"13px 16px"}}><span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.08em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>
+                      {!isTech&&<td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.08em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>}
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",gap:6}}><button className="btn-ghost" onClick={()=>openEdit(deal)}>Edit</button><button className="btn-danger" onClick={()=>deleteDeal(deal.id)}>✕</button></div></td>
                     </tr>,
                     isExp&&(
@@ -677,11 +706,11 @@ function CRM() {
                         <td colSpan={13} style={{padding:"0 24px 20px 56px",borderBottom:`1px solid ${t.borderDeep}`}}>
                           <div style={{borderTop:`1px solid ${t.borderDeep}`,paddingTop:14}}>
                             <div className="inline-tab-bar">
-                              {[["payments","💳 Payments"],["notes","✎ Notes"]].map(([tab,label])=>(
+                              {(isTech?[["notes","✎ Notes"]]:[["payments","💳 Payments"],["notes","✎ Notes"]]).map(([tab,label])=>(
                                 <button key={tab} style={inlineTabBtn(curTab===tab)} onClick={()=>{setExpandedId(deal.id);setExpandTab(p=>({...p,[deal.id]:tab}));}}>{label}</button>
                               ))}
                             </div>
-                            {curTab==="payments"&&(
+                            {!isTech&&curTab==="payments"&&(
                               <div>
                                 <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:12}}>Payment History — {deal.customer}</div>
                                 {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#2a4060",marginBottom:14,fontStyle:"italic"}}>No payments recorded yet.</div>:<div style={{marginBottom:16}}>
@@ -738,6 +767,25 @@ function CRM() {
                 <div style={{position:"absolute",top:3,left:horizon?15:3,width:12,height:12,background:"#fff",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
               </div>
             </button>
+          </div>
+        </div>
+      )}
+
+      {showTechModal&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowTechModal(false),setTechInput(""))}>
+          <div className="modal" style={{maxWidth:400}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Tech View</div>
+              <button onClick={()=>{setShowTechModal(false);setTechInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+            </div>
+            <div style={{fontSize:12,color:"#4a6a8a",marginBottom:20,lineHeight:1.7}}>Tech View hides all financial data — rates, contract values, payments, and collected amounts. Share this view with your technical team.</div>
+            <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
+            <input type="password" placeholder="Enter tech password" value={techInput} onChange={e=>setTechInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToTech()} style={{marginBottom:techError?6:16,borderColor:techError?"#ef4444":undefined}}/>
+            {techError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+              <button className="btn-ghost" onClick={()=>{setShowTechModal(false);setTechInput("");}}>Cancel</button>
+              <button className="btn-primary" onClick={switchToTech}>Switch to Tech View</button>
+            </div>
           </div>
         </div>
       )}
@@ -799,9 +847,18 @@ function MobileCRM(props) {
     notifications, setNotifications, showHistory, setShowHistory, history,
     showModal, closeModal, saveDeal, form, setForm, modalTab, setModalTab,
     editingId, modal30, addAlloc, removeAlloc, updateAlloc, MAX_H100, MAX_H200,
+    isTech, role, setRole,
   } = props;
 
   const [mobileTab, setMobileTab] = useState("deals"); // deals | stats | history
+  const [showTechModalM, setShowTechModalM] = useState(false);
+  const [techInputM, setTechInputM] = useState("");
+  const [techErrorM, setTechErrorM] = useState(false);
+  const switchToTechM = () => {
+    if (techInputM === TECH_PASSWORD) { localStorage.setItem("nexus-auth","tech"); setRole("tech"); setShowTechModalM(false); setTechInputM(""); }
+    else { setTechErrorM(true); setTimeout(()=>setTechErrorM(false),1500); }
+  };
+  const switchToAdminM = () => { localStorage.setItem("nexus-auth","1"); setRole("admin"); };
   const Redacted = ({w=64}) => <span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
   const statusOf = (label) => STATUSES.find(s=>s.label===label)||STATUSES[0];
   const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#0099ff":"#4a6a8a",borderRadius:4,padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
@@ -850,6 +907,9 @@ function MobileCRM(props) {
             <span className={fbReady?"livepulse":""} style={{fontSize:7}}>●</span>
             {fbReady?`${onlineUsers} ONLINE`:"…"}
           </span>
+          {isTech && <span style={{fontSize:9,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"3px 8px",letterSpacing:"0.08em",fontWeight:700}}>👷 TECH</span>}
+          {!isTech && <button onClick={()=>setShowTechModalM(true)} style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:4,padding:"5px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer"}}>👷</button>}
+          {isTech && <button onClick={switchToAdminM} style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:4,padding:"5px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer"}}>⬡</button>}
           <button onClick={openNew} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"7px 14px",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Deal</button>
         </div>
       </div>
@@ -879,7 +939,7 @@ function MobileCRM(props) {
         {mobileTab==="stats"&&(
           <div style={{padding:"16px"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-              {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
+              {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
                 <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
                   <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}>{s.label}</div>
                   <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:t.textBright}}>
@@ -977,7 +1037,7 @@ function MobileCRM(props) {
                         {hideValues&&<Redacted w={70}/>}
                       </div>
                       <div style={{textAlign:"right"}}>
-                        {collected>0&&<div style={{fontSize:11,color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{hideValues?<Redacted w={60}/>:fmtShort(collected)}<span style={{fontSize:9,color:"#2a5040",marginLeft:3}}>collected</span></div>}
+                        {!isTech&&collected>0&&<div style={{fontSize:11,color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{hideValues?<Redacted w={60}/>:fmtShort(collected)}<span style={{fontSize:9,color:"#2a5040",marginLeft:3}}>collected</span></div>}
                       </div>
                     </div>
                   </div>
@@ -987,7 +1047,7 @@ function MobileCRM(props) {
                     <div style={{borderTop:"1px solid #0d2035",background:"#060e1a"}}>
                       {/* Tabs */}
                       <div style={{display:"flex",borderBottom:"1px solid #0d2035"}}>
-                        {[["payments","💳 Payments"],["notes","✎ Notes"]].map(([tab,label])=>(
+                        {(isTech?[["notes","✎ Notes"]]:[["payments","💳 Payments"],["notes","✎ Notes"]]).map(([tab,label])=>(
                           <button key={tab} style={inlineTabBtn(curTab===tab)} onClick={()=>{setExpandTab(p=>({...p,[deal.id]:tab}));}}>{label}</button>
                         ))}
                         <div style={{marginLeft:"auto",display:"flex",gap:6,padding:"6px 12px"}}>
@@ -996,7 +1056,7 @@ function MobileCRM(props) {
                         </div>
                       </div>
 
-                      {curTab==="payments"&&(
+                      {!isTech&&curTab==="payments"&&(
                         <div style={{padding:"14px 16px"}}>
                           {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#2a4060",marginBottom:12,fontStyle:"italic"}}>No payments yet.</div>:(
                             <div style={{marginBottom:14}}>
