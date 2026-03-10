@@ -486,6 +486,82 @@ function AaronJudgeAnimation({ active }) {
 
 
 
+// ─── MONEY BAG ANIMATION ─────────────────────────────────────────────────────
+function MoneyBag() {
+  return (
+    <span style={{display:"inline-block",marginLeft:7,verticalAlign:"middle",lineHeight:1}}>
+      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style={{overflow:"visible"}}>
+        <style>{`
+          @keyframes bagBounce {
+            0%,100%{transform:translateY(0) rotate(-2deg);}
+            30%{transform:translateY(-4px) rotate(2deg);}
+            60%{transform:translateY(-2px) rotate(-1deg);}
+          }
+          @keyframes coinFly1 {
+            0%,60%{opacity:0;transform:translate(0,0) scale(0);}
+            65%{opacity:1;transform:translate(-6px,-10px) scale(1);}
+            100%{opacity:0;transform:translate(-10px,-20px) scale(0.6);}
+          }
+          @keyframes coinFly2 {
+            0%,65%{opacity:0;transform:translate(0,0) scale(0);}
+            70%{opacity:1;transform:translate(6px,-12px) scale(1);}
+            100%{opacity:0;transform:translate(10px,-22px) scale(0.6);}
+          }
+          @keyframes coinFly3 {
+            0%,70%{opacity:0;transform:translate(0,0) scale(0);}
+            75%{opacity:1;transform:translate(0px,-14px) scale(1);}
+            100%{opacity:0;transform:translate(2px,-24px) scale(0.5);}
+          }
+          @keyframes shineSwipe {
+            0%,100%{opacity:0;transform:translateX(-12px);}
+            40%,50%{opacity:0.6;transform:translateX(12px);}
+          }
+          .bag-g{animation:bagBounce 2.2s ease-in-out infinite;}
+          .coin1{animation:coinFly1 2.2s ease-out infinite;}
+          .coin2{animation:coinFly2 2.2s ease-out infinite;}
+          .coin3{animation:coinFly3 2.2s ease-out infinite;}
+          .bag-shine{animation:shineSwipe 2.2s ease-in-out infinite;}
+        `}</style>
+
+        {/* flying coins */}
+        <circle className="coin1" cx="18" cy="26" r="3" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.8"/>
+        <circle className="coin2" cx="18" cy="26" r="3" fill="#fbbf24" stroke="#f59e0b" strokeWidth="0.8"/>
+        <circle className="coin3" cx="18" cy="26" r="2.5" fill="#fcd34d" stroke="#f59e0b" strokeWidth="0.8"/>
+
+        <g className="bag-g">
+          {/* bag body */}
+          <ellipse cx="18" cy="24" rx="11" ry="10" fill="#f59e0b"/>
+          <ellipse cx="18" cy="24" rx="11" ry="10" fill="url(#bagGrad)"/>
+
+          {/* bag neck */}
+          <rect x="14" y="13" width="8" height="5" rx="2" fill="#d97706"/>
+
+          {/* knot/tie */}
+          <ellipse cx="18" cy="13" rx="5" ry="2.5" fill="#b45309"/>
+          <ellipse cx="18" cy="12.5" rx="3.5" ry="2" fill="#d97706"/>
+
+          {/* $ sign */}
+          <text x="18" y="28" textAnchor="middle" fontSize="11" fontWeight="800"
+            fill="#92400e" fontFamily="'Syne',Georgia,serif" style={{userSelect:"none"}}>$</text>
+
+          {/* shine swipe */}
+          <ellipse className="bag-shine" cx="14" cy="21" rx="3" ry="6"
+            fill="white" opacity="0.25" transform="rotate(-20 14 21)"/>
+
+          <defs>
+            <radialGradient id="bagGrad" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stopColor="#fcd34d" stopOpacity="0.6"/>
+              <stop offset="100%" stopColor="#d97706" stopOpacity="0"/>
+            </radialGradient>
+          </defs>
+        </g>
+      </svg>
+    </span>
+  );
+}
+
+
 export default function App() {
   const [authed, setAuthed] = useState(() => {
     const a = localStorage.getItem("nexus-auth");
@@ -845,7 +921,7 @@ function CRM({ role = "admin", setRole }) {
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16,marginBottom:28}}>
             {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
               <div className="stat-card" key={s.label}>
-                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>{s.label}</div>
+                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}</div>
                 <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:700,color:t.textBright,minHeight:34}}>
                   {(hideValues&&!s.plain)?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:6,minWidth:100,height:28}}>&nbsp;</span>:s.value}
                 </div>
@@ -1072,14 +1148,14 @@ function CRM({ role = "admin", setRole }) {
 
       {showSpecialModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowSpecialModal(false),setSpecialInput(""))}>
-          <div className="modal" style={{maxWidth:400,background:"#2a0535",border:"2px solid #f0abfc",animation:"rainbowBorder 2s linear infinite"}}>
+          <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,background:"linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Developer Mode</div>
-              <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:"#c084fc",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:"#c084fc",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
-            <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16,borderColor:specialError?"#f43f5e":"#c084fc",background:"#1a0020",color:"#f9d4ff"}} autoFocus/>
-            {specialError&&<div style={{color:"#f43f5e",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
+            <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16,borderColor:specialError?t.red:t.borderSoft}} autoFocus/>
+            {specialError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}}>Cancel</button>
               <button onClick={tryEnableSpecial} style={{background:"linear-gradient(135deg,#a21caf,#d946ef)",color:"#fff",border:"none",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Unlock ✨</button>
@@ -1090,14 +1166,14 @@ function CRM({ role = "admin", setRole }) {
 
       {showTechModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowTechModal(false),setTechInput(""))}>
-          <div className="modal" style={{maxWidth:400,background:"#2a0535",border:"2px solid #f0abfc",animation:"rainbowBorder 2s linear infinite"}}>
+          <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Tech View</div>
-              <button onClick={()=>{setShowTechModal(false);setTechInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              <button onClick={()=>{setShowTechModal(false);setTechInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
-            <input type="password" placeholder="Enter tech password" value={techInput} onChange={e=>setTechInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToTech()} style={{marginBottom:techError?6:16,borderColor:techError?"#ef4444":undefined}}/>
-            {techError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
+            <input type="password" placeholder="Enter tech password" value={techInput} onChange={e=>setTechInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToTech()} style={{marginBottom:techError?6:16,borderColor:techError?t.red:t.borderSoft}}/>
+            {techError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowTechModal(false);setTechInput("");}}>Cancel</button>
               <button className="btn-primary" onClick={switchToTech}>Switch to Tech View</button>
@@ -1108,14 +1184,14 @@ function CRM({ role = "admin", setRole }) {
 
       {showAdminModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowAdminModal(false),setAdminInput(""))}>
-          <div className="modal" style={{maxWidth:400,background:"#2a0535",border:"2px solid #f0abfc",animation:"rainbowBorder 2s linear infinite"}}>
+          <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Admin View</div>
-              <button onClick={()=>{setShowAdminModal(false);setAdminInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              <button onClick={()=>{setShowAdminModal(false);setAdminInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
-            <input type="password" placeholder="Enter admin password" value={adminInput} onChange={e=>setAdminInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToAdmin()} style={{marginBottom:adminError?6:16,borderColor:adminError?"#ef4444":undefined}} autoFocus/>
-            {adminError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
+            <input type="password" placeholder="Enter admin password" value={adminInput} onChange={e=>setAdminInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToAdmin()} style={{marginBottom:adminError?6:16,borderColor:adminError?t.red:t.borderSoft}} autoFocus/>
+            {adminError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowAdminModal(false);setAdminInput("");}}>Cancel</button>
               <button className="btn-primary" onClick={switchToAdmin}>Switch to Admin View</button>
@@ -1298,7 +1374,7 @@ function MobileCRM(props) {
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
               {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
                 <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
-                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}>{s.label}</div>
+                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}</div>
                   <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:t.textBright}}>
                     {hideValues&&!s.plain?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:80,height:24}}>&nbsp;</span>:s.value}
                   </div>
