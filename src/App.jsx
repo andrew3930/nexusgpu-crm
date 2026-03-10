@@ -248,12 +248,13 @@ const uid      = () => Date.now().toString(36)+Math.random().toString(36).slice(
 function calc30DayAlloc(a){ const s=GPU_SPECS[a.gpuType]; if(!s||!a.nodes||!a.ratePerGpuHour) return 0; return Number(a.nodes)*s.gpusPerNode*Number(a.ratePerGpuHour)*24*30; }
 const calcGPU30Day   = (allocs) => (allocs||[]).reduce((s,a)=>s+calc30DayAlloc(a),0);
 const calcGrand30Day = (deal)   => calcGPU30Day(deal.gpuAllocations)+(Number(deal.storage30Day)||0);
+const calcEffective30Day = (deal) => { const base = calcGrand30Day(deal); if (!deal.onDemand) return base; const util = Math.min(Math.max(Number(deal.utilization)||0, 0), 100) / 100; return base * util; };
 const totalCollected = (deal)   => (deal.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0);
 const emptyAlloc     = () => ({id:uid(),gpuType:"H100",nodes:"",ratePerGpuHour:""});
-const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:"",networking:"",architecture:""});
+const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:"",networking:"",architecture:"",onDemand:false,utilization:100});
 const emptyPayment   = () => ({id:uid(),amount:"",datePaid:new Date().toISOString().slice(0,10),period:""});
 const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bfa"}:{bg:"rgba(0,153,255,.15)",color:"#38bdf8"};
-const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
+const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",onDemand:false,utilization:100,...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
 
 export default function App() {
   const [authed, setAuthed] = useState(() => {
@@ -412,12 +413,13 @@ function CRM({ role = "admin", setRole }) {
   const saveEditPayment=()=>{ if(!editingPayment||!editingPayment.amount) return; const{dealId,paymentId,amount,datePaid,period}=editingPayment; updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:(x.payments||[]).map(p=>p.id===paymentId?{...p,amount:Number(amount),datePaid,period}:p)}:x)); setEditingPayment(null); };
   const toggleSort=(key)=>{ if(sortKey===key) setSortDir(d=>-d); else{setSortKey(key);setSortDir(1);} };
 
-  const visible=useMemo(()=>{ let list=deals.filter(d=>(filterStatus==="All"||d.status===filterStatus)&&d.customer.toLowerCase().includes(search.toLowerCase())); if(sortKey) list=[...list].sort((a,b)=>{ let av=sortKey==="totalCollected"?totalCollected(a):sortKey==="grand30"?calcGrand30Day(a):a[sortKey]; let bv=sortKey==="totalCollected"?totalCollected(b):sortKey==="grand30"?calcGrand30Day(b):b[sortKey]; if(typeof av==="string"){av=av.toLowerCase();bv=bv.toLowerCase();} return av<bv?-sortDir:av>bv?sortDir:0; }); return list; },[deals,filterStatus,search,sortKey,sortDir]);
+  const visible=useMemo(()=>{ let list=deals.filter(d=>(filterStatus==="All"||d.status===filterStatus)&&d.customer.toLowerCase().includes(search.toLowerCase())); if(sortKey) list=[...list].sort((a,b)=>{ let av=sortKey==="totalCollected"?totalCollected(a):sortKey==="grand30"?calcEffective30Day(a):a[sortKey]; let bv=sortKey==="totalCollected"?totalCollected(b):sortKey==="grand30"?calcEffective30Day(b):b[sortKey]; if(typeof av==="string"){av=av.toLowerCase();bv=bv.toLowerCase();} return av<bv?-sortDir:av>bv?sortDir:0; }); return list; },[deals,filterStatus,search,sortKey,sortDir]);
   const MAX_H100=128,MAX_H200=65;
-  const totals=useMemo(()=>{ const h100=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcGrand30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
+  const totals=useMemo(()=>{ const h100=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcEffective30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
   const statusOf=(label)=>STATUSES.find(s=>s.label===label)||STATUSES[0];
   const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#10b981",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
-  const modal30=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
+  const modal30base=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
+  const modal30=useMemo(()=>form.onDemand?modal30base*(Math.min(Math.max(Number(form.utilization)||0,0),100)/100):modal30base,[modal30base,form.onDemand,form.utilization]);
   const tabBtn=(active)=>({background:active?t.accentGlow:"transparent",border:`1px solid ${active?t.accent:t.borderSoft}`,color:active?t.accent:t.textDim,borderRadius:4,padding:"6px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
   const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?t.accent:"transparent"}`,color:active?t.accent:t.textDim,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
   const Redacted=({w=64})=><span style={{display:"inline-block",background:t.borderSoft,borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
@@ -692,19 +694,28 @@ function CRM({ role = "admin", setRole }) {
               <tbody>
                 {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:48,color:"#2a4a6a",fontSize:13}}>No deals found</td></tr>}
                 {visible.map(deal=>{
-                  const allocs=deal.gpuAllocations||[]; const gpu30=calcGPU30Day(allocs); const stor30=Number(deal.storage30Day)||0; const grand30=gpu30+stor30;
+                  const allocs=deal.gpuAllocations||[]; const gpu30=calcGPU30Day(allocs); const stor30=Number(deal.storage30Day)||0; const grand30=gpu30+stor30; const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=Math.min(Math.max(Number(deal.utilization)||0,0),100);
                   const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments";
                   const pf=getPF(deal.id); const totalNodes=allocs.reduce((s,a)=>s+(Number(a.nodes)||0),0); const hasNotes=!!(deal.notes&&deal.notes.trim());
                   return [
                     <tr key={deal.id} className="row-hover" style={{borderBottom:isExp?"none":`1px solid ${t.borderDeep}`,transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/></div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
                       <td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{fontSize:11,color:"#8aa8c8"}}><span style={{color:gs.color,fontWeight:600}}>{a.nodes||0}</span><span style={{color:"#3a5a7a"}}> nodes</span></div>;})}{allocs.length>1&&<div style={{fontSize:10,color:"#3a5a7a",borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={totalNodes} total</div>}</div></td>
                       {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:(deal.storageValue||deal.storage30Day)?<div style={{display:"flex",flexDirection:"column",gap:3}}>{deal.storageValue?<span style={{fontSize:11,color:"#c9d6e8"}}>{fmtShort(Number(deal.storageValue))}</span>:null}{deal.storage30Day?<span style={{fontSize:10,color:"#f59e0b"}}>{fmtShort(Number(deal.storage30Day))}<span style={{color:"#4a4020"}}>/30d</span></span>:null}</div>:<span style={{color:"#2a4060",fontSize:11}}>—</span>}</td>}
-                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<div style={{display:"flex",flexDirection:"column",gap:3}}>{allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#10b981"}}>{fmtShort(v)}</span></div>:null;})}{stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#10b981"}}>{fmtShort(stor30)}</span></div>}{grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#10b981",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}{grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#10b981",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}{grand30===0&&<span style={{color:"#2a4060"}}>—</span>}</div>}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<div style={{display:"flex",flexDirection:"column",gap:3}}>
+  {isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.12)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.25)",borderRadius:3,padding:"1px 6px",letterSpacing:"0.06em",fontWeight:700,alignSelf:"flex-start"}}>ON DEMAND · {util}%</span>}
+  {isOD&&effective30>0&&<span style={{color:"#10b981",fontWeight:700,fontSize:12}}>{fmtShort(effective30)}</span>}
+  {isOD&&grand30>0&&<span style={{fontSize:10,color:"#3a5a3a"}}>max {fmtShort(grand30)}</span>}
+  {!isOD&&allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#10b981"}}>{fmtShort(v)}</span></div>:null;})}
+  {!isOD&&stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#10b981"}}>{fmtShort(stor30)}</span></div>}
+  {!isOD&&grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#10b981",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}
+  {!isOD&&grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#10b981",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}
+  {grand30===0&&<span style={{color:"#2a4060"}}>—</span>}
+</div>}</td>}
                       {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#c9d6e8"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>}
                       {!isTech&&<td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11}}>{deal.paymentTerms}</td>}
                       <td style={{padding:"13px 16px"}}><span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span></td>
@@ -724,14 +735,15 @@ function CRM({ role = "admin", setRole }) {
                               <div>
                                 <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:12}}>Payment History — {deal.customer}</div>
                                 {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#2a4060",marginBottom:14,fontStyle:"italic"}}>No payments recorded yet.</div>:<div style={{marginBottom:16}}>
-                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:10,marginBottom:6}}>{["Amount","Date Paid","Period",""].map(h=><div key={h} style={{fontSize:9,color:"#2a5060",letterSpacing:"0.12em",textTransform:"uppercase"}}>{h}</div>)}</div>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:10,marginBottom:6}}>{["Amount","Date Paid","Period","Utilization",""].map(h=><div key={h} style={{fontSize:9,color:"#2a5060",letterSpacing:"0.12em",textTransform:"uppercase"}}>{h}</div>)}</div>
                                   {(deal.payments||[]).map(p=>{
                                     const isEditingThis=editingPayment&&editingPayment.dealId===deal.id&&editingPayment.paymentId===p.id;
-                                    if(isEditingThis) return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:8,alignItems:"center",padding:"7px 0",borderTop:`1px solid ${t.borderDeep}`}}><input className="payment-input" type="number" min="0" step="0.01" value={editingPayment.amount} onChange={e=>setEditingPayment(ep=>({...ep,amount:e.target.value}))} autoFocus/><input className="payment-input" type="date" value={editingPayment.datePaid} onChange={e=>setEditingPayment(ep=>({...ep,datePaid:e.target.value}))}/><input className="payment-input" type="text" placeholder="Period" value={editingPayment.period} onChange={e=>setEditingPayment(ep=>({...ep,period:e.target.value}))}/><div style={{display:"flex",gap:4}}><button className="btn-sm" style={{padding:"4px 8px",fontSize:10}} onClick={saveEditPayment}>✓</button><button className="btn-ghost" style={{padding:"4px 8px",fontSize:10}} onClick={cancelEditPayment}>✕</button></div></div>;
-                                    return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:10,alignItems:"center",padding:"7px 0",borderTop:"1px solid #0a1a2a"}}>
+                                    if(isEditingThis) return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:8,alignItems:"center",padding:"7px 0",borderTop:`1px solid ${t.borderDeep}`}}><input className="payment-input" type="number" min="0" step="0.01" value={editingPayment.amount} onChange={e=>setEditingPayment(ep=>({...ep,amount:e.target.value}))} autoFocus/><input className="payment-input" type="date" value={editingPayment.datePaid} onChange={e=>setEditingPayment(ep=>({...ep,datePaid:e.target.value}))}/><input className="payment-input" type="text" placeholder="Period" value={editingPayment.period} onChange={e=>setEditingPayment(ep=>({...ep,period:e.target.value}))}/><div/><div style={{display:"flex",gap:4}}><button className="btn-sm" style={{padding:"4px 8px",fontSize:10}} onClick={saveEditPayment}>✓</button><button className="btn-ghost" style={{padding:"4px 8px",fontSize:10}} onClick={cancelEditPayment}>✕</button></div></div>;
+                                    return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:10,alignItems:"center",padding:"7px 0",borderTop:"1px solid #0a1a2a"}}>
                                       <div style={{color:"#10b981",fontWeight:600,fontSize:12}}>{hideValues?<Redacted w={80}/>:fmt(p.amount)}</div>
                                       <div style={{color:"#8aa8c8",fontSize:11}}>{p.datePaid}</div>
                                       <div style={{color:"#8aa8c8",fontSize:11}}>{p.period||"—"}</div>
+                                      {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<div style={{fontSize:11,fontWeight:700,color:util>=90?"#10b981":util>=60?"#f59e0b":"#ef4444"}}>{util}%</div>:<div style={{color:"#2a4060",fontSize:11}}>—</div>;})()}
                                       <div style={{display:"flex",gap:4}}><button className="btn-ghost" style={{padding:"3px 8px",fontSize:10}} onClick={()=>startEditPayment(deal.id,p)}>✎</button><button className="btn-danger" style={{padding:"3px 8px",fontSize:10}} onClick={()=>deletePayment(deal.id,p.id)}>✕</button></div>
                                     </div>;
                                   })}
@@ -842,7 +854,7 @@ function CRM({ role = "admin", setRole }) {
             <div style={{marginBottom:18}}><label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
             <div style={{display:"flex",gap:8,marginBottom:18,borderBottom:"1px solid #1a2e45",paddingBottom:12,alignItems:"center"}}>
               {[["gpu","⬡ GPU"],["storage","💾 Storage"],["notes","✎ Notes"]].map(([tab,label])=>(<button key={tab} style={tabBtn(modalTab===tab)} onClick={()=>setModalTab(tab)}>{label}</button>))}
-              {modal30>0&&<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:10,color:"#2a5060"}}>30-DAY TOTAL</span><span style={{fontSize:13,color:"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div>}
+              {modal30base>0&&<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:10,color:"#2a5060"}}>{form.onDemand?"30-DAY (EFFECTIVE)":"30-DAY TOTAL"}</span><span style={{fontSize:13,color:form.onDemand?"#f59e0b":"#10b981",fontWeight:700}}>{fmt(modal30)}</span>{form.onDemand&&<span style={{fontSize:10,color:"#3a5a3a"}}>/ {fmt(modal30base)} max</span>}</div>}
             </div>
             {modalTab==="gpu"&&(<div style={{marginBottom:4}}><div style={{display:"grid",gridTemplateColumns:"110px 1fr 1fr 1fr auto",gap:10,marginBottom:6}}>{["GPU Type","Nodes","$/GPU/Hr","30-Day",""].map(h=><div key={h} style={{fontSize:9,color:"#2a5060",letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>)}</div>{form.gpuAllocations.map(alloc=>{const v30=calc30DayAlloc(alloc);return(<div key={alloc.id} className="alloc-row"><select value={alloc.gpuType} onChange={e=>updateAlloc(alloc.id,"gpuType",e.target.value)}>{GPU_TYPES.map(g=><option key={g}>{g}</option>)}</select><input type="number" min="0" placeholder="Nodes" value={alloc.nodes} onChange={e=>updateAlloc(alloc.id,"nodes",e.target.value)}/><input type="number" min="0" step="0.01" placeholder="Rate" value={alloc.ratePerGpuHour} onChange={e=>updateAlloc(alloc.id,"ratePerGpuHour",e.target.value)}/><div style={{background:"#060d18",border:"1px solid #0d2040",borderRadius:4,padding:"9px 10px",fontSize:12,color:v30>0?"#10b981":"#2a4060",fontWeight:600,textAlign:"right"}}>{v30>0?fmtShort(v30):"—"}</div>{form.gpuAllocations.length>1?<button className="btn-icon" onClick={()=>removeAlloc(alloc.id)}>✕</button>:<div/>}</div>);})}<button className="add-alloc-btn" onClick={addAlloc}>+ Add Another GPU Type</button></div>)}
             {modalTab==="storage"&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:4}}><div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage Contract Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div><div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage 30-Day Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>{(Number(form.storage30Day)||0)>0&&(<div style={{gridColumn:"1 / -1",background:"#060d18",border:"1px solid #0d2040",borderRadius:6,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#3a6060",letterSpacing:"0.1em"}}>STORAGE CONTRIBUTION TO 30-DAY TOTAL</span><span style={{color:"#10b981",fontWeight:700,fontSize:13}}>{fmt(Number(form.storage30Day))}</span></div>)}</div>)}
@@ -867,6 +879,26 @@ function CRM({ role = "admin", setRole }) {
                   {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
+            </div>
+            {/* On Demand Toggle */}
+            <div style={{marginTop:16,background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:"14px 16px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:form.onDemand?12:0}}>
+                <div>
+                  <div style={{fontSize:11,color:"#c9d6e8",fontWeight:600,letterSpacing:"0.04em"}}>On Demand</div>
+                  <div style={{fontSize:10,color:"#3a5a7a",marginTop:2}}>30-day values are reference only — actual revenue depends on utilization</div>
+                </div>
+                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand,utilization:f.utilization||100}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#1e3550",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                  <div style={{position:"absolute",top:3,left:form.onDemand?21:3,width:18,height:18,background:"#fff",borderRadius:"50%",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
+                </button>
+              </div>
+              {form.onDemand&&(
+                <div style={{display:"flex",alignItems:"center",gap:12}}>
+                  <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",whiteSpace:"nowrap"}}>Utilization %</label>
+                  <input type="range" min="0" max="100" step="1" value={form.utilization||100} onChange={e=>setForm(f=>({...f,utilization:Number(e.target.value)}))} style={{flex:1,accentColor:"#f59e0b"}}/>
+                  <div style={{background:"#060d18",border:"1px solid rgba(245,158,11,0.3)",borderRadius:4,padding:"5px 10px",fontSize:13,color:"#f59e0b",fontWeight:700,minWidth:52,textAlign:"center"}}>{form.utilization||100}%</div>
+                  <input type="number" min="0" max="100" step="1" value={form.utilization||100} onChange={e=>setForm(f=>({...f,utilization:Math.min(100,Math.max(0,Number(e.target.value)))}))} style={{width:64,textAlign:"center"}}/>
+                </div>
+              )}
             </div>
             <div style={{display:"flex",gap:12,marginTop:24,justifyContent:"flex-end"}}><button className="btn-ghost" onClick={closeModal}>Cancel</button><button className="btn-primary" onClick={saveDeal}>{editingId?"Save Changes":"Add Deal"}</button></div>
           </div>
@@ -1082,14 +1114,14 @@ function MobileCRM(props) {
             </div>
             {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#2a4a6a",fontSize:13}}>No deals found</div>}
             {visible.map(deal=>{
-              const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
+              const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=Math.min(Math.max(Number(deal.utilization)||0,0),100); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
               return (
                 <div key={deal.id} className="m-card" style={{padding:0,overflow:"hidden"}}>
                   {/* Card Header */}
                   <div onClick={()=>toggleExpand(deal.id,curTab)} style={{padding:"14px 16px",cursor:"pointer"}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                       <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}><span style={{fontWeight:600,color:"#d8e8f8",fontSize:14}}>{deal.customer||"—"}</span><NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/></div>
-                      <span style={{background:st.bg,color:st.color,padding:"3px 9px",borderRadius:4,fontSize:10,fontWeight:600,flexShrink:0,marginLeft:8}}>{deal.status}</span>
+                      <div style={{display:"flex",gap:4,flexShrink:0,marginLeft:8,alignItems:"center"}}>{isOD&&<span style={{background:"rgba(245,158,11,0.12)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.25)",padding:"3px 7px",borderRadius:4,fontSize:9,fontWeight:700}}>OD</span>}<span style={{background:st.bg,color:st.color,padding:"3px 9px",borderRadius:4,fontSize:10,fontWeight:600}}>{deal.status}</span></div>
                     </div>
                     <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
                       {allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <span key={a.id} className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType} · {a.nodes}n</span>;})}
@@ -1137,8 +1169,11 @@ function MobileCRM(props) {
                                 );
                                 return (
                                   <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #0a1a2a"}}>
-                                    <div>
-                                      <div style={{color:"#10b981",fontWeight:600,fontSize:13}}>{hideValues?<Redacted w={70}/>:fmt(p.amount)}</div>
+                                    <div style={{flex:1}}>
+                                      <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                        <div style={{color:"#10b981",fontWeight:600,fontSize:13}}>{hideValues?<Redacted w={70}/>:fmt(p.amount)}</div>
+                                        {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<span style={{fontSize:10,fontWeight:700,color:util>=90?"#10b981":util>=60?"#f59e0b":"#ef4444",background:util>=90?"rgba(16,185,129,0.1)":util>=60?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)",borderRadius:4,padding:"2px 6px"}}>{util}%</span>:null;})()}
+                                      </div>
                                       <div style={{fontSize:10,color:"#4a6a8a",marginTop:2}}>{p.datePaid}{p.period&&` · ${p.period}`}</div>
                                     </div>
                                     <div style={{display:"flex",gap:6}}>
@@ -1230,7 +1265,7 @@ function MobileCRM(props) {
             <div style={{display:"flex",gap:8,marginBottom:14,borderBottom:"1px solid #1a2e45",paddingBottom:12}}>
               {[["gpu","⬡ GPU"],["storage","💾 Storage"],["notes","✎ Notes"]].map(([tab,label])=>(<button key={tab} style={tabBtn(modalTab===tab)} onClick={()=>setModalTab(tab)}>{label}</button>))}
             </div>
-            {modal30>0&&<div style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",borderRadius:6,padding:"8px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#2a5060"}}>30-DAY TOTAL</span><span style={{fontSize:14,color:"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div>}
+            {modal30base>0&&<div style={{background:form.onDemand?"rgba(245,158,11,0.06)":"rgba(16,185,129,0.08)",border:`1px solid ${form.onDemand?"rgba(245,158,11,0.2)":"#1a4a2a"}`,borderRadius:6,padding:"8px 14px",marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#2a5060"}}>{form.onDemand?"EFFECTIVE 30-DAY":"30-DAY TOTAL"}</span><span style={{fontSize:14,color:form.onDemand?"#f59e0b":"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div>{form.onDemand&&<div style={{fontSize:10,color:"#3a5a3a",marginTop:3}}>max {fmt(modal30base)} at 100%</div>}</div>}
             {modalTab==="gpu"&&(
               <div style={{marginBottom:4}}>
                 <div style={{display:"grid",gridTemplateColumns:"90px 1fr 1fr",gap:8,marginBottom:6}}>{["GPU","Nodes","$/GPU/Hr"].map(h=><div key={h} style={{fontSize:9,color:"#2a5060",letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>)}</div>
@@ -1282,7 +1317,29 @@ function MobileCRM(props) {
                 </div>
               </div>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:20}}>
+            {/* On Demand Toggle - Mobile */}
+            <div style={{marginTop:14,background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:"12px 14px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:form.onDemand?12:0}}>
+                <div>
+                  <div style={{fontSize:12,color:"#c9d6e8",fontWeight:600}}>On Demand</div>
+                  <div style={{fontSize:10,color:"#3a5a7a",marginTop:2}}>30-day is reference at 100% utilization</div>
+                </div>
+                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand,utilization:f.utilization||100}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#1e3550",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                  <div style={{position:"absolute",top:3,left:form.onDemand?21:3,width:18,height:18,background:"#fff",borderRadius:"50%",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
+                </button>
+              </div>
+              {form.onDemand&&(
+                <div>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                    <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.08em",textTransform:"uppercase"}}>Utilization %</label>
+                    <div style={{background:"#060d18",border:"1px solid rgba(245,158,11,0.3)",borderRadius:4,padding:"3px 10px",fontSize:13,color:"#f59e0b",fontWeight:700}}>{form.utilization||100}%</div>
+                  </div>
+                  <input type="range" min="0" max="100" step="1" value={form.utilization||100} onChange={e=>setForm(f=>({...f,utilization:Number(e.target.value)}))} style={{width:"100%",accentColor:"#f59e0b",marginBottom:8}}/>
+                  <input type="number" min="0" max="100" step="1" value={form.utilization||100} onChange={e=>setForm(f=>({...f,utilization:Math.min(100,Math.max(0,Number(e.target.value)))}))} placeholder="Utilization %" className="payment-input"/>
+                </div>
+              )}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
               <button className="m-btn-ghost" onClick={closeModal}>Cancel</button>
               <button className="m-btn-primary" style={{margin:0}} onClick={saveDeal}>{editingId?"Save Changes":"Add Deal"}</button>
             </div>
