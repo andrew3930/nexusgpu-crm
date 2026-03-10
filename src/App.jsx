@@ -103,18 +103,22 @@ function CRM() {
   const fbLib   = useRef(null);
   const localOp = useRef(false);
 
-  const logEvent = useCallback((type, message, detail="") => {
-    if (!fbLib.current) return;
-    const { db, ref, set } = fbLib.current;
+  const logEvent = (type, message, detail="") => {
     const id = uid();
     const entry = { id, type, message, detail, ts: Date.now() };
-    set(ref(db, "history/" + id), entry);
-  }, []);
+    // Push to local history immediately
+    setHistory(h => [entry, ...h].slice(0, 200));
+    // Also persist to Firebase if available
+    if (fbLib.current) {
+      const { db, ref, set } = fbLib.current;
+      set(ref(db, "history/" + id), entry);
+    }
+  };
 
-  const pushNotif = useCallback((type, message, detail="") => {
+  const pushNotif = (type, message, detail="") => {
     const id = uid();
     setNotifications(n => [{ id, type, message, detail, ts: Date.now() }, ...n.slice(0, 4)]);
-  }, []);
+  };
 
   useEffect(() => {
     const script = document.createElement("script");
