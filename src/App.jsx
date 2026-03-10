@@ -74,7 +74,10 @@ const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDat
 export default function App() {
   const [authed, setAuthed] = useState(() => localStorage.getItem("nexus-auth") === "1");
   if (!authed) return <PasswordGate onUnlock={() => setAuthed(true)} />;
+  return <CRM />;
+}
 
+function CRM() {
   const [fbReady, setFbReady]           = useState(false);
   const [fbError, setFbError]           = useState(null);
   const [deals, setDeals]               = useState([]);
