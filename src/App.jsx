@@ -1,5 +1,38 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
+const PASSWORD = "Blonduos3930$!";
+
+function PasswordGate({ onUnlock }) {
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+  const submit = () => {
+    if (input === PASSWORD) { localStorage.setItem("nexus-auth", "1"); onUnlock(); }
+    else { setError(true); setTimeout(() => setError(false), 1500); }
+  };
+  return (
+    <div style={{minHeight:"100vh",background:"#080c14",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono',monospace"}}>
+      <div style={{background:"#0d1825",border:`1px solid ${error?"#ef4444":"#1e3550"}`,borderRadius:12,padding:40,width:380,textAlign:"center",transition:"border-color .2s"}}>
+        <div style={{width:48,height:48,background:"linear-gradient(135deg,#003d99,#0066ff)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,margin:"0 auto 16px"}}>⬡</div>
+        <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>NEXUS<span style={{color:"#0099ff"}}>GPU</span></div>
+        <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",marginBottom:28}}>SALES INTELLIGENCE PLATFORM</div>
+        <input
+          type="password"
+          placeholder="Enter password"
+          value={input}
+          onChange={e=>setInput(e.target.value)}
+          onKeyDown={e=>e.key==="Enter"&&submit()}
+          style={{background:"#060d18",border:`1px solid ${error?"#ef4444":"#1e3550"}`,color:"#c9d6e8",borderRadius:6,padding:"12px 16px",fontFamily:"inherit",fontSize:13,width:"100%",outline:"none",marginBottom:12,textAlign:"center",letterSpacing:"0.1em"}}
+          autoFocus
+        />
+        {error && <div style={{color:"#ef4444",fontSize:11,marginBottom:8,letterSpacing:"0.08em"}}>Incorrect password</div>}
+        <button onClick={submit} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"12px",width:"100%",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>
+          Unlock
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDZcopBmsQntA-6Y2PSIUUTVoAiVcowBV4",
   authDomain: "nexusgpu-crm.firebaseapp.com",
@@ -39,6 +72,9 @@ const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bf
 const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
 
 export default function App() {
+  const [authed, setAuthed] = useState(() => localStorage.getItem("nexus-auth") === "1");
+  if (!authed) return <PasswordGate onUnlock={() => setAuthed(true)} />;
+
   const [fbReady, setFbReady]           = useState(false);
   const [fbError, setFbError]           = useState(null);
   const [deals, setDeals]               = useState([]);
