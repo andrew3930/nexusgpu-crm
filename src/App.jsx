@@ -12,6 +12,7 @@ function useIsMobile() {
 
 const PASSWORD = "Blonduos3930$!";
 const TECH_PASSWORD = "CanopyWave$!";
+const SPECIAL_PASSWORD = "Blake$!";
 
 function HorizonLogo({size=36, stop1="#0055ee", stop2="#00bbff"}) {
   return (
@@ -125,11 +126,45 @@ const HORIZON_THEME = {
   rowHover:   "rgba(194,87,26,0.04)",
 };
 
+const SPECIAL_THEME = {
+  bg:         "#1a0020",
+  bgCard:     "#2a0535",
+  bgHeader:   "#1f0028",
+  bgInput:    "#2a0535",
+  bgDeep:     "#130018",
+  bgRow:      "#1f0030",
+  bgTable:    "#220030",
+  border:     "#c026d3",
+  borderSoft: "#a21caf",
+  borderDeep: "#7e22ce",
+  text:       "#f9d4ff",
+  textBright: "#ffeeff",
+  textMid:    "#e879f9",
+  textDim:    "#c026d3",
+  textDeep:   "#7e22ce",
+  accent:     "#f0abfc",
+  accentDark: "#d946ef",
+  accentGlow: "rgba(240,171,252,0.25)",
+  green:      "#f472b6",
+  greenBg:    "rgba(244,114,182,0.1)",
+  greenBorder:"#be185d",
+  amber:      "#fb7185",
+  red:        "#f43f5e",
+  logoStop1:  "#d946ef",
+  logoStop2:  "#f9a8d4",
+  scrollThumb:"#a21caf",
+  scrollTrack:"#1a0020",
+  rowHover:   "rgba(240,171,252,0.06)",
+};
+
 function useTheme() {
   const [horizon, setHorizon] = useState(() => localStorage.getItem("nexus-horizon") === "1");
-  const toggleTheme = () => setHorizon(h => { localStorage.setItem("nexus-horizon", h?"0":"1"); return !h; });
-  const t = horizon ? HORIZON_THEME : DARK_THEME;
-  return { t, horizon, toggleTheme };
+  const [special, setSpecial] = useState(() => localStorage.getItem("nexus-special") === "1");
+  const toggleTheme = () => { setSpecial(false); localStorage.removeItem("nexus-special"); setHorizon(h => { localStorage.setItem("nexus-horizon", h?"0":"1"); return !h; }); };
+  const enableSpecial = () => { setSpecial(true); setHorizon(false); localStorage.setItem("nexus-special","1"); localStorage.removeItem("nexus-horizon"); };
+  const disableSpecial = () => { setSpecial(false); localStorage.removeItem("nexus-special"); };
+  const t = special ? SPECIAL_THEME : horizon ? HORIZON_THEME : DARK_THEME;
+  return { t, horizon, toggleTheme, special, enableSpecial, disableSpecial };
 }
 
 // ─── DEAL BADGES ──────────────────────────────────────────────────────────────
@@ -249,13 +284,106 @@ function calc30DayAlloc(a){ const s=GPU_SPECS[a.gpuType]; if(!s||!a.nodes||!a.ra
 const calcGPU30Day   = (allocs) => (allocs||[]).reduce((s,a)=>s+calc30DayAlloc(a),0);
 const calcGrand30Day = (deal)   => calcGPU30Day(deal.gpuAllocations)+(Number(deal.storage30Day)||0);
 const calcEffective30Day = (deal) => calcGrand30Day(deal);
-const calcPaymentUtil = (deal) => { const base = calcGrand30Day(deal); if (!base) return null; const paid = (deal.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0); return Math.round((paid/base)*100); };
+// Parse a period string like "Feb 1 - 14 2026", "Jan 15 - 31 2026", "Feb 1 – 28 2026"
+// Returns { start: Date, end: Date } or null
+const parsePeriod = (period) => {
+  if (!period) return null;
+  try {
+    // Normalize en-dash/em-dash to hyphen, collapse spaces
+    const s = period.replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
+    // Try "Mon D - D YYYY" e.g. "Feb 1 - 14 2026"
+    let m = s.match(/^([A-Za-z]+)\s+(\d+)\s*-\s*(\d+)\s+(\d{4})$/);
+    if (m) {
+      const [,mon,d1,d2,yr] = m;
+      return { start: new Date(`${mon} ${d1} ${yr}`), end: new Date(`${mon} ${d2} ${yr}`) };
+    }
+    // Try "Mon D - Mon D YYYY" e.g. "Jan 15 - Feb 14 2026"
+    m = s.match(/^([A-Za-z]+)\s+(\d+)\s*-\s*([A-Za-z]+)\s+(\d+)\s+(\d{4})$/);
+    if (m) {
+      const [,m1,d1,m2,d2,yr] = m;
+      return { start: new Date(`${m1} ${d1} ${yr}`), end: new Date(`${m2} ${d2} ${yr}`) };
+    }
+    // Try "Mon D YYYY - Mon D YYYY"
+    m = s.match(/^([A-Za-z]+)\s+(\d+)\s+(\d{4})\s*-\s*([A-Za-z]+)\s+(\d+)\s+(\d{4})$/);
+    if (m) {
+      const [,m1,d1,y1,m2,d2,y2] = m;
+      return { start: new Date(`${m1} ${d1} ${y1}`), end: new Date(`${m2} ${d2} ${y2}`) };
+    }
+  } catch(e) {}
+  return null;
+};
+
+const calcPaymentUtil = (deal) => {
+  const base = calcGrand30Day(deal);
+  if (!base || !(deal.payments||[]).length) return null;
+  if (!deal.onDemand) {
+    // Non-OD: cumulative total vs 30-day rate
+    const paid = deal.payments.reduce((s,p)=>s+(Number(p.amount)||0),0);
+    return Math.round((paid/base)*100);
+  }
+  // On Demand: find the most recent 30-day window using period strings
+  // Sort payments by period end date (falling back to datePaid)
+  const withDates = deal.payments.map(p => {
+    const parsed = parsePeriod(p.period);
+    return {
+      amount: Number(p.amount)||0,
+      periodStart: parsed ? parsed.start : (p.datePaid ? new Date(p.datePaid) : null),
+      periodEnd:   parsed ? parsed.end   : (p.datePaid ? new Date(p.datePaid) : null),
+    };
+  }).filter(p => p.periodEnd);
+  if (!withDates.length) return null;
+  // Window: 30 days ending at the latest period end
+  const windowEnd = new Date(Math.max(...withDates.map(p => p.periodEnd.getTime())));
+  const windowStart = new Date(windowEnd.getTime() - 30*24*60*60*1000);
+  const MS_PER_DAY = 86400000;
+  let total = 0;
+  withDates.forEach(p => {
+    const pStart = p.periodStart.getTime();
+    const pEnd = p.periodEnd.getTime();
+    const pDays = Math.max(1, (pEnd - pStart) / MS_PER_DAY);
+    const overlapStart = Math.max(pStart, windowStart.getTime());
+    const overlapEnd = Math.min(pEnd, windowEnd.getTime());
+    if (overlapEnd <= overlapStart) return;
+    const overlapDays = (overlapEnd - overlapStart) / MS_PER_DAY;
+    total += p.amount * (overlapDays / pDays);
+  });
+  return Math.round((total / base) * 100);
+};
 const totalCollected = (deal)   => (deal.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0);
 const emptyAlloc     = () => ({id:uid(),gpuType:"H100",nodes:"",ratePerGpuHour:""});
 const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:"",networking:"",architecture:"",onDemand:false});
 const emptyPayment   = () => ({id:uid(),amount:"",datePaid:new Date().toISOString().slice(0,10),period:""});
 const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bfa"}:{bg:"rgba(0,153,255,.15)",color:"#38bdf8"};
 const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",onDemand:false,...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
+
+// ─── SPARKLE EMITTER ─────────────────────────────────────────────────────────
+function SparkleEmitter({ active }) {
+  const [sparks, setSparks] = useState([]);
+  useEffect(() => {
+    if (!active) { setSparks([]); return; }
+    const EMOJIS = ["✨","💖","🌸","💫","⭐","🦋","🌺","💕","🎀","💗","🌷","💝"];
+    const interval = setInterval(() => {
+      const id = Math.random().toString(36).slice(2);
+      const x = Math.random() * window.innerWidth;
+      const emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+      const duration = 2.5 + Math.random() * 2;
+      const size = 14 + Math.floor(Math.random() * 18);
+      setSparks(s => [...s.slice(-30), { id, x, emoji, duration, size }]);
+      setTimeout(() => setSparks(s => s.filter(sp => sp.id !== id)), duration * 1000);
+    }, 220);
+    return () => clearInterval(interval);
+  }, [active]);
+  if (!active) return null;
+  return (
+    <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:9998,overflow:"hidden"}}>
+      {sparks.map(sp => (
+        <span key={sp.id} className="special-sparkle" style={{left:sp.x,bottom:0,fontSize:sp.size,animationDuration:`${sp.duration}s`}}>
+          {sp.emoji}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 export default function App() {
   const [authed, setAuthed] = useState(() => {
@@ -269,7 +397,7 @@ export default function App() {
 }
 
 function CRM({ role = "admin", setRole }) {
-  const { t, horizon, toggleTheme } = useTheme();
+  const { t, horizon, toggleTheme, special, enableSpecial, disableSpecial } = useTheme();
   const isTech = role === "tech";
   const [showTechModal, setShowTechModal] = useState(false);
   const [techInput, setTechInput] = useState("");
@@ -283,6 +411,10 @@ function CRM({ role = "admin", setRole }) {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [adminInput, setAdminInput] = useState("");
   const [adminError, setAdminError] = useState(false);
+  const [showSpecialModal, setShowSpecialModal] = useState(false);
+  const [specialInput, setSpecialInput] = useState("");
+  const [specialError, setSpecialError] = useState(false);
+  const tryEnableSpecial = () => { if(specialInput===SPECIAL_PASSWORD){enableSpecial();setShowSpecialModal(false);setSpecialInput("");}else{setSpecialError(true);setTimeout(()=>setSpecialError(false),1500);}};
   const switchToAdmin = () => {
     if (adminInput === PASSWORD) {
       localStorage.setItem("nexus-auth","1"); setRole("admin");
@@ -448,11 +580,12 @@ function CRM({ role = "admin", setRole }) {
       addAlloc={addAlloc} removeAlloc={removeAlloc} updateAlloc={updateAlloc}
       MAX_H100={MAX_H100} MAX_H200={MAX_H200}
       isTech={isTech} role={role} setRole={setRole}
+      special={special} enableSpecial={enableSpecial} disableSpecial={disableSpecial}
     />
   );
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text}}>
+    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text}} className={special?"special-bg":""}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
         *{box-sizing:border-box;} ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:${t.scrollTrack};} ::-webkit-scrollbar-thumb{background:${t.scrollThumb};border-radius:3px;}
@@ -484,6 +617,14 @@ function CRM({ role = "admin", setRole }) {
         @keyframes sunHalo{0%,100%{transform:scale(1);opacity:0.3}50%{transform:scale(1.4);opacity:0}}
         @keyframes sunSparkle{0%,100%{opacity:0.6;transform:translate(0,0)}33%{opacity:1;transform:translate(1px,-1px)}66%{opacity:0.4;transform:translate(-1px,1px)}}
         @keyframes scan1{0%,100%{opacity:.1}40%{opacity:.95}} @keyframes scan2{0%,100%{opacity:.1}55%{opacity:.95}} @keyframes scan3{0%,100%{opacity:.1}70%{opacity:.95}}
+        @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
+        @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
+        @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
+        .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
+        .special-bg-m{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020);background-size:400% 400%;animation:shimmer 6s ease infinite;}
+        .special-header-m{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028);animation:shimmer 4s ease infinite;}
+        .special-text-m{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
         @keyframes pinA{0%,100%{opacity:.3}50%{opacity:1}} @keyframes core200{0%,100%{opacity:.2}50%{opacity:1}}
         @keyframes ring200{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pinB{0%,100%{opacity:.25}60%{opacity:1}}
         @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -493,14 +634,25 @@ function CRM({ role = "admin", setRole }) {
         .sc1{animation:scan1 1.8s ease-in-out infinite} .sc2{animation:scan2 1.8s ease-in-out infinite} .sc3{animation:scan3 1.8s ease-in-out infinite}
         .pA{animation:pinA 1.4s ease-in-out infinite} .co200{animation:core200 1.6s ease-in-out infinite}
         .ri200{transform-origin:14px 14px;animation:ring200 3s linear infinite} .pB{animation:pinB 1.6s ease-in-out infinite}
+        @keyframes sparkleFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0.2);opacity:0}}
+        @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
+        @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
+        @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
+        .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
+        .special-bg{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020) !important;background-size:400% 400% !important;animation:shimmer 6s ease infinite !important;}
+        .special-header{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028) !important;animation:shimmer 4s ease infinite !important;}
+        .special-glow{box-shadow:0 0 20px rgba(240,171,252,0.3),0 0 40px rgba(217,70,239,0.15) !important;}
+        .special-text{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
+        .special-row-hover:hover{background:rgba(240,171,252,0.08) !important;}
       `}</style>
 
       {/* Header */}
-      <div style={{borderBottom:`1px solid ${t.border}`,padding:"18px 32px",display:"flex",alignItems:"center",justifyContent:"space-between",background:t.bgHeader,flexWrap:"wrap",gap:12}}>
+      <div style={{borderBottom:`1px solid ${t.border}`,padding:"18px 32px",display:"flex",alignItems:"center",justifyContent:"space-between",background:t.bgHeader,flexWrap:"wrap",gap:12}} className={special?"special-header special-glow":""}>
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <HorizonLogo size={36} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:t.textBright,letterSpacing:"0.02em"}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}>{!special&&<span style={{color:t.textBright}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></span>}{special&&"✨ HORIZONCOMPUTE ✨"}</div>
             <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
           </div>
         </div>
@@ -699,7 +851,7 @@ function CRM({ role = "admin", setRole }) {
                   const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments";
                   const pf=getPF(deal.id); const totalNodes=allocs.reduce((s,a)=>s+(Number(a.nodes)||0),0); const hasNotes=!!(deal.notes&&deal.notes.trim());
                   return [
-                    <tr key={deal.id} className="row-hover" style={{borderBottom:isExp?"none":`1px solid ${t.borderDeep}`,transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
+                    <tr key={deal.id} className={special?"special-row-hover row-hover":"row-hover"} style={{borderBottom:isExp?"none":`1px solid ${t.borderDeep}`,transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
@@ -791,8 +943,8 @@ function CRM({ role = "admin", setRole }) {
             </div>
           )}
           {/* Horizon Mode Toggle + View Switcher */}
-          <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center"}}>
-            <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:horizon?t.bgCard:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",transition:"all .3s",boxShadow:horizon?`0 0 12px ${t.accentGlow}`:"none"}}>
+          <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+            <button onClick={special?disableSpecial:toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",transition:"all .3s",boxShadow:horizon?`0 0 12px ${t.accentGlow}`:"none"}}>
               <HorizonLogo size={18} stop1={t.logoStop1} stop2={t.logoStop2}/>
               {horizon ? "HORIZON MODE ON" : "HORIZON MODE"}
               <div style={{width:32,height:18,background:horizon?t.accent:t.borderSoft,borderRadius:9,position:"relative",transition:"background .3s",flexShrink:0}}>
@@ -805,6 +957,31 @@ function CRM({ role = "admin", setRole }) {
             {isTech && <button onClick={()=>setShowAdminModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
               <span style={{fontSize:14}}>⬡</span> ADMIN VIEW
             </button>}
+            <button onClick={special?disableSpecial:()=>setShowSpecialModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:special?"rgba(240,171,252,0.15)":"rgba(240,171,252,0.05)",border:special?"1px solid #f0abfc":"1px solid rgba(240,171,252,0.2)",color:special?"#f9a8d4":"#c084fc",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s",animation:special?"heartbeat 1.5s ease-in-out infinite":undefined}}>
+              <span style={{fontSize:14}}>✨</span> {special?"SPECIAL MODE ON":"SPECIAL MODE"}
+              <div style={{width:32,height:18,background:special?"#f0abfc":"rgba(240,171,252,0.2)",borderRadius:9,position:"relative",transition:"background .3s",flexShrink:0}}>
+                <div style={{position:"absolute",top:3,left:special?15:3,width:12,height:12,background:special?"#fff":"#c084fc",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
+              </div>
+            </button>
+          </div>
+          <SparkleEmitter active={special}/>
+        </div>
+      )}
+
+      {showSpecialModal&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowSpecialModal(false),setSpecialInput(""))}>
+          <div className="modal" style={{maxWidth:400,background:"#2a0535",border:"2px solid #f0abfc",animation:"rainbowBorder 2s linear infinite"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,background:"linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>✨ Special Mode ✨</div>
+              <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:"#c084fc",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+            </div>
+            <label style={{fontSize:10,color:"#c084fc",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
+            <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16,borderColor:specialError?"#f43f5e":"#c084fc",background:"#1a0020",color:"#f9d4ff"}} autoFocus/>
+            {specialError&&<div style={{color:"#f43f5e",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+              <button className="btn-ghost" onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}}>Cancel</button>
+              <button onClick={tryEnableSpecial} style={{background:"linear-gradient(135deg,#a21caf,#d946ef)",color:"#fff",border:"none",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Unlock ✨</button>
+            </div>
           </div>
         </div>
       )}
@@ -915,9 +1092,14 @@ function MobileCRM(props) {
     showModal, closeModal, saveDeal, form, setForm, modalTab, setModalTab,
     editingId, modal30, addAlloc, removeAlloc, updateAlloc, MAX_H100, MAX_H200,
     isTech, role, setRole,
+    special, enableSpecial, disableSpecial,
   } = props;
 
-  const [mobileTab, setMobileTab] = useState("deals"); // deals | stats | history
+  const [mobileTab, setMobileTab] = useState("deals");
+  const [showSpecialModalM, setShowSpecialModalM] = useState(false);
+  const [specialInputM, setSpecialInputM] = useState("");
+  const [specialErrorM, setSpecialErrorM] = useState(false);
+  const tryEnableSpecialM = () => { if(specialInputM===SPECIAL_PASSWORD){enableSpecial();setShowSpecialModalM(false);setSpecialInputM("");}else{setSpecialErrorM(true);setTimeout(()=>setSpecialErrorM(false),1500);}}; // deals | stats | history
   const [showTechModalM, setShowTechModalM] = useState(false);
   const [techInputM, setTechInputM] = useState("");
   const [techErrorM, setTechErrorM] = useState(false);
@@ -940,7 +1122,7 @@ function MobileCRM(props) {
   const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?"#0099ff":"transparent"}`,color:active?"#0099ff":"#4a6a8a",padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text,paddingBottom:70}}>
+    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text,paddingBottom:70}} className={special?"special-bg-m":""}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
         *{box-sizing:border-box;}
@@ -969,7 +1151,7 @@ function MobileCRM(props) {
       `}</style>
 
       {/* Header */}
-      <div style={{background:t.bgHeader,borderBottom:`1px solid ${t.border}`,padding:"14px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
+      <div style={{background:t.bgHeader,borderBottom:`1px solid ${t.border}`,padding:"14px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}} className={special?"special-header-m":""}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <HorizonLogo size={30} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
@@ -1088,6 +1270,12 @@ function MobileCRM(props) {
                 <span>⬡</span> ADMIN
               </button>}
             </div>
+            <button onClick={special?disableSpecial:()=>setShowSpecialModalM(true)} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:special?"rgba(240,171,252,0.15)":"rgba(240,171,252,0.05)",border:special?"1px solid #f0abfc":"1px solid rgba(240,171,252,0.2)",color:special?"#f9a8d4":"#c084fc",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",width:"100%",marginTop:8,animation:special?"heartbeat 1.5s ease-in-out infinite":undefined}}>
+              ✨ {special?"SPECIAL MODE ON":"SPECIAL MODE"}
+              <div style={{width:28,height:16,background:special?"#f0abfc":"rgba(240,171,252,0.2)",borderRadius:8,position:"relative",transition:"background .3s",marginLeft:"auto",flexShrink:0}}>
+                <div style={{position:"absolute",top:2,left:special?12:2,width:12,height:12,background:special?"#fff":"#c084fc",borderRadius:"50%",transition:"left .3s"}}/>
+              </div>
+            </button>
           </div>
         )}
 
