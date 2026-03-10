@@ -35,6 +35,59 @@ function HorizonLogo({size=36}) {
   );
 }
 
+// ─── DEAL BADGES ──────────────────────────────────────────────────────────────
+function NetworkingBadge({ value }) {
+  if (!value) return null;
+  const isIB = value === "IB";
+  return (
+    <div title={`Networking: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isIB?"rgba(139,92,246,0.15)":"rgba(0,153,255,0.12)",border:`1px solid ${isIB?"rgba(139,92,246,0.4)":"rgba(0,153,255,0.35)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isIB?"#a78bfa":"#38bdf8",letterSpacing:"0.04em",flexShrink:0}}>
+      {isIB ? (
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.2"/>
+          <circle cx="6" cy="6" r="2" fill="currentColor"/>
+          <line x1="6" y1="1" x2="6" y2="4" stroke="currentColor" strokeWidth="1.2"/>
+          <line x1="6" y1="8" x2="6" y2="11" stroke="currentColor" strokeWidth="1.2"/>
+          <line x1="1" y1="6" x2="4" y2="6" stroke="currentColor" strokeWidth="1.2"/>
+          <line x1="8" y1="6" x2="11" y2="6" stroke="currentColor" strokeWidth="1.2"/>
+        </svg>
+      ) : (
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <circle cx="2.5" cy="6" r="1.5" fill="currentColor"/>
+          <circle cx="9.5" cy="6" r="1.5" fill="currentColor"/>
+          <circle cx="6" cy="2.5" r="1.5" fill="currentColor"/>
+          <line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" strokeWidth="1.1"/>
+          <line x1="6" y1="4" x2="6" y2="6" stroke="currentColor" strokeWidth="1.1"/>
+        </svg>
+      )}
+      {value}
+    </div>
+  );
+}
+
+function ArchitectureBadge({ value }) {
+  if (!value) return null;
+  const isBM = value === "Bare Metal";
+  return (
+    <div title={`Architecture: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isBM?"rgba(245,158,11,0.12)":"rgba(16,185,129,0.1)",border:`1px solid ${isBM?"rgba(245,158,11,0.35)":"rgba(16,185,129,0.3)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isBM?"#f59e0b":"#10b981",letterSpacing:"0.04em",flexShrink:0}}>
+      {isBM ? (
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <rect x="1" y="3" width="10" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+          <line x1="3.5" y1="3" x2="3.5" y2="9" stroke="currentColor" strokeWidth="1"/>
+          <line x1="6" y1="3" x2="6" y2="9" stroke="currentColor" strokeWidth="1"/>
+          <line x1="8.5" y1="3" x2="8.5" y2="9" stroke="currentColor" strokeWidth="1"/>
+        </svg>
+      ) : (
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+          <rect x="2" y="1.5" width="8" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+          <rect x="2" y="7.5" width="8" height="3" rx="1" stroke="currentColor" strokeWidth="1" opacity="0.5"/>
+          <line x1="6" y1="6.5" x2="6" y2="7.5" stroke="currentColor" strokeWidth="1"/>
+        </svg>
+      )}
+      {isBM ? "Bare Metal" : "VM"}
+    </div>
+  );
+}
+
 function PasswordGate({ onUnlock }) {
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
@@ -99,10 +152,10 @@ const calcGPU30Day   = (allocs) => (allocs||[]).reduce((s,a)=>s+calc30DayAlloc(a
 const calcGrand30Day = (deal)   => calcGPU30Day(deal.gpuAllocations)+(Number(deal.storage30Day)||0);
 const totalCollected = (deal)   => (deal.payments||[]).reduce((s,p)=>s+(Number(p.amount)||0),0);
 const emptyAlloc     = () => ({id:uid(),gpuType:"H100",nodes:"",ratePerGpuHour:""});
-const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:""});
+const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:"",networking:"",architecture:""});
 const emptyPayment   = () => ({id:uid(),amount:"",datePaid:new Date().toISOString().slice(0,10),period:""});
 const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bfa"}:{bg:"rgba(0,153,255,.15)",color:"#38bdf8"};
-const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
+const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
 
 export default function App() {
   const [authed, setAuthed] = useState(() => localStorage.getItem("nexus-auth") === "1");
@@ -483,7 +536,7 @@ function CRM() {
                   return [
                     <tr key={deal.id} className="row-hover" style={{borderBottom:isExp?"none":"1px solid #111d2e",transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{color:"#d8e8f8",fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}</div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:"#d8e8f8",fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/></div></td>
                       <td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
                       <td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#2a4060"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
@@ -577,6 +630,20 @@ function CRM() {
               <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>End Date</label><input type="date" value={form.endDate||""} onChange={e=>setForm(f=>({...f,endDate:e.target.value}))}/></div>
               <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
               <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginTop:16}}>
+              <div>
+                <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
+                <div style={{display:"flex",gap:8}}>
+                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#38bdf8":"#4a6a8a",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
+                </div>
+              </div>
+              <div>
+                <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
+                <div style={{display:"flex",gap:8}}>
+                  {["VM","Bare Metal"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
+                </div>
+              </div>
             </div>
             <div style={{display:"flex",gap:12,marginTop:24,justifyContent:"flex-end"}}><button className="btn-ghost" onClick={closeModal}>Cancel</button><button className="btn-primary" onClick={saveDeal}>{editingId?"Save Changes":"Add Deal"}</button></div>
           </div>
@@ -735,7 +802,7 @@ function MobileCRM(props) {
                   {/* Card Header */}
                   <div onClick={()=>toggleExpand(deal.id,curTab)} style={{padding:"14px 16px",cursor:"pointer"}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-                      <div style={{fontWeight:600,color:"#d8e8f8",fontSize:14}}>{deal.customer||"—"}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}><span style={{fontWeight:600,color:"#d8e8f8",fontSize:14}}>{deal.customer||"—"}</span><NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/></div>
                       <span style={{background:st.bg,color:st.color,padding:"3px 9px",borderRadius:4,fontSize:10,fontWeight:600,flexShrink:0,marginLeft:8}}>{deal.status}</span>
                     </div>
                     <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
@@ -914,6 +981,20 @@ function MobileCRM(props) {
               <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
               <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
               <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:12}}>
+              <div>
+                <label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
+                <div style={{display:"flex",gap:6}}>
+                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#38bdf8":"#4a6a8a",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
+                </div>
+              </div>
+              <div>
+                <label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
+                <div style={{display:"flex",gap:6}}>
+                  {["VM","Bare Metal"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
+                </div>
+              </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:20}}>
               <button className="m-btn-ghost" onClick={closeModal}>Cancel</button>
