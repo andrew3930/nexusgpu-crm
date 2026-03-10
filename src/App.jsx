@@ -526,7 +526,6 @@ function CRM() {
               })}
             </div>
           </div>
-          </div>
 
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
             <input style={{width:220}} placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)}/>
