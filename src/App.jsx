@@ -13,7 +13,7 @@ function PasswordGate({ onUnlock }) {
     <div style={{minHeight:"100vh",background:"#080c14",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono',monospace"}}>
       <div style={{background:"#0d1825",border:`1px solid ${error?"#ef4444":"#1e3550"}`,borderRadius:12,padding:40,width:380,textAlign:"center",transition:"border-color .2s"}}>
         <div style={{width:48,height:48,background:"linear-gradient(135deg,#003d99,#0066ff)",borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,margin:"0 auto 16px"}}>⬡</div>
-        <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>NEXUS<span style={{color:"#0099ff"}}>GPU</span></div>
+        <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
         <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",marginBottom:28}}>SALES INTELLIGENCE PLATFORM</div>
         <input
           type="password"
@@ -217,7 +217,7 @@ export default function App() {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <div style={{width:36,height:36,background:"linear-gradient(135deg,#003d99,#0066ff)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>⬡</div>
           <div>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#e8f0fc",letterSpacing:"0.02em"}}>NEXUS<span style={{color:"#0099ff"}}>GPU</span></div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#e8f0fc",letterSpacing:"0.02em"}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
             <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
           </div>
         </div>
