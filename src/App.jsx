@@ -487,6 +487,112 @@ function AaronJudgeAnimation({ active }) {
 
 
 // ─── MONEY BAG ANIMATION ─────────────────────────────────────────────────────
+
+// ─── RUN RATE ICON (animated lightning bolt with bar chart) ──────────────────
+function RunRateIcon() {
+  return (
+    <span style={{display:"inline-block",marginLeft:7,verticalAlign:"middle",lineHeight:1}}>
+      <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style={{overflow:"visible"}}>
+        <style>{`
+          @keyframes boltFlash {
+            0%,100%{opacity:1;filter:drop-shadow(0 0 3px #38bdf8);}
+            45%,55%{opacity:0.3;filter:none;}
+          }
+          @keyframes bar1Rise {
+            0%,100%{transform:scaleY(1);}
+            50%{transform:scaleY(1.5);}
+          }
+          @keyframes bar2Rise {
+            0%,100%{transform:scaleY(1);}
+            50%{transform:scaleY(1.7);}
+          }
+          @keyframes bar3Rise {
+            0%,100%{transform:scaleY(1);}
+            50%{transform:scaleY(1.3);}
+          }
+          @keyframes glowPulse {
+            0%,100%{opacity:0.15;}
+            50%{opacity:0.45;}
+          }
+          .rrBolt{animation:boltFlash 1.8s ease-in-out infinite;}
+          .rrBar1{transform-origin:7px 28px;animation:bar1Rise 1.8s ease-in-out infinite;}
+          .rrBar2{transform-origin:14px 28px;animation:bar2Rise 1.8s ease-in-out 0.15s infinite;}
+          .rrBar3{transform-origin:21px 28px;animation:bar3Rise 1.8s ease-in-out 0.3s infinite;}
+          .rrGlow{animation:glowPulse 1.8s ease-in-out infinite;}
+        `}</style>
+
+        {/* glow bg */}
+        <circle className="rrGlow" cx="18" cy="18" r="14" fill="#38bdf8"/>
+
+        {/* bar chart */}
+        <rect className="rrBar1" x="5" y="20" width="5" height="8" rx="1.5" fill="#0ea5e9" opacity="0.7"/>
+        <rect className="rrBar2" x="12" y="15" width="5" height="13" rx="1.5" fill="#38bdf8" opacity="0.85"/>
+        <rect className="rrBar3" x="19" y="18" width="5" height="10" rx="1.5" fill="#7dd3fc" opacity="0.7"/>
+
+        {/* lightning bolt */}
+        <g className="rrBolt">
+          <polygon points="22,5 14,18 19,18 14,31 24,16 18,16" fill="#f0f9ff" stroke="#38bdf8" strokeWidth="0.5"/>
+        </g>
+      </svg>
+    </span>
+  );
+}
+
+// ─── ACTIVE DEALS ICON (animated handshake / deal pulse) ─────────────────────
+function ActiveDealsIcon() {
+  return (
+    <span style={{display:"inline-block",marginLeft:7,verticalAlign:"middle",lineHeight:1}}>
+      <svg width="22" height="22" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style={{overflow:"visible"}}>
+        <style>{`
+          @keyframes shakePulse {
+            0%,100%{transform:translateY(0);}
+            20%{transform:translateY(-2px) rotate(-3deg);}
+            40%{transform:translateY(1px) rotate(3deg);}
+            60%{transform:translateY(-1px) rotate(-2deg);}
+            80%{transform:translateY(0px) rotate(1deg);}
+          }
+          @keyframes ringPing {
+            0%{r:12;opacity:0.5;}
+            100%{r:18;opacity:0;}
+          }
+          @keyframes dotBlink {
+            0%,100%{opacity:1;}
+            50%{opacity:0.2;}
+          }
+          .adShake{animation:shakePulse 2s ease-in-out infinite;}
+          .adRing{animation:ringPing 2s ease-out infinite;}
+          .adDot{animation:dotBlink 2s ease-in-out infinite;}
+        `}</style>
+
+        {/* ping ring */}
+        <circle className="adRing" cx="18" cy="20" r="12" fill="none" stroke="#10b981" strokeWidth="1.2"/>
+
+        <g className="adShake">
+          {/* left hand */}
+          <path d="M6 20 Q8 16 11 17 L16 17 Q17 17 17 18.5 Q17 20 16 20 L13 20" stroke="#10b981" strokeWidth="2" strokeLinecap="round" fill="none"/>
+          {/* right hand */}
+          <path d="M30 20 Q28 16 25 17 L20 17 Q19 17 19 18.5 Q19 20 20 20 L23 20" stroke="#34d399" strokeWidth="2" strokeLinecap="round" fill="none"/>
+          {/* clasp */}
+          <ellipse cx="18" cy="19" rx="3.5" ry="3" fill="#10b981" opacity="0.9"/>
+          <ellipse cx="18" cy="19" rx="2" ry="1.8" fill="#6ee7b7"/>
+          {/* fingers left */}
+          <path d="M11 17 Q11 14 13 14" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+          <path d="M13 17 Q13 13 15 13" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+          {/* fingers right */}
+          <path d="M25 17 Q25 14 23 14" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+          <path d="M23 17 Q23 13 21 13" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+        </g>
+
+        {/* live dot */}
+        <circle className="adDot" cx="29" cy="9" r="3" fill="#10b981"/>
+        <circle cx="29" cy="9" r="1.5" fill="#6ee7b7"/>
+      </svg>
+    </span>
+  );
+}
+
 function MoneyBag() {
   return (
     <span style={{display:"inline-block",marginLeft:7,verticalAlign:"middle",lineHeight:1}}>
@@ -921,7 +1027,7 @@ function CRM({ role = "admin", setRole }) {
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16,marginBottom:28}}>
             {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
               <div className="stat-card" key={s.label}>
-                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}</div>
+                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}{s.label==="30-Day Run Rate"&&<RunRateIcon/>}{s.label==="Active Deals"&&<ActiveDealsIcon/>}</div>
                 <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:700,color:t.textBright,minHeight:34}}>
                   {(hideValues&&!s.plain)?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:6,minWidth:100,height:28}}>&nbsp;</span>:s.value}
                 </div>
@@ -1374,7 +1480,7 @@ function MobileCRM(props) {
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
               {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
                 <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
-                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}</div>
+                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}{s.label==="30-Day Run Rate"&&<RunRateIcon/>}{s.label==="Active Deals"&&<ActiveDealsIcon/>}</div>
                   <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:t.textBright}}>
                     {hideValues&&!s.plain?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:80,height:24}}>&nbsp;</span>:s.value}
                   </div>
