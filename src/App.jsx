@@ -451,7 +451,7 @@ function CRM() {
       {loadState==="ready"&&(
         <div style={{padding:"28px 32px"}}>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16,marginBottom:28}}>
-            {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Pipeline Value",value:fmtShort(totals.pipeline)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
+            {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
               <div className="stat-card" key={s.label}>
                 <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8}}>{s.label}</div>
                 <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:700,color:"#e8f0fc",minHeight:34}}>
@@ -508,23 +508,29 @@ function CRM() {
                 );
               })}
             </div>
-            {/* Combo Counters */}
-            <div style={{borderTop:"1px solid #0d2035",marginTop:4,paddingTop:12}}>
-              <div style={{fontSize:9,color:"#2a4a6a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}>Config Breakdown</div>
-              {[
-                {label:"RoCE v2 + VM",  net:"RoCE v2", arch:"VM",  color:"#38bdf8", bg:"rgba(56,189,248,0.08)"},
-                {label:"RoCE v2 + BM",  net:"RoCE v2", arch:"BM",  color:"#10b981", bg:"rgba(16,185,129,0.08)"},
-                {label:"IB + BM",       net:"IB",      arch:"BM",  color:"#a78bfa", bg:"rgba(139,92,246,0.08)"},
-              ].map(({label,net,arch,color,bg})=>{
-                const count = deals.filter(d=>d.networking===net&&d.architecture===arch).length;
-                return (
-                  <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",borderRadius:5,background:count>0?bg:"transparent",marginBottom:3}}>
-                    <span style={{fontSize:10,color:count>0?color:"#2a4a6a",fontWeight:count>0?600:400,letterSpacing:"0.06em"}}>{label}</span>
-                    <span style={{fontSize:13,fontWeight:700,color:count>0?color:"#1e3a5a",minWidth:20,textAlign:"right"}}>{count}</span>
+          {/* Config Breakdown Card */}
+          <div className="stat-card">
+            <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:14}}>Config Breakdown</div>
+            {[
+              {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM", color:"#38bdf8"},
+              {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM", color:"#10b981"},
+              {label:"IB + BM",      net:"IB",      arch:"BM", color:"#a78bfa"},
+            ].map(({label,net,arch,color})=>{
+              const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
+              const pct = Math.min(nodes/193,1);
+              return (
+                <div key={label} style={{marginBottom:10}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                    <span style={{fontSize:10,color:nodes>0?color:"#2a4a6a",fontWeight:nodes>0?600:400,letterSpacing:"0.06em"}}>{label}</span>
+                    <span style={{fontSize:12,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#2a4a6a",fontWeight:400,fontSize:10}}>/193</span></span>
                   </div>
-                );
-              })}
-            </div>
+                  <div style={{height:4,background:"#0a1220",borderRadius:2,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${pct*100}%`,background:color,borderRadius:2,transition:"width .4s ease",opacity:nodes>0?1:0.3}}/>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           </div>
 
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
@@ -762,7 +768,7 @@ function MobileCRM(props) {
         {mobileTab==="stats"&&(
           <div style={{padding:"16px"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
-              {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Pipeline Value",value:fmtShort(totals.pipeline)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
+              {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
                 <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
                   <div style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}>{s.label}</div>
                   <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:"#e8f0fc"}}>
@@ -798,19 +804,24 @@ function MobileCRM(props) {
                 );
               })}
             </div>
-            {/* Combo counters */}
             <div className="m-card" style={{padding:"14px 16px",marginBottom:10}}>
-              <div style={{fontSize:9,color:"#2a4a6a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Config Breakdown</div>
+              <div style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>Config Breakdown</div>
               {[
-                {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM",  color:"#38bdf8", bg:"rgba(56,189,248,0.08)"},
-                {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#10b981", bg:"rgba(16,185,129,0.08)"},
-                {label:"IB + BM",      net:"IB",      arch:"BM",  color:"#a78bfa", bg:"rgba(139,92,246,0.08)"},
-              ].map(({label,net,arch,color,bg})=>{
-                const count = deals.filter(d=>d.networking===net&&d.architecture===arch).length;
+                {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM",  color:"#38bdf8"},
+                {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#10b981"},
+                {label:"IB + BM",      net:"IB",      arch:"BM",  color:"#a78bfa"},
+              ].map(({label,net,arch,color})=>{
+                const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
+                const pct = Math.min(nodes/193,1);
                 return (
-                  <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 10px",borderRadius:6,background:count>0?bg:"transparent",marginBottom:4}}>
-                    <span style={{fontSize:11,color:count>0?color:"#2a4a6a",fontWeight:count>0?600:400}}>{label}</span>
-                    <span style={{fontSize:15,fontWeight:700,color:count>0?color:"#1e3a5a"}}>{count}</span>
+                  <div key={label} style={{marginBottom:10}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                      <span style={{fontSize:11,color:nodes>0?color:"#2a4a6a",fontWeight:nodes>0?600:400}}>{label}</span>
+                      <span style={{fontSize:13,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#2a4a6a",fontWeight:400,fontSize:11}}>/193</span></span>
+                    </div>
+                    <div style={{height:4,background:"#0a1220",borderRadius:2,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${pct*100}%`,background:color,borderRadius:2,transition:"width .4s",opacity:nodes>0?1:0.3}}/>
+                    </div>
                   </div>
                 );
               })}
