@@ -97,8 +97,24 @@ function CRM() {
   const [editingPayment, setEditingPayment] = useState(null);
   const [hideValues, setHideValues]     = useState(false);
   const [onlineUsers, setOnlineUsers]   = useState(1);
+  const [notifications, setNotifications] = useState([]);
+  const [showHistory, setShowHistory]   = useState(false);
+  const [history, setHistory]           = useState([]);
   const fbLib   = useRef(null);
   const localOp = useRef(false);
+
+  const logEvent = useCallback((type, message, detail="") => {
+    if (!fbLib.current) return;
+    const { db, ref, set } = fbLib.current;
+    const id = uid();
+    const entry = { id, type, message, detail, ts: Date.now() };
+    set(ref(db, "history/" + id), entry);
+  }, []);
+
+  const pushNotif = useCallback((type, message, detail="") => {
+    const id = uid();
+    setNotifications(n => [{ id, type, message, detail, ts: Date.now() }, ...n.slice(0, 4)]);
+  }, []);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -121,6 +137,13 @@ function CRM() {
       set(presRef, {online:true,t:Date.now()});
       onDisconnect(presRef).remove();
       onValue(ref(db,"presence"), snap=>{ const v=snap.val(); setOnlineUsers(v?Object.keys(v).length:1); });
+      onValue(ref(db,"history"), snap=>{
+        const val = snap.val();
+        if (val && typeof val === "object") {
+          const items = Object.values(val).sort((a,b) => b.ts - a.ts);
+          setHistory(items);
+        }
+      });
       onValue(ref(db,"deals"), snap=>{
         if(localOp.current){localOp.current=false;return;}
         const val=snap.val();
@@ -150,19 +173,26 @@ function CRM() {
   const saveDeal   = () => {
     if(!form.customer.trim()) return;
     const deal={...form,fullContractValue:Number(form.fullContractValue)||0,storageValue:Number(form.storageValue)||0,storage30Day:Number(form.storage30Day)||0,startDate:form.startDate||"",endDate:form.endDate||"",payments:form.payments||[],notes:form.notes||"",gpuAllocations:(form.gpuAllocations||[]).map(a=>({...a,nodes:Number(a.nodes)||0,ratePerGpuHour:Number(a.ratePerGpuHour)||0})).filter(a=>a.nodes>0&&a.ratePerGpuHour>0)};
-    if(editingId) updateDeals(d=>d.map(x=>x.id===editingId?deal:x));
-    else updateDeals(d=>[...d,{...deal,id:uid()}]);
+    if(editingId) {
+      updateDeals(d=>d.map(x=>x.id===editingId?deal:x));
+      logEvent("edit", "Deal edited", deal.customer);
+      pushNotif("edit", "Deal edited", deal.customer);
+    } else {
+      updateDeals(d=>[...d,{...deal,id:uid()}]);
+      logEvent("new_deal", "New deal added", deal.customer);
+      pushNotif("new_deal", "New deal added", deal.customer);
+    }
     closeModal();
   };
   const addAlloc    = () => setForm(f=>({...f,gpuAllocations:[...f.gpuAllocations,emptyAlloc()]}));
   const removeAlloc = (id) => setForm(f=>({...f,gpuAllocations:f.gpuAllocations.filter(a=>a.id!==id)}));
   const updateAlloc = (id,k,v) => setForm(f=>({...f,gpuAllocations:f.gpuAllocations.map(a=>a.id===id?{...a,[k]:v}:a)}));
-  const deleteDeal  = (id) => { updateDeals(d=>d.filter(x=>x.id!==id)); if(expandedId===id) setExpandedId(null); };
+  const deleteDeal  = (id) => { const d0=deals.find(x=>x.id===id); updateDeals(d=>d.filter(x=>x.id!==id)); if(expandedId===id) setExpandedId(null); if(d0){logEvent("delete_deal","Deal deleted",d0.customer);pushNotif("delete_deal","Deal deleted",d0.customer);} };
   const toggleExpand = (id,tab="payments") => { if(expandedId===id&&(expandTab[id]||"payments")===tab) setExpandedId(null); else{setExpandedId(id);setExpandTab(p=>({...p,[id]:tab}));} };
   const getPF=(id)=>paymentForms[id]||emptyPayment();
   const setPF=(id,v)=>setPaymentForms(p=>({...p,[id]:v}));
-  const addPayment=(dealId)=>{ const pf=getPF(dealId); if(!pf.amount||!pf.datePaid) return; updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:[...(x.payments||[]),{id:uid(),amount:Number(pf.amount),datePaid:pf.datePaid,period:pf.period}]}:x)); setPF(dealId,emptyPayment()); };
-  const deletePayment=(dealId,pid)=>updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:(x.payments||[]).filter(p=>p.id!==pid)}:x));
+  const addPayment=(dealId)=>{ const pf=getPF(dealId); if(!pf.amount||!pf.datePaid) return; const d0=deals.find(x=>x.id===dealId); updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:[...(x.payments||[]),{id:uid(),amount:Number(pf.amount),datePaid:pf.datePaid,period:pf.period}]}:x)); setPF(dealId,emptyPayment()); if(d0){const msg=`$${Number(pf.amount).toLocaleString()} payment`;logEvent("payment_added","Payment added",`${msg} — ${d0.customer}`);pushNotif("payment_added","Payment added",`${msg} · ${d0.customer}`);}};
+  const deletePayment=(dealId,pid)=>{ const d0=deals.find(x=>x.id===dealId); const p0=d0&&(d0.payments||[]).find(p=>p.id===pid); updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:(x.payments||[]).filter(p=>p.id!==pid)}:x)); if(d0&&p0){logEvent("payment_deleted","Payment deleted",`$${Number(p0.amount).toLocaleString()} — ${d0.customer}`);pushNotif("payment_deleted","Payment deleted",`$${Number(p0.amount).toLocaleString()} · ${d0.customer}`);}};
   const saveNotes=(dealId,notes)=>updateDeals(d=>d.map(x=>x.id===dealId?{...x,notes}:x));
   const startEditPayment=(dealId,p)=>setEditingPayment({dealId,paymentId:p.id,amount:String(p.amount),datePaid:p.datePaid,period:p.period||""});
   const cancelEditPayment=()=>setEditingPayment(null);
@@ -234,9 +264,67 @@ function CRM() {
           <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":"rgba(100,116,139,0.1)",border:`1px solid ${hideValues?"#ef4444":"#2a3a50"}`,color:hideValues?"#ef4444":"#6a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",transition:"all .2s"}}>
             {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
           </button>
+          <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#1e3550"}>
+            🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#0099ff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
+          </button>
           <button className="btn-primary" onClick={openNew}>+ New Deal</button>
         </div>
       </div>
+
+      {/* Notification Bar */}
+      {notifications.length > 0 && (
+        <div style={{background:"#060f1a",borderBottom:"1px solid #0d2a45",padding:"0 32px"}}>
+          {notifications.map((n, i) => {
+            const icons = {new_deal:"🟢", edit:"✏️", payment_added:"💳", payment_deleted:"🗑", delete_deal:"❌"};
+            const colors = {new_deal:"#10b981", edit:"#0099ff", payment_added:"#10b981", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
+            return (
+              <div key={n.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:i<notifications.length-1?"1px solid #0a1a2a":"none",opacity:i===0?1:0.5}}>
+                <span style={{fontSize:13}}>{icons[n.type]||"•"}</span>
+                <span style={{fontSize:11,color:colors[n.type]||"#c9d6e8",fontWeight:600,letterSpacing:"0.06em"}}>{n.message}</span>
+                {n.detail&&<span style={{fontSize:11,color:"#4a6a8a"}}>— {n.detail}</span>}
+                <span style={{fontSize:10,color:"#2a4060",marginLeft:"auto"}}>{new Date(n.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                {i===0&&<button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#2a4060",cursor:"pointer",fontSize:14,padding:"0 4px",lineHeight:1}} title="Dismiss all">×</button>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* History Side Panel */}
+      {showHistory && (
+        <div style={{position:"fixed",inset:0,zIndex:200,display:"flex"}}>
+          <div style={{flex:1,background:"rgba(0,0,0,0.5)"}} onClick={()=>setShowHistory(false)}/>
+          <div style={{width:420,background:"#090e18",borderLeft:"1px solid #1a2e45",display:"flex",flexDirection:"column",height:"100vh",overflowY:"auto"}}>
+            <div style={{padding:"20px 24px",borderBottom:"1px solid #1a2e45",display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,background:"#090e18",zIndex:1}}>
+              <div>
+                <div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:"#e8f0fc"}}>Activity History</div>
+                <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",marginTop:2}}>{history.length} EVENTS</div>
+              </div>
+              <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
+            </div>
+            <div style={{padding:"16px 24px",flex:1}}>
+              {history.length === 0 && <div style={{color:"#2a4060",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
+              {history.map(e => {
+                const icons = {new_deal:"🟢", edit:"✏️", payment_added:"💳", payment_deleted:"🗑", delete_deal:"❌"};
+                const colors = {new_deal:"#10b981", edit:"#0099ff", payment_added:"#10b981", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
+                const d = new Date(e.ts);
+                const dateStr = d.toLocaleDateString([],{month:"short",day:"numeric"});
+                const timeStr = d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+                return (
+                  <div key={e.id} style={{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid #0a1520"}}>
+                    <div style={{fontSize:16,minWidth:22,textAlign:"center",marginTop:1}}>{icons[e.type]||"•"}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:12,color:colors[e.type]||"#c9d6e8",fontWeight:600}}>{e.message}</div>
+                      {e.detail&&<div style={{fontSize:11,color:"#4a6a8a",marginTop:2}}>{e.detail}</div>}
+                      <div style={{fontSize:10,color:"#2a4060",marginTop:4,letterSpacing:"0.06em"}}>{dateStr} · {timeStr}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:"#2a4a6a"}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:13,letterSpacing:"0.12em"}}>CONNECTING TO FIREBASE…</span></div>}
 
