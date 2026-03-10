@@ -361,7 +361,7 @@ function SparkleEmitter({ active }) {
   const [sparks, setSparks] = useState([]);
   useEffect(() => {
     if (!active) { setSparks([]); return; }
-    const EMOJIS = ["✨","💖","🌸","💫","⭐","🦋","🌺","💕","🎀","💗","🌷","💝","🩹"];
+    const EMOJIS = ["✨","💖","🌸","💫","⭐","🦋","🌺","💕","🎀","💗","🌷","💝","❤️‍🩹","❤️‍🩹","❤️‍🩹"];
     const interval = setInterval(() => {
       const id = Math.random().toString(36).slice(2);
       const x = Math.random() * window.innerWidth;
@@ -381,6 +381,289 @@ function SparkleEmitter({ active }) {
           {sp.emoji}
         </span>
       ))}
+    </div>
+  );
+}
+
+
+// ─── AARON JUDGE PIXEL ANIMATION ─────────────────────────────────────────────
+function AaronJudgeAnimation({ active }) {
+  const [frame, setFrame] = useState(0);
+  const [ballX, setBallX] = useState(null);
+  const [ballY, setBallY] = useState(null);
+  const [showBall, setShowBall] = useState(false);
+  const frameRef = useRef(0);
+  const ballRef = useRef(null);
+
+  // Pixel art frames for Aaron Judge swing (#99, Yankees pinstripes)
+  // Each frame is a 20x24 grid. Colors: 0=transparent, 1=white(jersey), 2=navy, 3=skin, 4=gray(pants), 5=black, 6=red(NY logo), 7=yellow(bat), 8=brown(glove)
+  const FRAMES = [
+    // Frame 0: Stance / wind-up - bat held high back
+    [
+      "00000000222200000000",
+      "00000000233200000000",
+      "00000000222200000000",
+      "00000002222220000000",
+      "00000021112220000000",
+      "00000021162220000000",
+      "00000021112220000000",
+      "00000022222220000000",
+      "00000011111100000000",
+      "00000011111100000000",
+      "00000011111100000000",
+      "00000012211100000000",
+      "00000012211100000000",
+      "00000044444400000070",
+      "00000044444400000770",
+      "00000044444400007700",
+      "00000054444450077000",
+      "00000005444500770000",
+      "00000000545007700000",
+      "00000000545077000000",
+      "00000000555770000000",
+      "00000000557700000000",
+      "00000055770000000000",
+      "00000550000000000000",
+    ],
+    // Frame 1: Loading - weight back, bat cocking
+    [
+      "00000000222200000000",
+      "00000000233200000000",
+      "00000000222200000000",
+      "00000002222220000000",
+      "00000021112220000000",
+      "00000021162220000000",
+      "00000021112220000000",
+      "00000022222220000000",
+      "00000011111100000000",
+      "00000011111100000000",
+      "00000011111100000000",
+      "00000012211100000000",
+      "00000011211300000000",
+      "00000044444430000007",
+      "00000044444433000077",
+      "00000044444430000770",
+      "00000054444450007700",
+      "00000005444500077000",
+      "00000000545000770000",
+      "00000000545007700000",
+      "00000000555577000000",
+      "00000000005770000000",
+      "00000055700000000000",
+      "00000500000000000000",
+    ],
+    // Frame 2: Swing start - rotating hips, bat coming forward
+    [
+      "00000002220000000000",
+      "00000002320000000000",
+      "00000002220000000000",
+      "00000022222000000000",
+      "00000211112000000000",
+      "00000211612000000000",
+      "00000211112000000000",
+      "00000222222000000000",
+      "00000011111200000000",
+      "00000011111200000000",
+      "00000311111200000000",
+      "00000312211200000000",
+      "00000033211200000000",
+      "00003344444500000000",
+      "00033344444500000000",
+      "00033044444500000000",
+      "00330004444550000000",
+      "03300000444555000000",
+      "33000000044455500000",
+      "00000000004455550000",
+      "00000000000455577000",
+      "00000000000005577700",
+      "00000000000000777700",
+      "00000000000000007770",
+    ],
+    // Frame 3: Contact! Bat fully extended horizontal - IMPACT
+    [
+      "00000222000000000000",
+      "00000232000000000000",
+      "00000222000000000000",
+      "00002222200000000000",
+      "00021111200000000000",
+      "00021161200000000000",
+      "00021111200000000000",
+      "00022222200000000000",
+      "00031111220000000000",
+      "03311111220000000000",
+      "33311111220000000000",
+      "33312211220000000000",
+      "00032211220000000000",
+      "00003344455000000000",
+      "00003344455000000000",
+      "00000344455000000000",
+      "00000044455500000000",
+      "00000004455550000000",
+      "77777777777777700000",
+      "07777777777777770000",
+      "00000000000004455000",
+      "00000000000000455500",
+      "00000000000000055550",
+      "00000000000000005555",
+    ],
+    // Frame 4: Follow-through - bat wrapping around, watching ball
+    [
+      "00022200000000000000",
+      "00023200000000000000",
+      "00022200000000000000",
+      "00222220000000000000",
+      "02111120000000000000",
+      "02116120000000000000",
+      "02111120000000000000",
+      "02222220000000000000",
+      "03111122000000000000",
+      "33111122000000000000",
+      "33111122000000000000",
+      "33122122000000000000",
+      "03322122000000000000",
+      "00333445500000000000",
+      "00333445500000000000",
+      "07700344550000000000",
+      "77003344550000000000",
+      "70003344450000000000",
+      "00003344450000000000",
+      "00000344450000000000",
+      "00000044555000000000",
+      "00000004555500000000",
+      "00000000555550000000",
+      "00000000055555000000",
+    ],
+    // Frame 5: High follow-through - bat over shoulder, watching ball soar
+    [
+      "00222000000000000000",
+      "00232000000000000000",
+      "00222000000000000000",
+      "02222200000000000000",
+      "21111200000000000000",
+      "21161200000000000000",
+      "21111200000000000000",
+      "22222200000000000000",
+      "23111220000000000000",
+      "33111220000000000000",
+      "33111220000000000000",
+      "33122220000000000000",
+      "33322220000000000000",
+      "07733445000000000000",
+      "77033445000000000000",
+      "70033445000000000000",
+      "00033445500000000000",
+      "00003344550000000000",
+      "00003344550000000000",
+      "00003344450000000000",
+      "00000344450000000000",
+      "00000044555000000000",
+      "00000005555500000000",
+      "00000000555550000000",
+    ],
+  ];
+
+  const COLORS = {
+    '0': 'transparent',
+    '1': '#f0f0f0',       // white jersey
+    '2': '#0a1a3a',       // yankees navy
+    '3': '#d4956a',       // skin tone
+    '4': '#c8c8c8',       // gray pants
+    '5': '#111111',       // black cleats/outline
+    '6': '#cc0000',       // NY red logo
+    '7': '#c8a020',       // bat (ash wood)
+    '8': '#8b4513',       // glove brown
+  };
+
+  const SWING_FRAMES = [0, 0, 1, 1, 2, 3, 3, 4, 5, 5];
+  const TOTAL = SWING_FRAMES.length;
+
+  useEffect(() => {
+    if (!active) { setFrame(0); setShowBall(false); setBallX(null); return; }
+    let f = 0;
+    const iv = setInterval(() => {
+      f = (f + 1) % TOTAL;
+      frameRef.current = f;
+      setFrame(f);
+      // Launch ball on contact frame (index 3 = frame value 3)
+      if (SWING_FRAMES[f] === 3 && !ballRef.current) {
+        ballRef.current = true;
+        setShowBall(true);
+        setBallX(320);
+        setBallY(60);
+        setTimeout(() => { ballRef.current = false; setShowBall(false); }, 2200);
+      }
+    }, 110);
+    return () => clearInterval(iv);
+  }, [active]);
+
+  // Ball arc animation via CSS
+  useEffect(() => {
+    if (!showBall) return;
+    let t = 0;
+    const iv = setInterval(() => {
+      t += 0.045;
+      const x = 320 + t * 340;
+      const y = 60 - Math.sin(t * Math.PI * 0.6) * 140 + t * t * 30;
+      setBallX(x);
+      setBallY(Math.max(10, y));
+      if (t > 1.4) { clearInterval(iv); setShowBall(false); }
+    }, 30);
+    return () => clearInterval(iv);
+  }, [showBall]);
+
+  if (!active) return null;
+
+  const PIXEL = 3;
+  const currentFrameData = FRAMES[SWING_FRAMES[frame]];
+
+  return (
+    <div style={{
+      position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
+      pointerEvents: "none", zIndex: 9990,
+      display: "flex", alignItems: "flex-end", gap: 0,
+    }}>
+      {/* Ground strip */}
+      <div style={{position:"absolute",bottom:0,left:-60,right:-60,height:6,background:"linear-gradient(90deg,transparent,#1a3a1a,#2a5a2a,#1a3a1a,transparent)",borderRadius:3}}/>
+
+      {/* Pixel Aaron Judge */}
+      <div style={{position:"relative", marginBottom: 6}}>
+        {currentFrameData.map((row, ri) => (
+          <div key={ri} style={{display:"flex"}}>
+            {row.split("").map((c, ci) => (
+              <div key={ci} style={{
+                width: PIXEL, height: PIXEL,
+                background: COLORS[c] || "transparent",
+                imageRendering: "pixelated",
+              }}/>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Pixel baseball */}
+      {showBall && (
+        <div style={{
+          position: "fixed",
+          left: ballX,
+          bottom: ballY,
+          width: 10, height: 10,
+          borderRadius: "50%",
+          background: "radial-gradient(circle at 35% 35%, #fff 60%, #e8e8e8)",
+          border: "1.5px solid #cc3333",
+          boxShadow: "0 0 6px rgba(255,255,255,0.8), 0 0 12px rgba(255,255,180,0.5)",
+          imageRendering: "pixelated",
+          pointerEvents: "none",
+          zIndex: 9991,
+        }}/>
+      )}
+
+      {/* Stadium lights glow when active */}
+      <div style={{
+        position:"absolute", bottom: -6, left: "50%", transform:"translateX(-50%)",
+        width: 200, height: 30,
+        background: "radial-gradient(ellipse, rgba(255,255,180,0.12) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }}/>
     </div>
   );
 }
@@ -966,6 +1249,7 @@ function CRM({ role = "admin", setRole }) {
             </button>
           </div>
           <SparkleEmitter active={special}/>
+          <AaronJudgeAnimation active={special}/>
         </div>
       )}
 
