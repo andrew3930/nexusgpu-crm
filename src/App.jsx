@@ -1,5 +1,15 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const fn = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", fn);
+    return () => window.removeEventListener("resize", fn);
+  }, []);
+  return isMobile;
+}
+
 const PASSWORD = "Blonduos3930$!";
 
 function PasswordGate({ onUnlock }) {
@@ -212,6 +222,30 @@ function CRM() {
   const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#0099ff":"#4a6a8a",borderRadius:4,padding:"6px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
   const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?"#0099ff":"transparent"}`,color:active?"#0099ff":"#4a6a8a",padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
   const Redacted=({w=64})=><span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
+  const isMobile = useIsMobile();
+
+  if (isMobile) return (
+    <MobileCRM
+      deals={deals} visible={visible} totals={totals} loadState={loadState}
+      fbReady={fbReady} onlineUsers={onlineUsers} saveBadge={saveBadge}
+      hideValues={hideValues} setHideValues={setHideValues}
+      search={search} setSearch={setSearch}
+      filterStatus={filterStatus} setFilterStatus={setFilterStatus}
+      expandedId={expandedId} toggleExpand={toggleExpand} expandTab={expandTab} setExpandTab={setExpandTab}
+      paymentForms={paymentForms} setPF={setPF} getPF={getPF}
+      addPayment={addPayment} deletePayment={deletePayment}
+      editingPayment={editingPayment} startEditPayment={startEditPayment}
+      cancelEditPayment={cancelEditPayment} saveEditPayment={saveEditPayment} setEditingPayment={setEditingPayment}
+      openNew={openNew} openEdit={openEdit} deleteDeal={deleteDeal}
+      saveNotes={saveNotes} notifications={notifications} setNotifications={setNotifications}
+      showHistory={showHistory} setShowHistory={setShowHistory} history={history}
+      showModal={showModal} closeModal={closeModal} saveDeal={saveDeal}
+      form={form} setForm={setForm} modalTab={modalTab} setModalTab={setModalTab}
+      editingId={editingId} modal30={modal30}
+      addAlloc={addAlloc} removeAlloc={removeAlloc} updateAlloc={updateAlloc}
+      MAX_H100={MAX_H100} MAX_H200={MAX_H200}
+    />
+  );
 
   return (
     <div style={{minHeight:"100vh",background:"#080c14",fontFamily:"'IBM Plex Mono','Courier New',monospace",color:"#c9d6e8"}}>
@@ -516,6 +550,346 @@ function CRM() {
               <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
             </div>
             <div style={{display:"flex",gap:12,marginTop:24,justifyContent:"flex-end"}}><button className="btn-ghost" onClick={closeModal}>Cancel</button><button className="btn-primary" onClick={saveDeal}>{editingId?"Save Changes":"Add Deal"}</button></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MOBILE CRM ────────────────────────────────────────────────────────────────
+function MobileCRM(props) {
+  const {
+    deals, visible, totals, loadState, fbReady, onlineUsers, saveBadge,
+    hideValues, setHideValues, search, setSearch, filterStatus, setFilterStatus,
+    expandedId, toggleExpand, expandTab, setExpandTab,
+    paymentForms, setPF, getPF, addPayment, deletePayment,
+    editingPayment, startEditPayment, cancelEditPayment, saveEditPayment, setEditingPayment,
+    openNew, openEdit, deleteDeal, saveNotes,
+    notifications, setNotifications, showHistory, setShowHistory, history,
+    showModal, closeModal, saveDeal, form, setForm, modalTab, setModalTab,
+    editingId, modal30, addAlloc, removeAlloc, updateAlloc, MAX_H100, MAX_H200,
+  } = props;
+
+  const [mobileTab, setMobileTab] = useState("deals"); // deals | stats | history
+  const Redacted = ({w=64}) => <span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
+  const statusOf = (label) => STATUSES.find(s=>s.label===label)||STATUSES[0];
+  const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#0099ff":"#4a6a8a",borderRadius:4,padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
+  const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?"#0099ff":"transparent"}`,color:active?"#0099ff":"#4a6a8a",padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
+
+  return (
+    <div style={{minHeight:"100vh",background:"#080c14",fontFamily:"'IBM Plex Mono','Courier New',monospace",color:"#c9d6e8",paddingBottom:70}}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+        *{box-sizing:border-box;}
+        input,select{background:#0d1825;border:1px solid #1e3550;color:#c9d6e8;border-radius:6px;padding:10px 12px;font-family:inherit;font-size:14px;width:100%;outline:none;} input:focus,select:focus{border-color:#0099ff;} select option{background:#0d1825;}
+        textarea{background:#0d1825;border:1px solid #1e3550;color:#c9d6e8;border-radius:6px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;resize:vertical;line-height:1.6;} textarea:focus{border-color:#0099ff;}
+        .m-btn-primary{background:linear-gradient(135deg,#0066cc,#0099ff);color:#fff;border:none;border-radius:8px;padding:12px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;width:100%;}
+        .m-btn-ghost{background:transparent;color:#5588aa;border:1px solid #1e3550;border-radius:6px;padding:10px 16px;font-family:inherit;font-size:12px;cursor:pointer;flex:1;}
+        .m-btn-danger{background:transparent;color:#ef4444;border:1px solid #3a1a1a;border-radius:6px;padding:8px 14px;font-family:inherit;font-size:12px;cursor:pointer;}
+        .m-card{background:#0d1825;border:1px solid #1a2e45;border-radius:12px;padding:16px;margin-bottom:10px;}
+        .m-pill{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:0.06em;}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}} .pulsing{animation:pulse 1.2s ease-in-out infinite;}
+        @keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}} .livepulse{animation:livepulse 2s ease-in-out infinite;}
+        .payment-input{background:#060d18;border:1px solid #0d2040;color:#c9d6e8;border-radius:6px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;} .payment-input:focus{border-color:#0099ff;}
+        .gpu-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-weight:600;font-size:10px;}
+        .notes-area{background:#060d18;border:1px solid #0d2040;color:#8aa8c8;font-family:inherit;font-size:13px;width:100%;outline:none;resize:vertical;line-height:1.7;padding:12px 14px;min-height:120px;border-radius:6px;} .notes-area:focus{border-color:#0099ff;color:#c9d6e8;}
+        .alloc-row-m{display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;align-items:flex-end;margin-bottom:10px;}
+        .add-alloc-btn{background:transparent;border:1px dashed #1e3550;color:#3a6a8a;border-radius:6px;padding:10px;width:100%;font-family:inherit;font-size:12px;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;}
+        @keyframes scan1{0%,100%{opacity:.1}40%{opacity:.95}} @keyframes scan2{0%,100%{opacity:.1}55%{opacity:.95}} @keyframes scan3{0%,100%{opacity:.1}70%{opacity:.95}}
+        @keyframes pinA{0%,100%{opacity:.3}50%{opacity:1}} @keyframes core200{0%,100%{opacity:.2}50%{opacity:1}}
+        @keyframes ring200{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pinB{0%,100%{opacity:.25}60%{opacity:1}}
+        .sc1{animation:scan1 1.8s ease-in-out infinite} .sc2{animation:scan2 1.8s ease-in-out infinite} .sc3{animation:scan3 1.8s ease-in-out infinite}
+        .pA{animation:pinA 1.4s ease-in-out infinite} .co200{animation:core200 1.6s ease-in-out infinite}
+        .ri200{transform-origin:14px 14px;animation:ring200 3s linear infinite} .pB{animation:pinB 1.6s ease-in-out infinite}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;justify-content:center;z-index:100;}
+        .modal-sheet{background:#0d1825;border:1px solid #1e3550;border-radius:20px 20px 0 0;padding:20px 20px 36px;width:100%;max-height:92vh;overflow-y:auto;}
+      `}</style>
+
+      {/* Header */}
+      <div style={{background:"#090e18",borderBottom:"1px solid #1a2e45",padding:"14px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:30,height:30,background:"linear-gradient(135deg,#003d99,#0066ff)",borderRadius:7,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14}}>⬡</div>
+          <div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#e8f0fc",letterSpacing:"0.02em"}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
+          </div>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          {saveBadge&&<span style={{fontSize:10,color:saveBadge.color}} className={saveBadge.pulse?"pulsing":""}>{saveBadge.text}</span>}
+          <span style={{fontSize:9,display:"flex",alignItems:"center",gap:4,color:fbReady?"#10b981":"#f59e0b",background:fbReady?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${fbReady?"#1a4a2a":"#4a3000"}`,borderRadius:4,padding:"3px 8px"}}>
+            <span className={fbReady?"livepulse":""} style={{fontSize:7}}>●</span>
+            {fbReady?`${onlineUsers} ONLINE`:"…"}
+          </span>
+          <button onClick={openNew} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"7px 14px",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Deal</button>
+        </div>
+      </div>
+
+      {/* Notification Bar */}
+      {notifications.length > 0 && (
+        <div style={{background:"#060f1a",borderBottom:"1px solid #0d2a45",padding:"0 16px"}}>
+          {notifications.slice(0,1).map((n) => {
+            const icons = {new_deal:"🟢",edit:"✏️",payment_added:"💳",payment_deleted:"🗑",delete_deal:"❌"};
+            const colors = {new_deal:"#10b981",edit:"#0099ff",payment_added:"#10b981",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
+            return (
+              <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 0"}}>
+                <span>{icons[n.type]||"•"}</span>
+                <span style={{fontSize:11,color:colors[n.type]||"#c9d6e8",fontWeight:600,flex:1}}>{n.message}{n.detail&&` — ${n.detail}`}</span>
+                <button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:16,padding:"0 4px"}}>×</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:"#2a4a6a"}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:12}}>CONNECTING…</span></div>}
+
+      {loadState==="ready"&&(<>
+
+        {/* Stats Tab */}
+        {mobileTab==="stats"&&(
+          <div style={{padding:"16px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+              {[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Pipeline Value",value:fmtShort(totals.pipeline)},{label:"Total Collected",value:fmtShort(totals.collected)}].map(s=>(
+                <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
+                  <div style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6}}>{s.label}</div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:"#e8f0fc"}}>
+                    {hideValues&&!s.plain?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:80,height:24}}>&nbsp;</span>:s.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Node utilization */}
+            <div className="m-card">
+              <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Node Utilization</div>
+              {[{type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#38bdf8",bg:"rgba(56,189,248,0.15)"},{type:"H200",used:totals.h200Nodes,max:MAX_H200,color:"#a78bfa",bg:"rgba(139,92,246,0.15)"}].map(({type,used,max,color,bg})=>{
+                const pct=Math.min(used/max,1); const warn=pct>=0.9; const barColor=warn?"#ef4444":pct>=0.7?"#f59e0b":color;
+                const isH200=type==="H200";
+                return (
+                  <div key={type} style={{marginBottom:14}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                      <div style={{display:"flex",alignItems:"center",gap:7}}>
+                        {isH200?(
+                          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="2.5" fill="#100820" stroke="#a78bfa" strokeWidth="1.3"/><circle className="ri200" cx="14" cy="14" r="4.5" fill="none" stroke="#a78bfa" strokeWidth="1.2" strokeDasharray="8 4" strokeLinecap="round"/><circle className="co200" cx="14" cy="14" r="3.2" fill="#a78bfa"/><circle cx="14" cy="14" r="1.4" fill="#e8d8ff"/></svg>
+                        ):(
+                          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="2.5" fill="#061420" stroke="#38bdf8" strokeWidth="1.3"/><rect className="sc1" x="9" y="10" width="10" height="1.5" rx=".75" fill="#38bdf8"/><rect className="sc2" x="9" y="13.25" width="10" height="1.5" rx=".75" fill="#38bdf8"/><rect className="sc3" x="9" y="16.5" width="10" height="1.5" rx=".75" fill="#38bdf8"/></svg>
+                        )}
+                        <span style={{background:bg,color,padding:"2px 8px",borderRadius:3,fontSize:11,fontWeight:700}}>{type}</span>
+                      </div>
+                      <span style={{fontSize:13,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#3a5a7a",fontWeight:400}}>/{max}</span></span>
+                    </div>
+                    <div style={{height:6,background:"#0a1220",borderRadius:3,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${pct*100}%`,background:barColor,borderRadius:3,transition:"width .4s"}}/>
+                    </div>
+                    <div style={{fontSize:9,color:warn?"#ef4444":"#2a4a6a",marginTop:3,letterSpacing:"0.08em",textAlign:"right"}}>{Math.round(pct*100)}% · {max-used} FREE</div>
+                  </div>
+                );
+              })}
+            </div>
+            <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.1)":"rgba(100,116,139,0.08)",border:`1px solid ${hideValues?"#ef4444":"#2a3a50"}`,color:hideValues?"#ef4444":"#6a8aaa",borderRadius:6,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",width:"100%",marginTop:4}}>
+              {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
+            </button>
+          </div>
+        )}
+
+        {/* Deals Tab */}
+        {mobileTab==="deals"&&(
+          <div style={{padding:"12px 16px"}}>
+            <input placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:10,fontSize:14}}/>
+            <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
+              {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(st?st.color:"#0099ff"):"#1e3550"}`,color:active?(st?st.color:"#0099ff"):"#4a6a8a",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
+            </div>
+            {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#2a4a6a",fontSize:13}}>No deals found</div>}
+            {visible.map(deal=>{
+              const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
+              return (
+                <div key={deal.id} className="m-card" style={{padding:0,overflow:"hidden"}}>
+                  {/* Card Header */}
+                  <div onClick={()=>toggleExpand(deal.id,curTab)} style={{padding:"14px 16px",cursor:"pointer"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                      <div style={{fontWeight:600,color:"#d8e8f8",fontSize:14}}>{deal.customer||"—"}</div>
+                      <span style={{background:st.bg,color:st.color,padding:"3px 9px",borderRadius:4,fontSize:10,fontWeight:600,flexShrink:0,marginLeft:8}}>{deal.status}</span>
+                    </div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
+                      {allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <span key={a.id} className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType} · {a.nodes}n</span>;})}
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                      <div>
+                        {!hideValues&&grand30>0&&<div style={{fontSize:12,color:"#10b981",fontWeight:600}}>{fmtShort(grand30)}<span style={{color:"#2a5040",fontWeight:400,fontSize:10}}>/30d</span></div>}
+                        {hideValues&&<Redacted w={70}/>}
+                      </div>
+                      <div style={{textAlign:"right"}}>
+                        {collected>0&&<div style={{fontSize:11,color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{hideValues?<Redacted w={60}/>:fmtShort(collected)}<span style={{fontSize:9,color:"#2a5040",marginLeft:3}}>collected</span></div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded */}
+                  {isExp&&(
+                    <div style={{borderTop:"1px solid #0d2035",background:"#060e1a"}}>
+                      {/* Tabs */}
+                      <div style={{display:"flex",borderBottom:"1px solid #0d2035"}}>
+                        {[["payments","💳 Payments"],["notes","✎ Notes"]].map(([tab,label])=>(
+                          <button key={tab} style={inlineTabBtn(curTab===tab)} onClick={()=>{setExpandTab(p=>({...p,[deal.id]:tab}));}}>{label}</button>
+                        ))}
+                        <div style={{marginLeft:"auto",display:"flex",gap:6,padding:"6px 12px"}}>
+                          <button className="m-btn-ghost" style={{padding:"5px 10px",fontSize:11,flex:"none"}} onClick={(e)=>{e.stopPropagation();openEdit(deal);}}>Edit</button>
+                          <button className="m-btn-danger" style={{padding:"5px 10px",fontSize:11}} onClick={(e)=>{e.stopPropagation();deleteDeal(deal.id);}}>✕</button>
+                        </div>
+                      </div>
+
+                      {curTab==="payments"&&(
+                        <div style={{padding:"14px 16px"}}>
+                          {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#2a4060",marginBottom:12,fontStyle:"italic"}}>No payments yet.</div>:(
+                            <div style={{marginBottom:14}}>
+                              {(deal.payments||[]).map(p=>{
+                                const isEditingThis=editingPayment&&editingPayment.dealId===deal.id&&editingPayment.paymentId===p.id;
+                                if(isEditingThis) return (
+                                  <div key={p.id} style={{background:"#080f1c",borderRadius:8,padding:12,marginBottom:8}}>
+                                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+                                      <input className="payment-input" type="number" placeholder="Amount" value={editingPayment.amount} onChange={e=>setEditingPayment(ep=>({...ep,amount:e.target.value}))}/>
+                                      <input className="payment-input" type="date" value={editingPayment.datePaid} onChange={e=>setEditingPayment(ep=>({...ep,datePaid:e.target.value}))}/>
+                                    </div>
+                                    <input className="payment-input" type="text" placeholder="Period" value={editingPayment.period} onChange={e=>setEditingPayment(ep=>({...ep,period:e.target.value}))} style={{marginBottom:8}}/>
+                                    <div style={{display:"flex",gap:8}}><button className="m-btn-ghost" onClick={saveEditPayment} style={{flex:1,background:"rgba(16,185,129,0.1)",color:"#10b981",border:"1px solid #1a4a2a"}}>✓ Save</button><button className="m-btn-ghost" onClick={cancelEditPayment} style={{flex:1}}>Cancel</button></div>
+                                  </div>
+                                );
+                                return (
+                                  <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #0a1a2a"}}>
+                                    <div>
+                                      <div style={{color:"#10b981",fontWeight:600,fontSize:13}}>{hideValues?<Redacted w={70}/>:fmt(p.amount)}</div>
+                                      <div style={{fontSize:10,color:"#4a6a8a",marginTop:2}}>{p.datePaid}{p.period&&` · ${p.period}`}</div>
+                                    </div>
+                                    <div style={{display:"flex",gap:6}}>
+                                      <button className="m-btn-ghost" style={{padding:"5px 10px",fontSize:11,flex:"none"}} onClick={()=>startEditPayment(deal.id,p)}>✎</button>
+                                      <button className="m-btn-danger" style={{padding:"5px 10px",fontSize:11}} onClick={()=>deletePayment(deal.id,p.id)}>✕</button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              <div style={{display:"flex",justifyContent:"flex-end",gap:8,alignItems:"center",marginTop:10,paddingTop:10,borderTop:"1px solid #0d2035"}}>
+                                <span style={{fontSize:10,color:"#4a6a8a"}}>TOTAL</span>
+                                <span style={{color:"#10b981",fontWeight:700,fontSize:15}}>{hideValues?<Redacted w={80}/>:fmt(collected)}</span>
+                              </div>
+                            </div>
+                          )}
+                          {/* Add payment form */}
+                          <div style={{background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:14}}>
+                            <div style={{fontSize:10,color:"#2a5060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10}}>+ Log New Payment</div>
+                            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+                              <div><div style={{fontSize:9,color:"#2a5060",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Amount ($) *</div><input className="payment-input" type="number" min="0" placeholder="e.g. 50000" value={pf.amount} onChange={e=>setPF(deal.id,{...pf,amount:e.target.value})}/></div>
+                              <div><div style={{fontSize:9,color:"#2a5060",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Date Paid *</div><input className="payment-input" type="date" value={pf.datePaid} onChange={e=>setPF(deal.id,{...pf,datePaid:e.target.value})}/></div>
+                            </div>
+                            <div style={{marginBottom:10}}><div style={{fontSize:9,color:"#2a5060",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Period Covered</div><input className="payment-input" type="text" placeholder="e.g. Feb 1–28 2025" value={pf.period} onChange={e=>setPF(deal.id,{...pf,period:e.target.value})}/></div>
+                            <button className="m-btn-primary" onClick={()=>addPayment(deal.id)}>Add Payment</button>
+                          </div>
+                        </div>
+                      )}
+
+                      {curTab==="notes"&&(
+                        <div style={{padding:"14px 16px"}}>
+                          <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Notes — {deal.customer}</div>
+                          <textarea className="notes-area" placeholder="Type notes here…" defaultValue={deal.notes||""} onBlur={e=>saveNotes(deal.id,e.target.value)} rows={5}/>
+                          <div style={{fontSize:9,color:"#1a3a50",marginTop:4,letterSpacing:"0.08em"}}>AUTO-SAVED ON BLUR</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* History Tab */}
+        {mobileTab==="history"&&(
+          <div style={{padding:"16px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <div style={{fontSize:13,fontWeight:600,color:"#e8f0fc"}}>Activity History</div>
+              <div style={{fontSize:10,color:"#4a6a8a"}}>{history.length} EVENTS</div>
+            </div>
+            {history.length===0&&<div style={{color:"#2a4060",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
+            {history.map(e=>{
+              const icons={new_deal:"🟢",edit:"✏️",payment_added:"💳",payment_deleted:"🗑",delete_deal:"❌"};
+              const colors={new_deal:"#10b981",edit:"#0099ff",payment_added:"#10b981",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
+              const d=new Date(e.ts);
+              return (
+                <div key={e.id} className="m-card" style={{display:"flex",gap:12,padding:"12px 14px"}}>
+                  <div style={{fontSize:18,minWidth:24,textAlign:"center"}}>{icons[e.type]||"•"}</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:12,color:colors[e.type]||"#c9d6e8",fontWeight:600}}>{e.message}</div>
+                    {e.detail&&<div style={{fontSize:11,color:"#4a6a8a",marginTop:2}}>{e.detail}</div>}
+                    <div style={{fontSize:10,color:"#2a4060",marginTop:4}}>{d.toLocaleDateString([],{month:"short",day:"numeric"})} · {d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </>)}
+
+      {/* Bottom Nav */}
+      <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#090e18",borderTop:"1px solid #1a2e45",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",zIndex:50}}>
+        {[["deals","📋","Deals"],["stats","📊","Stats"],["history","🕐","History"]].map(([tab,icon,label])=>(
+          <button key={tab} onClick={()=>setMobileTab(tab)} style={{background:"none",border:"none",color:mobileTab===tab?"#0099ff":"#4a6a8a",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",padding:"12px 4px 10px",display:"flex",flexDirection:"column",alignItems:"center",gap:3,letterSpacing:"0.06em",textTransform:"uppercase",borderTop:mobileTab===tab?"2px solid #0099ff":"2px solid transparent"}}>
+            <span style={{fontSize:18}}>{icon}</span>{label}
+          </button>
+        ))}
+      </div>
+
+      {/* New/Edit Deal Modal (bottom sheet) */}
+      {showModal&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&closeModal()}>
+          <div className="modal-sheet">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:700,color:"#e8f0fc"}}>{editingId?"Edit Deal":"New Deal"}</div>
+              <button onClick={closeModal} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
+            </div>
+            <div style={{marginBottom:14}}><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
+            <div style={{display:"flex",gap:8,marginBottom:14,borderBottom:"1px solid #1a2e45",paddingBottom:12}}>
+              {[["gpu","⬡ GPU"],["storage","💾 Storage"],["notes","✎ Notes"]].map(([tab,label])=>(<button key={tab} style={tabBtn(modalTab===tab)} onClick={()=>setModalTab(tab)}>{label}</button>))}
+            </div>
+            {modal30>0&&<div style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",borderRadius:6,padding:"8px 14px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#2a5060"}}>30-DAY TOTAL</span><span style={{fontSize:14,color:"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div>}
+            {modalTab==="gpu"&&(
+              <div style={{marginBottom:4}}>
+                <div style={{display:"grid",gridTemplateColumns:"90px 1fr 1fr",gap:8,marginBottom:6}}>{["GPU","Nodes","$/GPU/Hr"].map(h=><div key={h} style={{fontSize:9,color:"#2a5060",letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>)}</div>
+                {form.gpuAllocations.map(alloc=>{
+                  const v30=calc30DayAlloc(alloc);
+                  return (
+                    <div key={alloc.id} style={{marginBottom:10}}>
+                      <div className="alloc-row-m">
+                        <select value={alloc.gpuType} onChange={e=>updateAlloc(alloc.id,"gpuType",e.target.value)}>{GPU_TYPES.map(g=><option key={g}>{g}</option>)}</select>
+                        <input type="number" min="0" placeholder="Nodes" value={alloc.nodes} onChange={e=>updateAlloc(alloc.id,"nodes",e.target.value)}/>
+                        <input type="number" min="0" step="0.01" placeholder="Rate" value={alloc.ratePerGpuHour} onChange={e=>updateAlloc(alloc.id,"ratePerGpuHour",e.target.value)}/>
+                      </div>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                        {v30>0&&<span style={{fontSize:11,color:"#10b981",fontWeight:600}}>30d: {fmtShort(v30)}</span>}
+                        {form.gpuAllocations.length>1&&<button onClick={()=>removeAlloc(alloc.id)} style={{background:"none",border:"1px solid #3a1a1a",color:"#ef4444",borderRadius:4,padding:"3px 10px",fontFamily:"inherit",fontSize:11,cursor:"pointer"}}>Remove</button>}
+                      </div>
+                    </div>
+                  );
+                })}
+                <button className="add-alloc-btn" onClick={addAlloc}>+ Add GPU Type</button>
+              </div>
+            )}
+            {modalTab==="storage"&&(
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:4}}>
+                <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Contract Value ($)</label><input type="number" min="0" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div>
+                <div><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>30-Day Value ($)</label><input type="number" min="0" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>
+              </div>
+            )}
+            {modalTab==="notes"&&(
+              <div style={{marginBottom:4}}><label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Deal Notes</label><textarea rows={5} placeholder="Enter any notes…" value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
+            )}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
+              <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Full Contract ($)</label><input type="number" min="0" placeholder="e.g. 4920000" value={form.fullContractValue} onChange={e=>setForm(f=>({...f,fullContractValue:e.target.value}))}/></div>
+              <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
+              <div><label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:20}}>
+              <button className="m-btn-ghost" onClick={closeModal}>Cancel</button>
+              <button className="m-btn-primary" style={{margin:0}} onClick={saveDeal}>{editingId?"Save Changes":"Add Deal"}</button>
+            </div>
           </div>
         </div>
       )}
