@@ -12,7 +12,7 @@ function useIsMobile() {
 
 const PASSWORD = "Blonduos3930$!";
 const TECH_PASSWORD = "CanopyWave$!";
-const SPECIAL_PASSWORD = "Blake$!";
+const DEV_PASSWORD = "Blake$!";
 
 function HorizonLogo({size=36, stop1="#0055ee", stop2="#00bbff"}) {
   return (
@@ -127,34 +127,34 @@ const HORIZON_THEME = {
 };
 
 const SPECIAL_THEME = {
-  bg:         "#1a0020",
-  bgCard:     "#2a0535",
-  bgHeader:   "#1f0028",
-  bgInput:    "#2a0535",
-  bgDeep:     "#130018",
-  bgRow:      "#1f0030",
-  bgTable:    "#220030",
-  border:     "#c026d3",
-  borderSoft: "#a21caf",
-  borderDeep: "#7e22ce",
-  text:       "#f9d4ff",
-  textBright: "#ffeeff",
-  textMid:    "#e879f9",
-  textDim:    "#c026d3",
-  textDeep:   "#7e22ce",
-  accent:     "#f0abfc",
-  accentDark: "#d946ef",
-  accentGlow: "rgba(240,171,252,0.25)",
-  green:      "#f472b6",
-  greenBg:    "rgba(244,114,182,0.1)",
-  greenBorder:"#be185d",
-  amber:      "#fb7185",
-  red:        "#f43f5e",
-  logoStop1:  "#d946ef",
-  logoStop2:  "#f9a8d4",
-  scrollThumb:"#a21caf",
-  scrollTrack:"#1a0020",
-  rowHover:   "rgba(240,171,252,0.06)",
+  bg:         "#020d06",
+  bgCard:     "#041a0a",
+  bgHeader:   "#021408",
+  bgInput:    "#041a0a",
+  bgDeep:     "#010a04",
+  bgRow:      "#031208",
+  bgTable:    "#031608",
+  border:     "#1a6630",
+  borderSoft: "#154d24",
+  borderDeep: "#0f3318",
+  text:       "#b8f0c8",
+  textBright: "#e0ffe8",
+  textMid:    "#6dde6d",
+  textDim:    "#3a9950",
+  textDeep:   "#1a6630",
+  accent:     "#6dde6d",
+  accentDark: "#3ab84a",
+  accentGlow: "rgba(109,222,109,0.2)",
+  green:      "#6dde6d",
+  greenBg:    "rgba(109,222,109,0.08)",
+  greenBorder:"#2a7a3a",
+  amber:      "#e6c84a",
+  red:        "#f05050",
+  logoStop1:  "#3ab84a",
+  logoStop2:  "#6dde6d",
+  scrollThumb:"#1a6630",
+  scrollTrack:"#020d06",
+  rowHover:   "rgba(109,222,109,0.04)",
 };
 
 function useTheme() {
@@ -361,7 +361,7 @@ function SparkleEmitter({ active }) {
   const [sparks, setSparks] = useState([]);
   useEffect(() => {
     if (!active) { setSparks([]); return; }
-    const EMOJIS = ["✨","💖","🌸","💫","⭐","🦋","🌺","💕","🎀","💗","🌷","💝","❤️‍🩹","❤️‍🩹","❤️‍🩹"];
+    const EMOJIS = [];
     const interval = setInterval(() => {
       const id = Math.random().toString(36).slice(2);
       const x = Math.random() * window.innerWidth;
@@ -515,7 +515,7 @@ function CRM({ role = "admin", setRole }) {
   const [showSpecialModal, setShowSpecialModal] = useState(false);
   const [specialInput, setSpecialInput] = useState("");
   const [specialError, setSpecialError] = useState(false);
-  const tryEnableSpecial = () => { if(specialInput===SPECIAL_PASSWORD){enableSpecial();setShowSpecialModal(false);setSpecialInput("");}else{setSpecialError(true);setTimeout(()=>setSpecialError(false),1500);}};
+  const tryEnableSpecial = () => { if(specialInput===DEV_PASSWORD){enableSpecial();setShowSpecialModal(false);setSpecialInput("");}else{setSpecialError(true);setTimeout(()=>setSpecialError(false),1500);}};
   const switchToAdmin = () => {
     if (adminInput === PASSWORD) {
       localStorage.setItem("nexus-auth","1"); setRole("admin");
@@ -720,12 +720,12 @@ function CRM({ role = "admin", setRole }) {
         @keyframes scan1{0%,100%{opacity:.1}40%{opacity:.95}} @keyframes scan2{0%,100%{opacity:.1}55%{opacity:.95}} @keyframes scan3{0%,100%{opacity:.1}70%{opacity:.95}}
         @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
         @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
-        @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
+        
         @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
         .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
-        .special-bg-m{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020);background-size:400% 400%;animation:shimmer 6s ease infinite;}
-        .special-header-m{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028);animation:shimmer 4s ease infinite;}
-        .special-text-m{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
+        .special-bg-m{background:linear-gradient(135deg,#020d06,#021a0a,#011008,#020d06);background-size:400% 400%;}
+        .special-header-m{background:linear-gradient(90deg,#021408,#041a0a,#021408);}
+        .special-text-m{color:#6dde6d !important;}
         @keyframes pinA{0%,100%{opacity:.3}50%{opacity:1}} @keyframes core200{0%,100%{opacity:.2}50%{opacity:1}}
         @keyframes ring200{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pinB{0%,100%{opacity:.25}60%{opacity:1}}
         @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -738,15 +738,15 @@ function CRM({ role = "admin", setRole }) {
         @keyframes sparkleFloat{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0.2);opacity:0}}
         @keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
         @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
-        @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
+        
         @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
         .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
-        .special-bg{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020) !important;background-size:400% 400% !important;animation:shimmer 6s ease infinite !important;cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
+        .special-bg{background:linear-gradient(135deg,#020d06,#021a0a,#011008,#020d06) !important;background-size:400% 400% !important;/*animation:shimmer 6s ease infinite !important;*/cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
         .special-bg *{cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
-        .special-header{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028) !important;animation:shimmer 4s ease infinite !important;}
-        .special-glow{box-shadow:0 0 20px rgba(240,171,252,0.3),0 0 40px rgba(217,70,239,0.15) !important;}
-        .special-text{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
-        .special-row-hover:hover{background:rgba(240,171,252,0.08) !important;}
+        .special-header{background:linear-gradient(90deg,#021408,#041a0a,#021408) !important;}
+        .special-glow{box-shadow:0 0 20px rgba(100,220,100,0.15),0 0 40px rgba(80,200,80,0.08) !important;}
+        .special-text{color:#6dde6d !important;}
+        .special-row-hover:hover{background:rgba(100,220,100,0.05) !important;}
       `}</style>
 
       {/* Header */}
@@ -754,7 +754,7 @@ function CRM({ role = "admin", setRole }) {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <HorizonLogo size={36} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}>{!special&&<span style={{color:t.textBright}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></span>}{special&&"✨ HORIZONCOMPUTE ✨"}</div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}><span style={{color:t.textBright}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></span></div>
             <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
           </div>
         </div>
@@ -1059,10 +1059,10 @@ function CRM({ role = "admin", setRole }) {
             {isTech && <button onClick={()=>setShowAdminModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
               <span style={{fontSize:14}}>⬡</span> ADMIN VIEW
             </button>}
-            <button onClick={special?disableSpecial:()=>setShowSpecialModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:special?"rgba(240,171,252,0.15)":"rgba(240,171,252,0.05)",border:special?"1px solid #f0abfc":"1px solid rgba(240,171,252,0.2)",color:special?"#f9a8d4":"#c084fc",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s",animation:special?"heartbeat 1.5s ease-in-out infinite":undefined}}>
-              <span style={{fontSize:14}}>✨</span> {special?"SPECIAL MODE ON":"SPECIAL MODE"}
-              <div style={{width:32,height:18,background:special?"#f0abfc":"rgba(240,171,252,0.2)",borderRadius:9,position:"relative",transition:"background .3s",flexShrink:0}}>
-                <div style={{position:"absolute",top:3,left:special?15:3,width:12,height:12,background:special?"#fff":"#c084fc",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
+            <button onClick={special?disableSpecial:()=>setShowSpecialModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:special?"rgba(100,200,100,0.08)":"rgba(255,255,255,0.03)",border:special?"1px solid rgba(100,200,100,0.4)":"1px solid rgba(255,255,255,0.1)",color:special?"#6dde6d":"#888",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
+              {special?"DEV MODE: ON":"DEV MODE"}
+              <div style={{width:32,height:18,background:special?"rgba(100,220,100,0.4)":"rgba(255,255,255,0.1)",borderRadius:9,position:"relative",transition:"background .3s",flexShrink:0}}>
+                <div style={{position:"absolute",top:3,left:special?15:3,width:12,height:12,background:special?"#6dde6d":"#555",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
               </div>
             </button>
           </div>
@@ -1073,17 +1073,17 @@ function CRM({ role = "admin", setRole }) {
 
       {showSpecialModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowSpecialModal(false),setSpecialInput(""))}>
-          <div className="modal" style={{maxWidth:400,background:"#2a0535",border:"2px solid #f0abfc",animation:"rainbowBorder 2s linear infinite"}}>
+          <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,background:"linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>✨ Special Mode ✨</div>
-              <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:"#c084fc",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:"#e8f0fc",letterSpacing:"0.04em"}}>DEVELOPER MODE</div>
+              <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:"#888",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:"#c084fc",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
-            <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16,borderColor:specialError?"#f43f5e":"#c084fc",background:"#1a0020",color:"#f9d4ff"}} autoFocus/>
-            {specialError&&<div style={{color:"#f43f5e",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <label style={{fontSize:10,color:"#6dde6d",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Access Key</label>
+            <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16}} autoFocus/>
+            {specialError&&<div style={{color:"#f05050",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Authentication failed</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}}>Cancel</button>
-              <button onClick={tryEnableSpecial} style={{background:"linear-gradient(135deg,#a21caf,#d946ef)",color:"#fff",border:"none",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Unlock ✨</button>
+              <button onClick={tryEnableSpecial} style={{background:"rgba(100,180,100,0.15)",color:"#6dde6d",border:"1px solid rgba(100,180,100,0.3)",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Authenticate</button>
             </div>
           </div>
         </div>
@@ -1202,7 +1202,7 @@ function MobileCRM(props) {
   const [showSpecialModalM, setShowSpecialModalM] = useState(false);
   const [specialInputM, setSpecialInputM] = useState("");
   const [specialErrorM, setSpecialErrorM] = useState(false);
-  const tryEnableSpecialM = () => { if(specialInputM===SPECIAL_PASSWORD){enableSpecial();setShowSpecialModalM(false);setSpecialInputM("");}else{setSpecialErrorM(true);setTimeout(()=>setSpecialErrorM(false),1500);}}; // deals | stats | history
+  const tryEnableSpecialM = () => { if(specialInputM===DEV_PASSWORD){enableSpecial();setShowSpecialModalM(false);setSpecialInputM("");}else{setSpecialErrorM(true);setTimeout(()=>setSpecialErrorM(false),1500);}}; // deals | stats | history
   const [showTechModalM, setShowTechModalM] = useState(false);
   const [techInputM, setTechInputM] = useState("");
   const [techErrorM, setTechErrorM] = useState(false);
@@ -1373,10 +1373,10 @@ function MobileCRM(props) {
                 <span>⬡</span> ADMIN
               </button>}
             </div>
-            <button onClick={special?disableSpecial:()=>setShowSpecialModalM(true)} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:special?"rgba(240,171,252,0.15)":"rgba(240,171,252,0.05)",border:special?"1px solid #f0abfc":"1px solid rgba(240,171,252,0.2)",color:special?"#f9a8d4":"#c084fc",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",width:"100%",marginTop:8,animation:special?"heartbeat 1.5s ease-in-out infinite":undefined}}>
-              ✨ {special?"SPECIAL MODE ON":"SPECIAL MODE"}
-              <div style={{width:28,height:16,background:special?"#f0abfc":"rgba(240,171,252,0.2)",borderRadius:8,position:"relative",transition:"background .3s",marginLeft:"auto",flexShrink:0}}>
-                <div style={{position:"absolute",top:2,left:special?12:2,width:12,height:12,background:special?"#fff":"#c084fc",borderRadius:"50%",transition:"left .3s"}}/>
+            <button onClick={special?disableSpecial:()=>setShowSpecialModalM(true)} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:special?"rgba(100,200,100,0.08)":"rgba(255,255,255,0.03)",border:special?"1px solid rgba(100,200,100,0.4)":"1px solid rgba(255,255,255,0.1)",color:special?"#6dde6d":"#888",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",width:"100%",marginTop:8}}>
+              {special?"DEV MODE: ON":"DEV MODE"}
+              <div style={{width:28,height:16,background:special?"rgba(100,220,100,0.4)":"rgba(255,255,255,0.1)",borderRadius:8,position:"relative",transition:"background .3w",marginLeft:"auto",flexShrink:0}}>
+                <div style={{position:"absolute",top:2,left:special?12:2,width:12,height:12,background:special?"#6dde6d":"#555",borderRadius:"50%",transition:"left .3s"}}/>
               </div>
             </button>
           </div>
