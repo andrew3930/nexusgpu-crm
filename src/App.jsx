@@ -14,23 +14,48 @@ const PASSWORD = "Blonduos3930$!";
 
 function HorizonLogo({size=36, stop1="#0055ee", stop2="#00bbff"}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{overflow:"visible"}}>
       <defs>
-        <linearGradient id="hcGrad" x1="4" y1="12" x2="32" y2="26" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor={stop1}/>
-          <stop offset="100%" stopColor={stop2}/>
-        </linearGradient>
-        <filter id="hcGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2" result="blur"/>
+        <radialGradient id="sunCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={stop2} stopOpacity="1"/>
+          <stop offset="60%" stopColor={stop1} stopOpacity="0.9"/>
+          <stop offset="100%" stopColor={stop1} stopOpacity="0.4"/>
+        </radialGradient>
+        <filter id="sunGlow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
           <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
       </defs>
-      {/* Dome arc */}
-      <path d="M5.5 21 A12.5 12.5 0 0 1 30.5 21" stroke="url(#hcGrad)" strokeWidth="3" strokeLinecap="round" fill="none" filter="url(#hcGlow)" className="hc-dome"/>
-      {/* Horizon line */}
-      <line x1="3" y1="25" x2="33" y2="25" stroke="url(#hcGrad)" strokeWidth="3" strokeLinecap="round" filter="url(#hcGlow)" className="hc-line"/>
-      {/* Inner base curve */}
-      <path d="M9 25 A9 3.5 0 0 0 27 25" stroke="url(#hcGrad)" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.45" className="hc-base"/>
+
+      {/* Rotating ray group */}
+      <g style={{transformOrigin:"18px 18px",animation:"sunSpin 8s linear infinite"}}>
+        {[0,45,90,135,180,225,270,315].map((deg,i) => (
+          <line
+            key={deg}
+            x1={18 + Math.cos(deg*Math.PI/180)*9}
+            y1={18 + Math.sin(deg*Math.PI/180)*9}
+            x2={18 + Math.cos(deg*Math.PI/180)*14}
+            y2={18 + Math.sin(deg*Math.PI/180)*14}
+            stroke={stop2}
+            strokeWidth={i%2===0?"2":"1.2"}
+            strokeLinecap="round"
+            opacity={i%2===0?"0.9":"0.5"}
+            filter="url(#sunGlow)"
+          />
+        ))}
+      </g>
+
+      {/* Pulsing halo */}
+      <circle cx="18" cy="18" r="8" fill="none" stroke={stop1} strokeWidth="1"
+        opacity="0.3" style={{transformOrigin:"18px 18px", animation:"sunHalo 2.4s ease-in-out infinite"}}/>
+
+      {/* Core sun */}
+      <circle cx="18" cy="18" r="6" fill="url(#sunCore)" filter="url(#sunGlow)"
+        style={{transformOrigin:"18px 18px", animation:"sunPulse 2.4s ease-in-out infinite"}}/>
+
+      {/* Inner bright spot */}
+      <circle cx="16" cy="16" r="2" fill={stop2} opacity="0.6"
+        style={{animation:"sunSparkle 2.4s ease-in-out infinite"}}/>
     </svg>
   );
 }
@@ -169,7 +194,7 @@ function PasswordGate({ onUnlock }) {
   return (
     <div style={{minHeight:"100vh",background:"#080c14",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono',monospace"}}>
       <div style={{background:"#0d1825",border:`1px solid ${error?"#ef4444":"#1e3550"}`,borderRadius:12,padding:40,width:380,textAlign:"center",transition:"border-color .2s"}}>
-        <div style={{margin:"0 auto 16px",width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center"}}><HorizonLogo size={48} stop1={t?.logoStop1||"#0055ee"} stop2={t?.logoStop2||"#00bbff"}/></div>
+        <div style={{margin:"0 auto 20px",display:"flex",justifyContent:"center"}}><HorizonLogo size={56} stop1="#0055ee" stop2="#00bbff"/></div>
         <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
         <div style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.15em",marginBottom:28}}>SALES INTELLIGENCE PLATFORM</div>
         <input
@@ -424,15 +449,17 @@ function CRM() {
         .gpu-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-weight:600;font-size:10px;}
         .inline-tab-bar{display:flex;border-bottom:1px solid ${t.borderDeep};margin-bottom:14px;}
         .notes-area{background:${t.bgDeep};border:1px solid ${t.borderDeep};color:${t.textMid};font-family:inherit;font-size:11px;width:100%;outline:none;resize:vertical;line-height:1.7;padding:12px 14px;min-height:110px;border-radius:6px;transition:border-color .15s;} .notes-area:focus{border-color:${t.accent};color:${t.text};}
-        @keyframes hcPulse{0%,100%{opacity:1;filter:drop-shadow(0 0 4px #0088ff) drop-shadow(0 0 8px #0044cc)}50%{opacity:.85;filter:drop-shadow(0 0 8px #00aaff) drop-shadow(0 0 16px #0066ff) drop-shadow(0 0 24px #0033aa)}}
-        .hc-dome,.hc-line,.hc-base{animation:hcPulse 2.4s ease-in-out infinite}
-        .hc-line{animation-delay:.3s} .hc-base{animation-delay:.6s}
+        @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes sunPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.85}}
+        @keyframes sunHalo{0%,100%{transform:scale(1);opacity:0.3}50%{transform:scale(1.4);opacity:0}}
+        @keyframes sunSparkle{0%,100%{opacity:0.6;transform:translate(0,0)}33%{opacity:1;transform:translate(1px,-1px)}66%{opacity:0.4;transform:translate(-1px,1px)}}
         @keyframes scan1{0%,100%{opacity:.1}40%{opacity:.95}} @keyframes scan2{0%,100%{opacity:.1}55%{opacity:.95}} @keyframes scan3{0%,100%{opacity:.1}70%{opacity:.95}}
         @keyframes pinA{0%,100%{opacity:.3}50%{opacity:1}} @keyframes core200{0%,100%{opacity:.2}50%{opacity:1}}
         @keyframes ring200{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pinB{0%,100%{opacity:.25}60%{opacity:1}}
-        @keyframes hcPulse{0%,100%{opacity:1;filter:drop-shadow(0 0 4px #0088ff) drop-shadow(0 0 8px #0044cc)}50%{opacity:.85;filter:drop-shadow(0 0 8px #00aaff) drop-shadow(0 0 16px #0066ff) drop-shadow(0 0 24px #0033aa)}}
-        .hc-dome,.hc-line,.hc-base{animation:hcPulse 2.4s ease-in-out infinite}
-        .hc-line{animation-delay:.3s} .hc-base{animation-delay:.6s}
+        @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        @keyframes sunPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.85}}
+        @keyframes sunHalo{0%,100%{transform:scale(1);opacity:0.3}50%{transform:scale(1.4);opacity:0}}
+        @keyframes sunSparkle{0%,100%{opacity:0.6;transform:translate(0,0)}33%{opacity:1;transform:translate(1px,-1px)}66%{opacity:0.4;transform:translate(-1px,1px)}}
         .sc1{animation:scan1 1.8s ease-in-out infinite} .sc2{animation:scan2 1.8s ease-in-out infinite} .sc3{animation:scan3 1.8s ease-in-out infinite}
         .pA{animation:pinA 1.4s ease-in-out infinite} .co200{animation:core200 1.6s ease-in-out infinite}
         .ri200{transform-origin:14px 14px;animation:ring200 3s linear infinite} .pB{animation:pinB 1.6s ease-in-out infinite}
