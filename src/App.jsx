@@ -66,7 +66,7 @@ function NetworkingBadge({ value }) {
 
 function ArchitectureBadge({ value }) {
   if (!value) return null;
-  const isBM = value === "Bare Metal";
+  const isBM = value === "BM";
   return (
     <div title={`Architecture: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isBM?"rgba(245,158,11,0.12)":"rgba(16,185,129,0.1)",border:`1px solid ${isBM?"rgba(245,158,11,0.35)":"rgba(16,185,129,0.3)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isBM?"#f59e0b":"#10b981",letterSpacing:"0.04em",flexShrink:0}}>
       {isBM ? (
@@ -83,7 +83,7 @@ function ArchitectureBadge({ value }) {
           <line x1="6" y1="6.5" x2="6" y2="7.5" stroke="currentColor" strokeWidth="1"/>
         </svg>
       )}
-      {isBM ? "Bare Metal" : "VM"}
+      {isBM ? "BM" : "VM"}
     </div>
   );
 }
@@ -508,6 +508,24 @@ function CRM() {
                 );
               })}
             </div>
+            {/* Combo Counters */}
+            <div style={{borderTop:"1px solid #0d2035",marginTop:4,paddingTop:12}}>
+              <div style={{fontSize:9,color:"#2a4a6a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}>Config Breakdown</div>
+              {[
+                {label:"RoCE v2 + VM",  net:"RoCE v2", arch:"VM",  color:"#38bdf8", bg:"rgba(56,189,248,0.08)"},
+                {label:"RoCE v2 + BM",  net:"RoCE v2", arch:"BM",  color:"#10b981", bg:"rgba(16,185,129,0.08)"},
+                {label:"IB + BM",       net:"IB",      arch:"BM",  color:"#a78bfa", bg:"rgba(139,92,246,0.08)"},
+              ].map(({label,net,arch,color,bg})=>{
+                const count = deals.filter(d=>d.networking===net&&d.architecture===arch).length;
+                return (
+                  <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 8px",borderRadius:5,background:count>0?bg:"transparent",marginBottom:3}}>
+                    <span style={{fontSize:10,color:count>0?color:"#2a4a6a",fontWeight:count>0?600:400,letterSpacing:"0.06em"}}>{label}</span>
+                    <span style={{fontSize:13,fontWeight:700,color:count>0?color:"#1e3a5a",minWidth:20,textAlign:"right"}}>{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           </div>
 
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
@@ -641,7 +659,7 @@ function CRM() {
               <div>
                 <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
                 <div style={{display:"flex",gap:8}}>
-                  {["VM","Bare Metal"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
+                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
             </div>
@@ -777,6 +795,23 @@ function MobileCRM(props) {
                       <div style={{height:"100%",width:`${pct*100}%`,background:barColor,borderRadius:3,transition:"width .4s"}}/>
                     </div>
                     <div style={{fontSize:9,color:warn?"#ef4444":"#2a4a6a",marginTop:3,letterSpacing:"0.08em",textAlign:"right"}}>{Math.round(pct*100)}% · {max-used} FREE</div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Combo counters */}
+            <div className="m-card" style={{padding:"14px 16px",marginBottom:10}}>
+              <div style={{fontSize:9,color:"#2a4a6a",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Config Breakdown</div>
+              {[
+                {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM",  color:"#38bdf8", bg:"rgba(56,189,248,0.08)"},
+                {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#10b981", bg:"rgba(16,185,129,0.08)"},
+                {label:"IB + BM",      net:"IB",      arch:"BM",  color:"#a78bfa", bg:"rgba(139,92,246,0.08)"},
+              ].map(({label,net,arch,color,bg})=>{
+                const count = deals.filter(d=>d.networking===net&&d.architecture===arch).length;
+                return (
+                  <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 10px",borderRadius:6,background:count>0?bg:"transparent",marginBottom:4}}>
+                    <span style={{fontSize:11,color:count>0?color:"#2a4a6a",fontWeight:count>0?600:400}}>{label}</span>
+                    <span style={{fontSize:15,fontWeight:700,color:count>0?color:"#1e3a5a"}}>{count}</span>
                   </div>
                 );
               })}
@@ -992,7 +1027,7 @@ function MobileCRM(props) {
               <div>
                 <label style={{fontSize:9,color:"#4a6a8a",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
                 <div style={{display:"flex",gap:6}}>
-                  {["VM","Bare Metal"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
+                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#1e3550"}`,color:active?"#f59e0b":"#4a6a8a",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
             </div>
