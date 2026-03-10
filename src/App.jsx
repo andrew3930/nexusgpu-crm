@@ -512,9 +512,14 @@ function CRM({ role = "admin", setRole }) {
           {!isTech && <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",transition:"all .2s"}}>
             {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
           </button>}
-          <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#1e3550"}>
+          {!isTech && <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#1e3550"}>
             🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#0099ff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
-          </button>
+          </button>}
+          {isTech && history.length>0 && (
+            <span style={{fontSize:10,color:"#2a6a4a",background:"rgba(16,185,129,0.06)",border:"1px solid #1a3a2a",borderRadius:4,padding:"4px 12px",letterSpacing:"0.06em"}}>
+              🟢 UPDATED {(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins}m AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}h AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}
+            </span>
+          )}
           <button className="btn-primary" onClick={openNew}>+ New Deal</button>
         </div>
       </div>
@@ -704,7 +709,7 @@ function CRM({ role = "admin", setRole }) {
                       {!isTech&&<td style={{padding:"13px 16px",color:"#8aa8c8",fontSize:11}}>{deal.paymentTerms}</td>}
                       <td style={{padding:"13px 16px"}}><span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span></td>
                       {!isTech&&<td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#10b981":"#4a6a8a",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.08em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>}
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",gap:6}}><button className="btn-ghost" onClick={()=>openEdit(deal)}>Edit</button><button className="btn-danger" onClick={()=>deleteDeal(deal.id)}>✕</button></div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",gap:6}}>{!isTech&&<button className="btn-ghost" onClick={()=>openEdit(deal)}>Edit</button>}<button className="btn-danger" onClick={()=>deleteDeal(deal.id)}>✕</button></div></td>
                     </tr>,
                     isExp&&(
                       <tr key={`${deal.id}-exp`} className="expand-row">
@@ -762,7 +767,16 @@ function CRM({ role = "admin", setRole }) {
               </tbody>
             </table>
           </div>
-          <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.1em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>
+          {!isTech && <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.1em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>}
+          {isTech && history.length>0 && (
+            <div style={{marginTop:14,display:"flex",alignItems:"center",gap:10,background:"rgba(16,185,129,0.05)",border:"1px solid #1a3a2a",borderRadius:6,padding:"8px 16px",fontSize:11,color:"#2a8a5a",letterSpacing:"0.06em"}}>
+              <span style={{color:"#10b981"}}>🟢</span>
+              <span>LAST UPDATED&nbsp;·&nbsp;{(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins} MIN AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}H AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}</span>
+              <span style={{color:"#1a5a3a"}}>·</span>
+              <span style={{color:"#1a6a4a"}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
+              <span style={{marginLeft:"auto",fontSize:10,color:"#1a4a2a"}}>{visible.length} DEALS · 🔥 FIREBASE LIVE SYNC</span>
+            </div>
+          )}
           {/* Horizon Mode Toggle + View Switcher */}
           <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center"}}>
             <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:horizon?t.bgCard:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",transition:"all .3s",boxShadow:horizon?`0 0 12px ${t.accentGlow}`:"none"}}>
@@ -789,7 +803,6 @@ function CRM({ role = "admin", setRole }) {
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Tech View</div>
               <button onClick={()=>{setShowTechModal(false);setTechInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <div style={{fontSize:12,color:"#4a6a8a",marginBottom:20,lineHeight:1.7}}>Tech View hides all financial data — rates, contract values, payments, and collected amounts. Share this view with your technical team.</div>
             <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
             <input type="password" placeholder="Enter tech password" value={techInput} onChange={e=>setTechInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToTech()} style={{marginBottom:techError?6:16,borderColor:techError?"#ef4444":undefined}}/>
             {techError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
@@ -808,7 +821,6 @@ function CRM({ role = "admin", setRole }) {
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Admin View</div>
               <button onClick={()=>{setShowAdminModal(false);setAdminInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <div style={{fontSize:12,color:"#4a6a8a",marginBottom:20,lineHeight:1.7}}>Enter the admin password to access the full CRM with financial data.</div>
             <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
             <input type="password" placeholder="Enter admin password" value={adminInput} onChange={e=>setAdminInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToAdmin()} style={{marginBottom:adminError?6:16,borderColor:adminError?"#ef4444":undefined}} autoFocus/>
             {adminError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
@@ -1057,6 +1069,13 @@ function MobileCRM(props) {
         {/* Deals Tab */}
         {mobileTab==="deals"&&(
           <div style={{padding:"12px 16px"}}>
+            {isTech && history.length>0 && (
+              <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid #1a3a2a",borderRadius:6,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",gap:8,fontSize:11,color:"#2a8a5a",letterSpacing:"0.06em"}}>
+                <span style={{color:"#10b981"}}>🟢</span>
+                <span>LAST UPDATED&nbsp;·&nbsp;{(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins} MIN AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}H AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}</span>
+                <span style={{marginLeft:"auto",color:"#1a5a3a",fontSize:10}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
+              </div>
+            )}
             <input placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:10,fontSize:14}}/>
             <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
               {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(st?st.color:"#0099ff"):"#1e3550"}`,color:active?(st?st.color:"#0099ff"):"#4a6a8a",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
@@ -1095,7 +1114,7 @@ function MobileCRM(props) {
                           <button key={tab} style={inlineTabBtn(curTab===tab)} onClick={()=>{setExpandTab(p=>({...p,[deal.id]:tab}));}}>{label}</button>
                         ))}
                         <div style={{marginLeft:"auto",display:"flex",gap:6,padding:"6px 12px"}}>
-                          <button className="m-btn-ghost" style={{padding:"5px 10px",fontSize:11,flex:"none"}} onClick={(e)=>{e.stopPropagation();openEdit(deal);}}>Edit</button>
+                          {!isTech&&<button className="m-btn-ghost" style={{padding:"5px 10px",fontSize:11,flex:"none"}} onClick={(e)=>{e.stopPropagation();openEdit(deal);}}>Edit</button>}
                           <button className="m-btn-danger" style={{padding:"5px 10px",fontSize:11}} onClick={(e)=>{e.stopPropagation();deleteDeal(deal.id);}}>✕</button>
                         </div>
                       </div>
@@ -1192,7 +1211,7 @@ function MobileCRM(props) {
 
       {/* Bottom Nav */}
       <div style={{position:"fixed",bottom:0,left:0,right:0,background:t.bgHeader,borderTop:`1px solid ${t.border}`,display:"grid",gridTemplateColumns:"1fr 1fr 1fr",zIndex:50}}>
-        {[["deals","📋","Deals"],["stats","📊","Stats"],["history","🕐","History"]].map(([tab,icon,label])=>(
+        {(isTech?[["deals","📋","Deals"],["stats","📊","Stats"]]:[["deals","📋","Deals"],["stats","📊","Stats"],["history","🕐","History"]]).map(([tab,icon,label])=>(
           <button key={tab} onClick={()=>setMobileTab(tab)} style={{background:"none",border:"none",color:mobileTab===tab?t.accent:t.textDim,fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",padding:"12px 4px 10px",display:"flex",flexDirection:"column",alignItems:"center",gap:3,letterSpacing:"0.06em",textTransform:"uppercase",borderTop:mobileTab===tab?`2px solid ${t.accent}`:"2px solid transparent"}}>
             <span style={{fontSize:18}}>{icon}</span>{label}
           </button>
