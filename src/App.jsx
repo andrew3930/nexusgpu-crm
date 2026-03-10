@@ -278,7 +278,15 @@ function CRM({ role = "admin", setRole }) {
       setRole("tech"); setShowTechModal(false); setTechInput("");
     } else { setTechError(true); setTimeout(()=>setTechError(false),1500); }
   };
-  const switchToAdmin = () => { localStorage.setItem("nexus-auth","1"); setRole("admin"); };
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminInput, setAdminInput] = useState("");
+  const [adminError, setAdminError] = useState(false);
+  const switchToAdmin = () => {
+    if (adminInput === PASSWORD) {
+      localStorage.setItem("nexus-auth","1"); setRole("admin");
+      setShowAdminModal(false); setAdminInput("");
+    } else { setAdminError(true); setTimeout(()=>setAdminError(false),1500); }
+  };
   const [fbReady, setFbReady]           = useState(false);
   const [fbError, setFbError]           = useState(null);
   const [deals, setDeals]               = useState([]);
@@ -507,10 +515,7 @@ function CRM({ role = "admin", setRole }) {
           <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#1e3550"}>
             🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#0099ff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
           </button>
-          {!isTech && <button onClick={()=>setShowTechModal(true)} style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"}}>👷 Tech View</button>}
-          {isTech && <button onClick={switchToAdmin} style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"}}>⬡ Admin View</button>}
-          {!isTech && <button className="btn-primary" onClick={openNew}>+ New Deal</button>}
-          {isTech && <button className="btn-primary" onClick={openNew}>+ New Deal</button>}
+          <button className="btn-primary" onClick={openNew}>+ New Deal</button>
         </div>
       </div>
 
@@ -758,8 +763,8 @@ function CRM({ role = "admin", setRole }) {
             </table>
           </div>
           <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.1em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>
-          {/* Horizon Mode Toggle */}
-          <div style={{marginTop:24,display:"flex",justifyContent:"center"}}>
+          {/* Horizon Mode Toggle + View Switcher */}
+          <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center"}}>
             <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:horizon?t.bgCard:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",transition:"all .3s",boxShadow:horizon?`0 0 12px ${t.accentGlow}`:"none"}}>
               <HorizonLogo size={18} stop1={t.logoStop1} stop2={t.logoStop2}/>
               {horizon ? "HORIZON MODE ON" : "HORIZON MODE"}
@@ -767,6 +772,12 @@ function CRM({ role = "admin", setRole }) {
                 <div style={{position:"absolute",top:3,left:horizon?15:3,width:12,height:12,background:"#fff",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
               </div>
             </button>
+            {!isTech && <button onClick={()=>setShowTechModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
+              <span style={{fontSize:14}}>👷</span> TECH VIEW
+            </button>}
+            {isTech && <button onClick={()=>setShowAdminModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
+              <span style={{fontSize:14}}>⬡</span> ADMIN VIEW
+            </button>}
           </div>
         </div>
       )}
@@ -785,6 +796,25 @@ function CRM({ role = "admin", setRole }) {
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowTechModal(false);setTechInput("");}}>Cancel</button>
               <button className="btn-primary" onClick={switchToTech}>Switch to Tech View</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAdminModal&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowAdminModal(false),setAdminInput(""))}>
+          <div className="modal" style={{maxWidth:400}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Admin View</div>
+              <button onClick={()=>{setShowAdminModal(false);setAdminInput("");}} style={{background:"none",border:"none",color:"#4a6a8a",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+            </div>
+            <div style={{fontSize:12,color:"#4a6a8a",marginBottom:20,lineHeight:1.7}}>Enter the admin password to access the full CRM with financial data.</div>
+            <label style={{fontSize:10,color:"#4a6a8a",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
+            <input type="password" placeholder="Enter admin password" value={adminInput} onChange={e=>setAdminInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToAdmin()} style={{marginBottom:adminError?6:16,borderColor:adminError?"#ef4444":undefined}} autoFocus/>
+            {adminError&&<div style={{color:"#ef4444",fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
+            <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
+              <button className="btn-ghost" onClick={()=>{setShowAdminModal(false);setAdminInput("");}}>Cancel</button>
+              <button className="btn-primary" onClick={switchToAdmin}>Switch to Admin View</button>
             </div>
           </div>
         </div>
@@ -858,7 +888,15 @@ function MobileCRM(props) {
     if (techInputM === TECH_PASSWORD) { localStorage.setItem("nexus-auth","tech"); setRole("tech"); setShowTechModalM(false); setTechInputM(""); }
     else { setTechErrorM(true); setTimeout(()=>setTechErrorM(false),1500); }
   };
-  const switchToAdminM = () => { localStorage.setItem("nexus-auth","1"); setRole("admin"); };
+  const [showAdminModalM, setShowAdminModalM] = useState(false);
+  const [adminInputM, setAdminInputM] = useState("");
+  const [adminErrorM, setAdminErrorM] = useState(false);
+  const switchToAdminM = () => {
+    if (adminInputM === PASSWORD) {
+      localStorage.setItem("nexus-auth","1"); setRole("admin");
+      setShowAdminModalM(false); setAdminInputM("");
+    } else { setAdminErrorM(true); setTimeout(()=>setAdminErrorM(false),1500); }
+  };
   const Redacted = ({w=64}) => <span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
   const statusOf = (label) => STATUSES.find(s=>s.label===label)||STATUSES[0];
   const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#1e3550"}`,color:active?"#0099ff":"#4a6a8a",borderRadius:4,padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
@@ -908,8 +946,6 @@ function MobileCRM(props) {
             {fbReady?`${onlineUsers} ONLINE`:"…"}
           </span>
           {isTech && <span style={{fontSize:9,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"3px 8px",letterSpacing:"0.08em",fontWeight:700}}>👷 TECH</span>}
-          {!isTech && <button onClick={()=>setShowTechModalM(true)} style={{background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:4,padding:"5px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer"}}>👷</button>}
-          {isTech && <button onClick={switchToAdminM} style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:4,padding:"5px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer"}}>⬡</button>}
           <button onClick={openNew} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"7px 14px",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Deal</button>
         </div>
       </div>
@@ -1000,13 +1036,21 @@ function MobileCRM(props) {
             <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.1)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:6,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",width:"100%",marginTop:4}}>
               {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
             </button>
-            <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"10px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",width:"100%",marginTop:8,transition:"all .3s"}}>
-              <HorizonLogo size={16} stop1={t.logoStop1} stop2={t.logoStop2}/>
-              {horizon ? "HORIZON MODE ON" : "HORIZON MODE"}
-              <div style={{width:32,height:18,background:horizon?t.accent:t.borderSoft,borderRadius:9,position:"relative",transition:"background .3s",marginLeft:"auto"}}>
-                <div style={{position:"absolute",top:3,left:horizon?15:3,width:12,height:12,background:"#fff",borderRadius:"50%",transition:"left .3s"}}/>
-              </div>
-            </button>
+            <div style={{display:"flex",gap:8,marginTop:8}}>
+              <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:8,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",flex:1,transition:"all .3s"}}>
+                <HorizonLogo size={16} stop1={t.logoStop1} stop2={t.logoStop2}/>
+                {horizon ? "HORIZON ON" : "HORIZON"}
+                <div style={{width:28,height:16,background:horizon?t.accent:t.borderSoft,borderRadius:8,position:"relative",transition:"background .3s",marginLeft:"auto",flexShrink:0}}>
+                  <div style={{position:"absolute",top:2,left:horizon?12:2,width:12,height:12,background:"#fff",borderRadius:"50%",transition:"left .3s"}}/>
+                </div>
+              </button>
+              {!isTech && <button onClick={()=>setShowTechModalM(true)} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",flexShrink:0,transition:"all .3s"}}>
+                <span>👷</span> TECH
+              </button>}
+              {isTech && <button onClick={()=>setShowAdminModalM(true)} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",flexShrink:0,transition:"all .3s"}}>
+                <span>⬡</span> ADMIN
+              </button>}
+            </div>
           </div>
         )}
 
