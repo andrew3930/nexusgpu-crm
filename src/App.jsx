@@ -692,6 +692,10 @@ function CRM({ role = "admin", setRole }) {
     } else { setTechError(true); setTimeout(()=>setTechError(false),1500); }
   };
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [repairRma, setRepairRma] = useState(()=>{
+    try { const s=localStorage.getItem("nexus-repair-rma"); return s?JSON.parse(s):{H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; } catch(e){ return {H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; }
+  });
+  const saveRepairRma = (next) => { setRepairRma(next); try{localStorage.setItem("nexus-repair-rma",JSON.stringify(next));}catch(e){} };
   const [adminInput, setAdminInput] = useState("");
   const [adminError, setAdminError] = useState(false);
   const [showSpecialModal, setShowSpecialModal] = useState(false);
@@ -1041,7 +1045,10 @@ function CRM({ role = "admin", setRole }) {
                 {type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#38bdf8",bg:"rgba(56,189,248,0.15)"},
                 {type:"H200",used:totals.h200Nodes,max:MAX_H200,color:"#a78bfa",bg:"rgba(139,92,246,0.15)"},
               ].map(({type,used,max,color,bg})=>{
-                const pct=Math.min(used/max,1); const warn=pct>=0.9; const barColor=warn?"#ef4444":pct>=0.7?"#f59e0b":color;
+                const repair=repairRma[type]?.repair||0; const rma=repairRma[type]?.rma||0;
+                const unavail=repair+rma; const available=max-unavail;
+                const pctUsed=Math.min(used/max,1); const pctUnavail=Math.min(unavail/max,1);
+                const warn=pctUsed>=0.9; const barColor=warn?"#ef4444":pctUsed>=0.7?"#f59e0b":color;
                 const isH200=type==="H200";
                 return (
                   <div key={type} style={{marginBottom:12}}>
@@ -1072,12 +1079,18 @@ function CRM({ role = "admin", setRole }) {
                         )}
                         <span style={{background:bg,color,padding:"2px 7px",borderRadius:3,fontSize:10,fontWeight:700}}>{type}</span>
                       </div>
-                      <span style={{fontSize:11,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#3a5a7a",fontWeight:400}}>/{max}</span></span>
+                      <span style={{fontSize:11,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#3a5a7a",fontWeight:400}}>/{available} avail</span></span>
                     </div>
-                    <div style={{height:5,background:"#0d1825",borderRadius:3,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${pct*100}%`,background:barColor,borderRadius:3,transition:"width .4s ease"}}/>
+                    {/* Stacked bar: used | repair/rma | free */}
+                    <div style={{height:6,background:"#0d1825",borderRadius:3,overflow:"hidden",display:"flex"}}>
+                      <div style={{height:"100%",width:`${pctUsed*100}%`,background:barColor,borderRadius:"3px 0 0 3px",transition:"width .4s ease",flexShrink:0}}/>
+                      {pctUnavail>0&&<div style={{height:"100%",width:`${pctUnavail*100}%`,background:"rgba(239,68,68,0.5)",transition:"width .4s ease",flexShrink:0}}/>}
                     </div>
-                    <div style={{fontSize:9,color:warn?"#ef4444":"#2a4a6a",marginTop:3,letterSpacing:"0.08em",textAlign:"right"}}>{Math.round(pct*100)}% UTILIZED · {max-used} FREE</div>
+                    <div style={{fontSize:9,color:"#2a4a6a",marginTop:3,letterSpacing:"0.07em",display:"flex",justifyContent:"space-between"}}>
+                      <span style={{color:warn?"#ef4444":"#2a6a8a"}}>{Math.round(pctUsed*100)}% UTILIZED</span>
+                      {unavail>0&&<span style={{color:"rgba(239,68,68,0.7)"}}>{repair>0?`${repair} REPAIR`:""}{repair>0&&rma>0?" · ":""}{rma>0?`${rma} RMA`:""}</span>}
+                      <span>{available-used>0?`${available-used} FREE`:""}</span>
+                    </div>
                   </div>
                 );
               })}
@@ -1219,6 +1232,63 @@ function CRM({ role = "admin", setRole }) {
             </table>
           </div>
           {!isTech && <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.1em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>}
+          {/* ── Inventory Status Module ─────────────────────────────────── */}
+          {!isTech&&(
+          <div style={{marginTop:28,background:t.bgCard,border:`1px solid ${t.borderSoft}`,borderRadius:12,padding:"20px 24px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+              <span style={{fontSize:14}}>🔧</span>
+              <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.12em",textTransform:"uppercase"}}>Node Inventory Status</span>
+              <span style={{fontSize:10,color:t.textDeep,marginLeft:"auto",letterSpacing:"0.08em"}}>affects utilization display</span>
+            </div>
+            {["H100","H200"].map(type=>{
+              const max=type==="H100"?MAX_H100:MAX_H200;
+              const used=type==="H100"?totals.h100Nodes:totals.h200Nodes;
+              const repair=repairRma[type]?.repair||0;
+              const rma=repairRma[type]?.rma||0;
+              const available=max-repair-rma;
+              const free=available-used;
+              const color=type==="H100"?"#38bdf8":"#a78bfa";
+              return(
+                <div key={type} style={{marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${t.borderDeep}`}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+                    <span style={{fontSize:10,fontWeight:700,color,background:type==="H100"?"rgba(56,189,248,0.12)":"rgba(167,139,250,0.12)",padding:"2px 10px",borderRadius:4,letterSpacing:"0.06em"}}>{type}</span>
+                    <div style={{display:"flex",gap:16,marginLeft:"auto",fontSize:10,color:t.textDim}}>
+                      <span>Total: <b style={{color:t.textBright}}>{max}</b></span>
+                      <span style={{color:"#10b981"}}>Deployed: <b>{used}</b></span>
+                      <span style={{color:free>0?"#f59e0b":"#ef4444"}}>Available: <b>{free}</b></span>
+                      {(repair+rma)>0&&<span style={{color:"#ef4444"}}>Unavailable: <b>{repair+rma}</b></span>}
+                    </div>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                    {[
+                      {key:"repair",label:"Repair List",icon:"🔨",color:"#f59e0b",bg:"rgba(245,158,11,0.08)",border:"rgba(245,158,11,0.25)"},
+                      {key:"rma",label:"RMA",icon:"📦",color:"#ef4444",bg:"rgba(239,68,68,0.08)",border:"rgba(239,68,68,0.25)"},
+                    ].map(({key,label,icon,color:ic,bg,border})=>(
+                      <div key={key} style={{background:bg,border:`1px solid ${border}`,borderRadius:8,padding:"12px 14px"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
+                          <span style={{fontSize:12}}>{icon}</span>
+                          <span style={{fontSize:10,fontWeight:600,color:ic,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</span>
+                        </div>
+                        <div style={{display:"flex",alignItems:"center",gap:8}}>
+                          <button onClick={()=>{const v=Math.max(0,(repairRma[type]?.[key]||0)-1);saveRepairRma({...repairRma,[type]:{...repairRma[type],[key]:v}});}} style={{width:28,height:28,background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:4,color:t.textMid,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit",lineHeight:1}}>−</button>
+                          <input
+                            type="number" min="0" max={max}
+                            value={repairRma[type]?.[key]||0}
+                            onChange={e=>{const v=Math.max(0,Math.min(max,Number(e.target.value)||0));saveRepairRma({...repairRma,[type]:{...repairRma[type],[key]:v}});}}
+                            style={{width:56,textAlign:"center",background:t.bgInput,border:`1px solid ${border}`,borderRadius:4,padding:"5px 8px",fontFamily:"inherit",fontSize:15,fontWeight:700,color:ic,outline:"none"}}
+                          />
+                          <button onClick={()=>{const v=Math.min(max,(repairRma[type]?.[key]||0)+1);saveRepairRma({...repairRma,[type]:{...repairRma[type],[key]:v}});}} style={{width:28,height:28,background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:4,color:t.textMid,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit",lineHeight:1}}>+</button>
+                          <span style={{fontSize:9,color:t.textDeep,letterSpacing:"0.06em",textTransform:"uppercase"}}>nodes</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          )}
+
           {isTech && history.length>0 && (
             <div style={{marginTop:14,display:"flex",alignItems:"center",gap:10,background:"rgba(16,185,129,0.05)",border:"1px solid #1a3a2a",borderRadius:6,padding:"8px 16px",fontSize:11,color:"#2a8a5a",letterSpacing:"0.06em"}}>
               <span style={{color:"#10b981"}}>🟢</span>
