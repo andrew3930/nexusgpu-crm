@@ -668,6 +668,131 @@ function MoneyBag() {
 }
 
 
+// ─── INVOICE TRACKER COMPONENT ───────────────────────────────────────────────
+function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, hideValues, fmt, fmtShort, uid }) {
+  const [form, setForm] = useState({ dealId:"", amount:"", period:"", dateSent:new Date().toISOString().slice(0,10), notes:"" });
+  const [confirmPay, setConfirmPay] = useState(null); // invoice id pending confirmation
+
+  const activeDeals = deals.filter(d=>["Testing","In Production"].includes(d.status));
+  const totalOutstanding = invoices.reduce((s,inv)=>s+(Number(inv.amount)||0),0);
+
+  const addInvoice = () => {
+    if(!form.dealId||!form.amount) return;
+    const deal = deals.find(d=>d.id===form.dealId);
+    if(!deal) return;
+    const inv = {
+      id: uid(),
+      dealId: form.dealId,
+      customerName: deal.customer,
+      amount: Number(form.amount),
+      period: form.period,
+      dateSent: form.dateSent,
+      notes: form.notes,
+      createdAt: Date.now(),
+    };
+    updateInvoices(prev=>[...prev, inv]);
+    setForm({ dealId:"", amount:"", period:"", dateSent:new Date().toISOString().slice(0,10), notes:"" });
+  };
+
+  const deleteInvoice = (id) => updateInvoices(prev=>prev.filter(x=>x.id!==id));
+
+  const sorted = [...invoices].sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+
+  return (
+    <div style={{marginTop:28,background:t.bgCard,border:`1px solid ${t.borderSoft}`,borderRadius:12,padding:"20px 24px"}}>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+        <span style={{fontSize:16}}>📄</span>
+        <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.12em",textTransform:"uppercase"}}>Outstanding Invoices</span>
+        {invoices.length>0&&(
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:14}}>
+            <span style={{fontSize:10,color:"#f59e0b",letterSpacing:"0.08em"}}>{invoices.length} PENDING</span>
+            <span style={{fontSize:13,fontWeight:700,color:"#f59e0b",fontFamily:"'Syne',sans-serif"}}>{hideValues?"••••••":fmt(totalOutstanding)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Invoice list */}
+      {sorted.length===0?(
+        <div style={{fontSize:11,color:t.textDeep,fontStyle:"italic",marginBottom:18,textAlign:"center",padding:"12px 0"}}>No outstanding invoices. Log one below.</div>
+      ):(
+        <div style={{marginBottom:20}}>
+          {/* Header row */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 100px 120px 110px 160px auto",gap:10,marginBottom:6,padding:"0 4px"}}>
+            {["Customer","Amount","Period","Sent","Notes",""].map(h=>(
+              <div key={h} style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>
+            ))}
+          </div>
+          {sorted.map(inv=>(
+            <div key={inv.id} style={{display:"grid",gridTemplateColumns:"1fr 100px 120px 110px 160px auto",gap:10,alignItems:"center",padding:"9px 4px",borderTop:`1px solid ${t.borderDeep}`}}>
+              <div>
+                <div style={{fontSize:12,fontWeight:600,color:t.textBright}}>{inv.customerName}</div>
+                {inv.dealId&&deals.find(d=>d.id===inv.dealId)&&(
+                  <div style={{fontSize:9,color:t.textDeep,marginTop:1,letterSpacing:"0.06em"}}>{deals.find(d=>d.id===inv.dealId)?.status}</div>
+                )}
+              </div>
+              <div style={{fontSize:13,fontWeight:700,color:"#f59e0b"}}>{hideValues?"•••":fmtShort(inv.amount)}</div>
+              <div style={{fontSize:11,color:t.textMid}}>{inv.period||"—"}</div>
+              <div style={{fontSize:11,color:t.textDim}}>{inv.dateSent||"—"}</div>
+              <div style={{fontSize:10,color:t.textDim,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{inv.notes||"—"}</div>
+              <div style={{display:"flex",gap:5}}>
+                {confirmPay===inv.id?(
+                  <>
+                    <button onClick={()=>{markInvoicePaid(inv.id);setConfirmPay(null);}} style={{background:"rgba(16,185,129,0.15)",border:"1px solid #1a6a3a",color:"#10b981",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.06em"}}>✓ Confirm</button>
+                    <button onClick={()=>setConfirmPay(null)} style={{background:"transparent",border:`1px solid ${t.borderDeep}`,color:t.textDim,borderRadius:4,padding:"4px 8px",fontFamily:"inherit",fontSize:10,cursor:"pointer"}}>✕</button>
+                  </>
+                ):(
+                  <>
+                    <button title="Mark as paid — files into payment history" onClick={()=>setConfirmPay(inv.id)} style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",color:"#10b981",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",letterSpacing:"0.04em"}}>
+                      ✓ Paid
+                    </button>
+                    <button onClick={()=>deleteInvoice(inv.id)} style={{background:"transparent",border:`1px solid ${t.borderDeep}`,color:"#ef4444",borderRadius:4,padding:"4px 8px",fontFamily:"inherit",fontSize:10,cursor:"pointer"}}>✕</button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add new invoice form */}
+      <div style={{background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:8,padding:"14px 16px"}}>
+        <div style={{fontSize:10,color:t.textDeep,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>+ Log New Invoice</div>
+        <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
+          <div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Customer / Deal *</div>
+            <select value={form.dealId} onChange={e=>setForm(f=>({...f,dealId:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:form.dealId?t.text:t.textDeep,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}>
+              <option value="">— Select deal —</option>
+              {activeDeals.map(d=><option key={d.id} value={d.id}>{d.customer}</option>)}
+              {deals.filter(d=>!["Testing","In Production"].includes(d.status)).map(d=><option key={d.id} value={d.id}>{d.customer} ({d.status})</option>)}
+            </select>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Amount ($) *</div>
+            <input type="number" min="0" step="0.01" placeholder="e.g. 480000" value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Period Covered</div>
+            <input type="text" placeholder="e.g. Mar 1–31 2025" value={form.period} onChange={e=>setForm(f=>({...f,period:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
+          </div>
+          <div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Date Sent</div>
+            <input type="date" value={form.dateSent} onChange={e=>setForm(f=>({...f,dateSent:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:10,alignItems:"flex-end"}}>
+          <div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Notes (optional)</div>
+            <input type="text" placeholder="e.g. Invoice #42, net-30 terms" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
+          </div>
+          <button onClick={addInvoice} disabled={!form.dealId||!form.amount} style={{background:form.dealId&&form.amount?"linear-gradient(135deg,#0066cc,#0099ff)":"rgba(255,255,255,0.05)",color:form.dealId&&form.amount?"#fff":"#2a4a6a",border:"none",borderRadius:6,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:form.dealId&&form.amount?"pointer":"not-allowed",letterSpacing:"0.08em",textTransform:"uppercase",whiteSpace:"nowrap"}}>Log Invoice</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function App() {
   const [authed, setAuthed] = useState(() => {
     const a = localStorage.getItem("nexus-auth");
@@ -692,6 +817,8 @@ function CRM({ role = "admin", setRole }) {
     } else { setTechError(true); setTimeout(()=>setTechError(false),1500); }
   };
   const [showAdminModal, setShowAdminModal] = useState(false);
+  const [invoices, setInvoices] = useState([]);
+  const localInvOp = useRef(false);
   const [repairRma, setRepairRma] = useState(()=>{
     try { const s=localStorage.getItem("nexus-repair-rma"); return s?JSON.parse(s):{H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; } catch(e){ return {H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; }
   });
@@ -778,6 +905,12 @@ function CRM({ role = "admin", setRole }) {
           setHistory(items);
         }
       });
+      onValue(ref(db,"invoices"), snap=>{
+        if(localInvOp.current){localInvOp.current=false;return;}
+        const val=snap.val();
+        if(val&&typeof val==="object"){ setInvoices(Object.values(val)); }
+        else { setInvoices([]); }
+      });
       onValue(ref(db,"deals"), snap=>{
         if(localOp.current){localOp.current=false;return;}
         const val=snap.val();
@@ -796,6 +929,22 @@ function CRM({ role = "admin", setRole }) {
     try{ const obj={}; next.forEach(d=>{obj[d.id]=d;}); localOp.current=true; await set(ref(db,"deals"),obj); setSaveState("saved"); setTimeout(()=>setSaveState("idle"),2000); }
     catch{ setSaveState("error"); setTimeout(()=>setSaveState("idle"),3000); }
   },[]);
+
+  const persistInvoices = useCallback(async(next)=>{
+    if(!fbLib.current) return;
+    const{db,ref,set}=fbLib.current;
+    localInvOp.current=true;
+    try{ const obj={}; next.forEach(inv=>{obj[inv.id]=inv;}); await set(ref(db,"invoices"),obj); }
+    catch(e){ console.error("Invoice save failed",e); }
+  },[]);
+
+  const updateInvoices = useCallback((updater)=>{
+    setInvoices(prev=>{
+      const next=typeof updater==="function"?updater(prev):updater;
+      persistInvoices(next);
+      return next;
+    });
+  },[persistInvoices]);
 
   const updateDeals = useCallback((updater)=>{
     setDeals(prev=>{ const next=typeof updater==="function"?updater(prev):updater; persistDeals(next); return next; });
@@ -827,6 +976,21 @@ function CRM({ role = "admin", setRole }) {
   const setPF=(id,v)=>setPaymentForms(p=>({...p,[id]:v}));
   const addPayment=(dealId)=>{ const pf=getPF(dealId); if(!pf.amount||!pf.datePaid) return; const d0=deals.find(x=>x.id===dealId); updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:[...(x.payments||[]),{id:uid(),amount:Number(pf.amount),datePaid:pf.datePaid,period:pf.period}]}:x)); setPF(dealId,emptyPayment()); if(d0){const msg=`$${Number(pf.amount).toLocaleString()} payment`;logEvent("payment_added","Payment added",`${msg} — ${d0.customer}`);pushNotif("payment_added","Payment added",`${msg} · ${d0.customer}`);}};
   const deletePayment=(dealId,pid)=>{ const d0=deals.find(x=>x.id===dealId); const p0=d0&&(d0.payments||[]).find(p=>p.id===pid); updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:(x.payments||[]).filter(p=>p.id!==pid)}:x)); if(d0&&p0){logEvent("payment_deleted","Payment deleted",`$${Number(p0.amount).toLocaleString()} — ${d0.customer}`);pushNotif("payment_deleted","Payment deleted",`$${Number(p0.amount).toLocaleString()} · ${d0.customer}`);}};
+  const markInvoicePaid = (invId) => {
+    const inv = invoices.find(x=>x.id===invId);
+    if(!inv) return;
+    // File payment into the deal
+    const paidDate = new Date().toISOString().slice(0,10);
+    updateDeals(d=>d.map(x=>x.id===inv.dealId
+      ? {...x, payments:[...(x.payments||[]), {id:uid(), amount:Number(inv.amount), datePaid:paidDate, period:inv.period}]}
+      : x
+    ));
+    // Remove from invoices
+    updateInvoices(inv=>inv.filter(x=>x.id!==invId));
+    logEvent("invoice_paid","Invoice marked paid",`$${Number(inv.amount).toLocaleString()} — ${inv.customerName}`);
+    pushNotif("invoice_paid","Invoice paid",`$${Number(inv.amount).toLocaleString()} · ${inv.customerName}`);
+  };
+
   const saveNotes=(dealId,notes)=>updateDeals(d=>d.map(x=>x.id===dealId?{...x,notes}:x));
   const startEditPayment=(dealId,p)=>setEditingPayment({dealId,paymentId:p.id,amount:String(p.amount),datePaid:p.datePaid,period:p.period||""});
   const cancelEditPayment=()=>setEditingPayment(null);
@@ -835,7 +999,7 @@ function CRM({ role = "admin", setRole }) {
 
   const visible=useMemo(()=>{ let list=deals.filter(d=>(filterStatus==="All"||d.status===filterStatus)&&d.customer.toLowerCase().includes(search.toLowerCase())); if(sortKey) list=[...list].sort((a,b)=>{ let av=sortKey==="totalCollected"?totalCollected(a):sortKey==="grand30"?calcEffective30Day(a):a[sortKey]; let bv=sortKey==="totalCollected"?totalCollected(b):sortKey==="grand30"?calcEffective30Day(b):b[sortKey]; if(typeof av==="string"){av=av.toLowerCase();bv=bv.toLowerCase();} return av<bv?-sortDir:av>bv?sortDir:0; }); return list; },[deals,filterStatus,search,sortKey,sortDir]);
   const MAX_H100=128,MAX_H200=65;
-  const totals=useMemo(()=>{ const h100=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcEffective30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
+  const totals=useMemo(()=>{ const ACTIVE_STATUSES=["Testing","In Production"]; const h100=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcEffective30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
   const statusOf=(label)=>STATUSES.find(s=>s.label===label)||STATUSES[0];
   const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#10b981",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
   const modal30base=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
@@ -1297,6 +1461,21 @@ function CRM({ role = "admin", setRole }) {
               <span style={{color:"#1a6a4a"}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
               <span style={{marginLeft:"auto",fontSize:10,color:"#1a4a2a"}}>{visible.length} DEALS · 🔥 FIREBASE LIVE SYNC</span>
             </div>
+          )}
+
+          {/* ── Invoice Tracker ─────────────────────────────────────────── */}
+          {!isTech&&(
+          <InvoiceTracker
+            invoices={invoices}
+            deals={deals}
+            t={t}
+            updateInvoices={updateInvoices}
+            markInvoicePaid={markInvoicePaid}
+            hideValues={hideValues}
+            fmt={fmt}
+            fmtShort={fmtShort}
+            uid={uid}
+          />
           )}
           {/* Horizon Mode Toggle + View Switcher */}
           <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center",flexWrap:"wrap"}}>
