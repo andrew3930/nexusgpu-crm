@@ -65,34 +65,34 @@ function HorizonLogo({size=36, stop1="#0055ee", stop2="#00bbff"}) {
 
 // ─── THEME ────────────────────────────────────────────────────────────────────
 const DARK_THEME = {
-  bg:         "#0d1520",
-  bgCard:     "#141f2e",
-  bgHeader:   "#0f1928",
-  bgInput:    "#141f2e",
-  bgDeep:     "#0e1a2a",
-  bgRow:      "#060e1a",
-  bgTable:    "#0e1a2a",
-  border:     "#1e3a55",
-  borderSoft: "#254463",
-  borderDeep: "#162d48",
-  text:       "#cfdde0",
-  textBright: "#ecf3ff",
-  textMid:    "#8fb8d8",
-  textDim:    "#557090",
-  textDeep:   "#304e6a",
-  accent:     "#0099ff",
-  accentDark: "#0066cc",
-  accentGlow: "rgba(0,153,255,0.18)",
-  green:      "#10b981",
-  greenBg:    "rgba(16,185,129,0.08)",
-  greenBorder:"#1a4a2a",
-  amber:      "#f59e0b",
-  red:        "#ef4444",
-  logoStop1:  "#0055ee",
-  logoStop2:  "#00bbff",
-  scrollThumb:"#254670",
-  scrollTrack:"#0d1828",
-  rowHover:   "rgba(0,180,255,0.055)",
+  bg:         "#f2f2f7",
+  bgCard:     "#ffffff",
+  bgHeader:   "#ffffff",
+  bgInput:    "#f2f2f7",
+  bgDeep:     "#e8e8ed",
+  bgRow:      "#f9f9fb",
+  bgTable:    "#ffffff",
+  border:     "#d1d1d6",
+  borderSoft: "#c7c7cc",
+  borderDeep: "#e5e5ea",
+  text:       "#1c1c1e",
+  textBright: "#000000",
+  textMid:    "#48484a",
+  textDim:    "#6e6e73",
+  textDeep:   "#aeaeb2",
+  accent:     "#007aff",
+  accentDark: "#0055cc",
+  accentGlow: "rgba(0,122,255,0.15)",
+  green:      "#34c759",
+  greenBg:    "rgba(52,199,89,0.08)",
+  greenBorder:"rgba(52,199,89,0.3)",
+  amber:      "#ff9500",
+  red:        "#ff3b30",
+  logoStop1:  "#007aff",
+  logoStop2:  "#5ac8fa",
+  scrollThumb:"#c7c7cc",
+  scrollTrack:"#f2f2f7",
+  rowHover:   "rgba(0,0,0,0.025)",
 };
 
 const HORIZON_THEME = {
@@ -172,7 +172,7 @@ function NetworkingBadge({ value }) {
   if (!value) return null;
   const isIB = value === "IB";
   return (
-    <div title={`Networking: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isIB?"rgba(139,92,246,0.15)":"rgba(0,153,255,0.12)",border:`1px solid ${isIB?"rgba(139,92,246,0.4)":"rgba(0,153,255,0.35)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isIB?"#a78bfa":"#38bdf8",letterSpacing:"0.04em",flexShrink:0}}>
+    <div title={`Networking: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isIB?"rgba(139,92,246,0.15)":"rgba(0,153,255,0.12)",border:`1px solid ${isIB?"rgba(139,92,246,0.4)":"rgba(0,153,255,0.35)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isIB?"#a78bfa":"#5ac8fa",letterSpacing:"0.04em",flexShrink:0}}>
       {isIB ? (
         <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
           <rect x="1" y="1" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.2"/>
@@ -200,7 +200,7 @@ function ArchitectureBadge({ value }) {
   if (!value) return null;
   const isBM = value === "BM";
   return (
-    <div title={`Architecture: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isBM?"rgba(245,158,11,0.12)":"rgba(16,185,129,0.1)",border:`1px solid ${isBM?"rgba(245,158,11,0.35)":"rgba(16,185,129,0.3)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isBM?"#f59e0b":"#10b981",letterSpacing:"0.04em",flexShrink:0}}>
+    <div title={`Architecture: ${value}`} style={{display:"inline-flex",alignItems:"center",gap:4,background:isBM?"rgba(245,158,11,0.12)":"rgba(16,185,129,0.1)",border:`1px solid ${isBM?"rgba(245,158,11,0.35)":"rgba(16,185,129,0.3)"}`,borderRadius:5,padding:"2px 7px",fontSize:10,fontWeight:700,color:isBM?"#f59e0b":"#34c759",letterSpacing:"0.04em",flexShrink:0}}>
       {isBM ? (
         <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
           <rect x="1" y="3" width="10" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -229,22 +229,22 @@ function PasswordGate({ onUnlock }) {
     else { setError(true); setTimeout(() => setError(false), 1500); }
   };
   return (
-    <div style={{minHeight:"100vh",background:"#0d1520",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'IBM Plex Mono',monospace"}}>
-      <div style={{background:"#141f2e",border:`1px solid ${error?"#ef4444":"#254463"}`,borderRadius:12,padding:40,width:380,textAlign:"center",transition:"border-color .2s"}}>
+    <div style={{minHeight:"100vh",background:"#f2f2f7",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif"}}>
+      <div style={{background:"#ffffff",border:`1px solid ${error?"#ef4444":"#c7c7cc"}`,borderRadius:12,padding:40,width:380,textAlign:"center",transition:"border-color .2s"}}>
         <div style={{margin:"0 auto 20px",display:"flex",justifyContent:"center"}}><HorizonLogo size={56} stop1="#0055ee" stop2="#00bbff"/></div>
-        <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
-        <div style={{fontSize:10,color:"#557090",letterSpacing:"0.15em",marginBottom:28}}>SALES INTELLIGENCE PLATFORM</div>
+        <div style={{fontFamily:"sans-serif",fontSize:20,fontWeight:800,color:"#e8f0fc",marginBottom:4}}>HORIZON<span style={{color:"#007aff",fontWeight:800}}>COMPUTE</span></div>
+        <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.04em",marginBottom:28}}>SALES INTELLIGENCE PLATFORM</div>
         <input
           type="password"
           placeholder="Enter password"
           value={input}
           onChange={e=>setInput(e.target.value)}
           onKeyDown={e=>e.key==="Enter"&&submit()}
-          style={{background:"#0e1a2a",border:`1px solid ${error?"#ef4444":"#254463"}`,color:"#c9d6e8",borderRadius:6,padding:"12px 16px",fontFamily:"inherit",fontSize:13,width:"100%",outline:"none",marginBottom:12,textAlign:"center",letterSpacing:"0.1em"}}
+          style={{background:"#e8e8ed",border:`1px solid ${error?"#ef4444":"#c7c7cc"}`,color:"#1c1c1e",borderRadius:6,padding:"12px 16px",fontFamily:"inherit",fontSize:13,width:"100%",outline:"none",marginBottom:12,textAlign:"center",letterSpacing:"0.02em"}}
           autoFocus
         />
-        {error && <div style={{color:"#ef4444",fontSize:11,marginBottom:8,letterSpacing:"0.08em"}}>Incorrect password</div>}
-        <button onClick={submit} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"12px",width:"100%",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>
+        {error && <div style={{color:"#ef4444",fontSize:11,marginBottom:8,letterSpacing:"0.01em"}}>Incorrect password</div>}
+        <button onClick={submit} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"12px",width:"100%",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase"}}>
           Unlock
         </button>
       </div>
@@ -268,7 +268,7 @@ const PAYMENT_TERMS = ["Prepaid 30 Days", "Prepaid 1st of Month", "Prepaid", "Bi
 const STATUSES = [
   { label: "Not Started",   color: "#64748b", bg: "rgba(100,116,139,0.15)" },
   { label: "Testing",       color: "#f59e0b", bg: "rgba(245,158,11,0.15)"  },
-  { label: "In Production", color: "#10b981", bg: "rgba(16,185,129,0.15)" },
+  { label: "In Production", color: "#34c759", bg: "rgba(52,199,89,0.12)" },
   { label: "Finished",      color: "#3b82f6", bg: "rgba(59,130,246,0.15)"  },
   { label: "Terminated",    color: "#ef4444", bg: "rgba(239,68,68,0.15)"   },
 ];
@@ -353,7 +353,7 @@ const totalCollected = (deal)   => (deal.payments||[]).reduce((s,p)=>s+(Number(p
 const emptyAlloc     = () => ({id:uid(),gpuType:"H100",nodes:"",ratePerGpuHour:""});
 const emptyDeal      = () => ({id:uid(),customer:"",startDate:"",endDate:"",gpuAllocations:[emptyAlloc()],storageValue:"",storage30Day:"",fullContractValue:"",paymentTerms:PAYMENT_TERMS[0],status:"Not Started",payments:[],notes:"",networking:"",architecture:"",onDemand:false});
 const emptyPayment   = () => ({id:uid(),amount:"",datePaid:new Date().toISOString().slice(0,10),period:""});
-const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bfa"}:{bg:"rgba(0,153,255,.15)",color:"#38bdf8"};
+const gpuStyle       = (t) => t==="H200"?{bg:"rgba(139,92,246,.2)",color:"#a78bfa"}:{bg:"rgba(0,153,255,.15)",color:"#5ac8fa"};
 const normDeal       = (d)  => ({storageValue:0,storage30Day:0,notes:"",startDate:"",endDate:"",networking:"",architecture:"",onDemand:false,...d,gpuAllocations:d.gpuAllocations||[],payments:d.payments||[]});
 
 // ─── SPARKLE EMITTER ─────────────────────────────────────────────────────────
@@ -523,16 +523,16 @@ function RunRateIcon() {
         `}</style>
 
         {/* glow bg */}
-        <circle className="rrGlow" cx="18" cy="18" r="14" fill="#38bdf8"/>
+        <circle className="rrGlow" cx="18" cy="18" r="14" fill="#5ac8fa"/>
 
         {/* bar chart */}
         <rect className="rrBar1" x="5" y="20" width="5" height="8" rx="1.5" fill="#0ea5e9" opacity="0.7"/>
-        <rect className="rrBar2" x="12" y="15" width="5" height="13" rx="1.5" fill="#38bdf8" opacity="0.85"/>
+        <rect className="rrBar2" x="12" y="15" width="5" height="13" rx="1.5" fill="#5ac8fa" opacity="0.85"/>
         <rect className="rrBar3" x="19" y="18" width="5" height="10" rx="1.5" fill="#7dd3fc" opacity="0.7"/>
 
         {/* lightning bolt */}
         <g className="rrBolt">
-          <polygon points="22,5 14,18 19,18 14,31 24,16 18,16" fill="#f0f9ff" stroke="#38bdf8" strokeWidth="0.5"/>
+          <polygon points="22,5 14,18 19,18 14,31 24,16 18,16" fill="#f0f9ff" stroke="#5ac8fa" strokeWidth="0.5"/>
         </g>
       </svg>
     </span>
@@ -567,26 +567,26 @@ function ActiveDealsIcon() {
         `}</style>
 
         {/* ping ring */}
-        <circle className="adRing" cx="18" cy="20" r="12" fill="none" stroke="#10b981" strokeWidth="1.2"/>
+        <circle className="adRing" cx="18" cy="20" r="12" fill="none" stroke="#34c759" strokeWidth="1.2"/>
 
         <g className="adShake">
           {/* left hand */}
-          <path d="M6 20 Q8 16 11 17 L16 17 Q17 17 17 18.5 Q17 20 16 20 L13 20" stroke="#10b981" strokeWidth="2" strokeLinecap="round" fill="none"/>
+          <path d="M6 20 Q8 16 11 17 L16 17 Q17 17 17 18.5 Q17 20 16 20 L13 20" stroke="#34c759" strokeWidth="2" strokeLinecap="round" fill="none"/>
           {/* right hand */}
           <path d="M30 20 Q28 16 25 17 L20 17 Q19 17 19 18.5 Q19 20 20 20 L23 20" stroke="#34d399" strokeWidth="2" strokeLinecap="round" fill="none"/>
           {/* clasp */}
-          <ellipse cx="18" cy="19" rx="3.5" ry="3" fill="#10b981" opacity="0.9"/>
+          <ellipse cx="18" cy="19" rx="3.5" ry="3" fill="#34c759" opacity="0.9"/>
           <ellipse cx="18" cy="19" rx="2" ry="1.8" fill="#6ee7b7"/>
           {/* fingers left */}
-          <path d="M11 17 Q11 14 13 14" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-          <path d="M13 17 Q13 13 15 13" stroke="#10b981" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+          <path d="M11 17 Q11 14 13 14" stroke="#34c759" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+          <path d="M13 17 Q13 13 15 13" stroke="#34c759" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
           {/* fingers right */}
           <path d="M25 17 Q25 14 23 14" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
           <path d="M23 17 Q23 13 21 13" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
         </g>
 
         {/* live dot */}
-        <circle className="adDot" cx="29" cy="9" r="3" fill="#10b981"/>
+        <circle className="adDot" cx="29" cy="9" r="3" fill="#34c759"/>
         <circle cx="29" cy="9" r="1.5" fill="#6ee7b7"/>
       </svg>
     </span>
@@ -649,7 +649,7 @@ function MoneyBag() {
 
           {/* $ sign */}
           <text x="18" y="28" textAnchor="middle" fontSize="11" fontWeight="800"
-            fill="#92400e" fontFamily="'Syne',Georgia,serif" style={{userSelect:"none"}}>$</text>
+            fill="#92400e" fontFamily="-apple-system,BlinkMacSystemFont,'Inter',sans-serif" style={{userSelect:"none"}}>$</text>
 
           {/* shine swipe */}
           <ellipse className="bag-shine" cx="14" cy="21" rx="3" ry="6"
@@ -703,11 +703,11 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
       {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
         <span style={{fontSize:16}}>📄</span>
-        <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.12em",textTransform:"uppercase"}}>Outstanding Invoices</span>
+        <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.03em",textTransform:"uppercase"}}>Outstanding Invoices</span>
         {invoices.length>0&&(
           <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:14}}>
-            <span style={{fontSize:10,color:"#f59e0b",letterSpacing:"0.08em"}}>{invoices.length} PENDING</span>
-            <span style={{fontSize:13,fontWeight:700,color:"#f59e0b",fontFamily:"'Syne',sans-serif"}}>{hideValues?"••••••":fmt(totalOutstanding)}</span>
+            <span style={{fontSize:10,color:"#f59e0b",letterSpacing:"0.01em"}}>{invoices.length} PENDING</span>
+            <span style={{fontSize:13,fontWeight:700,color:"#f59e0b",fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif"}}>{hideValues?"••••••":fmt(totalOutstanding)}</span>
           </div>
         )}
       </div>
@@ -720,7 +720,7 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
           {/* Header row */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 100px 120px 110px 160px auto",gap:10,marginBottom:6,padding:"0 4px"}}>
             {["Customer","Amount","Period","Sent","Notes",""].map(h=>(
-              <div key={h} style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>
+              <div key={h} style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase"}}>{h}</div>
             ))}
           </div>
           {sorted.map(inv=>(
@@ -738,12 +738,12 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
               <div style={{display:"flex",gap:5}}>
                 {confirmPay===inv.id?(
                   <>
-                    <button onClick={()=>{markInvoicePaid(inv.id);setConfirmPay(null);}} style={{background:"rgba(16,185,129,0.15)",border:"1px solid #1a6a3a",color:"#10b981",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.06em"}}>✓ Confirm</button>
+                    <button onClick={()=>{markInvoicePaid(inv.id);setConfirmPay(null);}} style={{background:"rgba(52,199,89,0.12)",border:"1px solid #1a6a3a",color:"#34c759",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.06em"}}>✓ Confirm</button>
                     <button onClick={()=>setConfirmPay(null)} style={{background:"transparent",border:`1px solid ${t.borderDeep}`,color:t.textDim,borderRadius:4,padding:"4px 8px",fontFamily:"inherit",fontSize:10,cursor:"pointer"}}>✕</button>
                   </>
                 ):(
                   <>
-                    <button title="Mark as paid — files into payment history" onClick={()=>setConfirmPay(inv.id)} style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.25)",color:"#10b981",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",letterSpacing:"0.04em"}}>
+                    <button title="Mark as paid — files into payment history" onClick={()=>setConfirmPay(inv.id)} style={{background:"rgba(52,199,89,0.08)",border:"1px solid rgba(16,185,129,0.25)",color:"#34c759",borderRadius:4,padding:"4px 10px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",letterSpacing:"0.04em"}}>
                       ✓ Paid
                     </button>
                     <button onClick={()=>deleteInvoice(inv.id)} style={{background:"transparent",border:`1px solid ${t.borderDeep}`,color:"#ef4444",borderRadius:4,padding:"4px 8px",fontFamily:"inherit",fontSize:10,cursor:"pointer"}}>✕</button>
@@ -757,10 +757,10 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
 
       {/* Add new invoice form */}
       <div style={{background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:8,padding:"14px 16px"}}>
-        <div style={{fontSize:10,color:t.textDeep,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>+ Log New Invoice</div>
+        <div style={{fontSize:10,color:t.textDeep,letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:12}}>+ Log New Invoice</div>
         <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr 1fr",gap:10,marginBottom:10}}>
           <div>
-            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Customer / Deal *</div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Customer / Deal *</div>
             <select value={form.dealId} onChange={e=>setForm(f=>({...f,dealId:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:form.dealId?t.text:t.textDeep,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}>
               <option value="">— Select deal —</option>
               {activeDeals.map(d=><option key={d.id} value={d.id}>{d.customer}</option>)}
@@ -768,24 +768,24 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
             </select>
           </div>
           <div>
-            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Amount ($) *</div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Amount ($) *</div>
             <input type="number" min="0" step="0.01" placeholder="e.g. 480000" value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
           </div>
           <div>
-            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Period Covered</div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Period Covered</div>
             <input type="text" placeholder="e.g. Mar 1–31 2025" value={form.period} onChange={e=>setForm(f=>({...f,period:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
           </div>
           <div>
-            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Date Sent</div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Date Sent</div>
             <input type="date" value={form.dateSent} onChange={e=>setForm(f=>({...f,dateSent:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:10,alignItems:"flex-end"}}>
           <div>
-            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Notes (optional)</div>
+            <div style={{fontSize:9,color:t.textDeep,letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Notes (optional)</div>
             <input type="text" placeholder="e.g. Invoice #42, net-30 terms" value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} style={{background:t.bgInput,border:`1px solid ${t.borderSoft}`,color:t.text,borderRadius:6,padding:"9px 10px",fontFamily:"inherit",fontSize:12,width:"100%",outline:"none"}}/>
           </div>
-          <button onClick={addInvoice} disabled={!form.dealId||!form.amount} style={{background:form.dealId&&form.amount?"linear-gradient(135deg,#0066cc,#0099ff)":"rgba(255,255,255,0.05)",color:form.dealId&&form.amount?"#fff":"#2a4a6a",border:"none",borderRadius:6,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:form.dealId&&form.amount?"pointer":"not-allowed",letterSpacing:"0.08em",textTransform:"uppercase",whiteSpace:"nowrap"}}>Log Invoice</button>
+          <button onClick={addInvoice} disabled={!form.dealId||!form.amount} style={{background:form.dealId&&form.amount?"linear-gradient(135deg,#0066cc,#0099ff)":"rgba(255,255,255,0.05)",color:form.dealId&&form.amount?"#fff":"#aeaeb2",border:"none",borderRadius:6,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:form.dealId&&form.amount?"pointer":"not-allowed",letterSpacing:"0.01em",textTransform:"uppercase",whiteSpace:"nowrap"}}>Log Invoice</button>
         </div>
       </div>
     </div>
@@ -810,9 +810,9 @@ function calcXP(totalCollected) {
 }
 
 const CLASS_DATA = [
-  { min:1,  max:2,  name:"Intern",      color:"#8aa8c8", title:"GPU Intern" },
-  { min:3,  max:4,  name:"Analyst",     color:"#38bdf8", title:"Deal Analyst" },
-  { min:5,  max:6,  name:"Dealer",      color:"#10b981", title:"GPU Dealer" },
+  { min:1,  max:2,  name:"Intern",      color:"#48484a", title:"GPU Intern" },
+  { min:3,  max:4,  name:"Analyst",     color:"#5ac8fa", title:"Deal Analyst" },
+  { min:5,  max:6,  name:"Dealer",      color:"#34c759", title:"GPU Dealer" },
   { min:7,  max:8,  name:"Executive",   color:"#f59e0b", title:"GPU Executive" },
   { min:9,  max:10, name:"Tycoon",      color:"#f97316", title:"GPU Tycoon" },
   { min:11, max:99, name:"Overlord",    color:"#a78bfa", title:"GPU Overlord" },
@@ -1027,12 +1027,12 @@ function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt }
   const barColor = cls.color;
 
   return (
-    <div style={{display:'flex',alignItems:'flex-start',gap:16,background:t.bgDeep,border:`1px solid ${t.borderSoft}`,borderRadius:10,padding:'14px 18px',position:'relative',overflow:'hidden',minWidth:300}}>
+    <div style={{display:'flex',alignItems:'flex-start',gap:12,background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:'14px 16px',position:'relative',overflow:'hidden',height:'100%',boxSizing:'border-box',boxShadow:'0 1px 3px rgba(0,0,0,0.06)'}}>
 
       {/* Level-up flash overlay */}
       {showLevelUp&&(
         <div style={{position:'absolute',inset:0,background:'rgba(255,215,0,0.12)',borderRadius:10,pointerEvents:'none',animation:'lvlFlash 0.4s ease-out forwards',zIndex:10}}>
-          <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:'#ffd700',letterSpacing:'0.1em',textShadow:'0 0 20px #ffd700',whiteSpace:'nowrap'}}>
+          <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:800,color:'#ffd700',letterSpacing:'0.1em',textShadow:'0 0 20px #ffd700',whiteSpace:'nowrap'}}>
             ⬆ LEVEL UP! {level}
           </div>
         </div>
@@ -1052,10 +1052,10 @@ function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt }
       </div>
 
       {/* Stats panel */}
-      <div style={{flex:1,minWidth:0}}>
+      <div style={{flex:1,minWidth:0,overflow:'hidden'}}>
         {/* Name + class */}
         <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:4}}>
-          <span style={{fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:800,color:cls.color,letterSpacing:'0.04em'}}>{cls.title}</span>
+          <span style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:12,fontWeight:800,color:cls.color,letterSpacing:'0.03em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{cls.title}</span>
           <span style={{fontSize:9,color:t.textDeep,letterSpacing:'0.1em',textTransform:'uppercase'}}>Lv.{level}</span>
         </div>
 
@@ -1067,7 +1067,7 @@ function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt }
               {level<XP_THRESHOLDS.length ? `${(xp/1000).toFixed(0)}K / ${(nextXp/1000).toFixed(0)}K` : 'MAX'}
             </span>
           </div>
-          <div style={{height:7,background:'#0a1220',borderRadius:4,overflow:'hidden',position:'relative'}}>
+          <div style={{height:7,background:'#e8e8ed',borderRadius:4,overflow:'hidden',position:'relative'}}>
             <div style={{height:'100%',width:`${pct}%`,background:`linear-gradient(90deg, ${barColor}88, ${barColor})`,borderRadius:4,transition:'width 0.6s ease',position:'relative'}}>
               {pct>15&&<div style={{position:'absolute',right:4,top:'50%',transform:'translateY(-50%)',width:4,height:4,background:'rgba(255,255,255,0.5)',borderRadius:'50%'}}/>}
             </div>
@@ -1075,7 +1075,7 @@ function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt }
         </div>
 
         {/* Mini stats */}
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:4}}>
           {[
             {label:'COLLECTED', value:hideValues?'•••':fmt(totalCollected), color:'#10b981'},
             {label:'LEVEL',     value:String(level),                         color:cls.color},
@@ -1302,11 +1302,11 @@ function CRM({ role = "admin", setRole }) {
   const MAX_H100=128,MAX_H200=65;
   const totals=useMemo(()=>{ const ACTIVE_STATUSES=["Testing","In Production"]; const h100=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcEffective30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
   const statusOf=(label)=>STATUSES.find(s=>s.label===label)||STATUSES[0];
-  const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#10b981",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
+  const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#34c759",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
   const modal30base=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
   const modal30=useMemo(()=>modal30base,[modal30base]);
-  const tabBtn=(active)=>({background:active?t.accentGlow:"transparent",border:`1px solid ${active?t.accent:t.borderSoft}`,color:active?t.accent:t.textDim,borderRadius:4,padding:"6px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
-  const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?t.accent:"transparent"}`,color:active?t.accent:t.textDim,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
+  const tabBtn=(active)=>({background:active?t.accentGlow:"transparent",border:`1px solid ${active?t.accent:t.borderSoft}`,color:active?t.accent:t.textDim,borderRadius:4,padding:"6px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s"});
+  const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?t.accent:"transparent"}`,color:active?t.accent:t.textDim,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s"});
   const Redacted=({w=64})=><span style={{display:"inline-block",background:t.borderSoft,borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
   const isMobile = useIsMobile();
 
@@ -1337,12 +1337,12 @@ function CRM({ role = "admin", setRole }) {
   );
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text}} className={special?"special-bg":""}>
+    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",color:t.text}} className={special?"special-bg":""}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@700;800&display=swap');
         *{box-sizing:border-box;} ::-webkit-scrollbar{width:6px;height:6px;} ::-webkit-scrollbar-track{background:${t.scrollTrack};} ::-webkit-scrollbar-thumb{background:${t.scrollThumb};border-radius:3px;}
         .row-hover:hover{background:${t.rowHover}!important;}
-        .btn-primary{background:linear-gradient(135deg,${t.accentDark},${t.accent});color:#fff;border:none;border-radius:4px;padding:9px 20px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:opacity .15s;} .btn-primary:hover{opacity:.85;}
+        .btn-primary{background:${t.accent};color:#fff;border:none;border-radius:4px;padding:9px 20px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:opacity .15s;} .btn-primary:hover{opacity:.85;}
         .btn-sm{background:linear-gradient(135deg,${t.accentDark},${t.accent});color:#fff;border:none;border-radius:4px;padding:6px 14px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:opacity .15s;white-space:nowrap;} .btn-sm:hover{opacity:.85;}
         .btn-ghost{background:transparent;color:${t.textMid};border:1px solid ${t.borderSoft};border-radius:4px;padding:7px 14px;font-family:inherit;font-size:11px;cursor:pointer;letter-spacing:0.06em;transition:all .15s;} .btn-ghost:hover{border-color:${t.accent};color:${t.accent};}
         .btn-danger{background:transparent;color:#ef4444;border:1px solid #3a1a1a;border-radius:4px;padding:5px 10px;font-family:inherit;font-size:11px;cursor:pointer;transition:all .15s;} .btn-danger:hover{background:rgba(239,68,68,.1);border-color:#ef4444;}
@@ -1350,14 +1350,14 @@ function CRM({ role = "admin", setRole }) {
         .btn-expand{background:transparent;border:none;color:#4a6a8a;cursor:pointer;font-family:inherit;font-size:12px;padding:2px 6px;transition:color .15s;} .btn-expand:hover{color:#0099ff;}
         input,select{background:${t.bgInput};border:1px solid ${t.borderSoft};color:${t.text};border-radius:4px;padding:9px 12px;font-family:inherit;font-size:12px;width:100%;outline:none;transition:border-color .15s;} input:focus,select:focus{border-color:${t.accent};} select option{background:${t.bgInput};}
         textarea{background:${t.bgInput};border:1px solid ${t.borderSoft};color:${t.text};border-radius:4px;padding:10px 12px;font-family:inherit;font-size:12px;width:100%;outline:none;transition:border-color .15s;resize:vertical;line-height:1.6;} textarea:focus{border-color:${t.accent};}
-        .stat-card{background:${t.bgCard};border:1px solid ${t.border};border-radius:8px;padding:20px 24px;}
+        .stat-card{background:${t.bgCard};border:1px solid ${t.border};border-radius:12px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);}
         th{cursor:pointer;user-select:none;} th:hover{color:#0099ff;}
         .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);}
-        .modal{background:${t.bgCard};border:1px solid ${t.borderSoft};border-radius:12px;padding:32px;width:640px;max-width:96vw;max-height:92vh;overflow-y:auto;}
+        .modal{background:${t.bgCard};border:1px solid ${t.border};border-radius:16px;padding:32px;width:640px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.08);}
         .filter-pill{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.07em;cursor:pointer;border:1px solid transparent;transition:all .15s;text-transform:uppercase;}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}} .pulsing{animation:pulse 1.2s ease-in-out infinite;}
         @keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}} .livepulse{animation:livepulse 2s ease-in-out infinite;}
-        .payment-input{background:${t.bgDeep};border:1px solid ${t.borderDeep};color:${t.text};border-radius:4px;padding:7px 10px;font-family:inherit;font-size:11px;width:100%;outline:none;transition:border-color .15s;} .payment-input:focus{border-color:${t.accent};}
+        .payment-input{background:${t.bgInput};border:1px solid ${t.border};color:${t.text};border-radius:4px;padding:7px 10px;font-family:inherit;font-size:11px;width:100%;outline:none;transition:border-color .15s;} .payment-input:focus{border-color:${t.accent};}
         .expand-row{background:${t.bgRow};}
         .alloc-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr auto;gap:10px;align-items:flex-end;margin-bottom:10px;}
         .add-alloc-btn{background:transparent;border:1px dashed ${t.borderSoft};color:${t.textDim};border-radius:6px;padding:8px;width:100%;font-family:inherit;font-size:11px;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all .15s;margin-top:4px;} .add-alloc-btn:hover{border-color:${t.accent};color:${t.accent};}
@@ -1407,23 +1407,23 @@ function CRM({ role = "admin", setRole }) {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <HorizonLogo size={36} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}>{!special&&<span style={{color:t.textBright}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></span>}{special&&"✨ HORIZONCOMPUTE ✨"}</div>
-            <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
+            <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}>{!special&&<span style={{color:t.textBright}}>HORIZON<span style={{color:"#007aff",fontWeight:800}}>COMPUTE</span></span>}{special&&"✨ HORIZONCOMPUTE ✨"}</div>
+            <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.04em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
           </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
           {saveBadge&&<span style={{fontSize:11,color:saveBadge.color,letterSpacing:"0.06em"}} className={saveBadge.pulse?"pulsing":""}>{saveBadge.text}</span>}
           {fbError&&<span style={{fontSize:10,color:"#ef4444"}}>⚠ {fbError}</span>}
-          <span style={{fontSize:10,display:"flex",alignItems:"center",gap:5,color:fbReady?"#10b981":"#f59e0b",background:fbReady?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${fbReady?"#1a4a2a":"#4a3000"}`,borderRadius:4,padding:"4px 10px",letterSpacing:"0.08em"}}>
+          <span style={{fontSize:10,display:"flex",alignItems:"center",gap:5,color:fbReady?"#34c759":"#f59e0b",background:fbReady?"rgba(52,199,89,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${fbReady?"rgba(52,199,89,0.3)":"#4a3000"}`,borderRadius:4,padding:"4px 10px",letterSpacing:"0.01em"}}>
             <span className={fbReady?"livepulse":""} style={{fontSize:8}}>●</span>
             {fbReady?`LIVE · ${onlineUsers} ONLINE`:"CONNECTING…"}
           </span>
-          {isTech && <span style={{fontSize:10,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"4px 12px",letterSpacing:"0.1em",fontWeight:700}}>👷 TECH VIEW</span>}
-          {!isTech && <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",transition:"all .2s"}}>
+          {isTech && <span style={{fontSize:10,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"4px 12px",letterSpacing:"0.02em",fontWeight:700}}>👷 TECH VIEW</span>}
+          {!isTech && <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.12)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:"0.02em",textTransform:"uppercase",transition:"all .2s"}}>
             {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
           </button>}
-          {!isTech && <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#0099ff"} onMouseOut={e=>e.currentTarget.style.borderColor="#254463"}>
-            🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#0099ff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
+          {!isTech && <button onClick={()=>setShowHistory(true)} style={{background:"rgba(0,153,255,0.08)",border:"1px solid #1e3550",color:"#4a8aaa",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s",position:"relative"}} onMouseOver={e=>e.currentTarget.style.borderColor="#007aff"} onMouseOut={e=>e.currentTarget.style.borderColor="#c7c7cc"}>
+            🕐 History{history.length>0&&<span style={{position:"absolute",top:-5,right:-5,background:"#007aff",color:"#fff",borderRadius:"50%",width:16,height:16,fontSize:9,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>{history.length>99?"99+":history.length}</span>}
           </button>}
           {isTech && history.length>0 && (
             <span style={{fontSize:10,color:"#2a6a4a",background:"rgba(16,185,129,0.06)",border:"1px solid #1a3a2a",borderRadius:4,padding:"4px 12px",letterSpacing:"0.06em"}}>
@@ -1439,14 +1439,14 @@ function CRM({ role = "admin", setRole }) {
         <div style={{background:t.bgDeep,borderBottom:`1px solid ${t.borderDeep}`,padding:"0 16px"}}>
           {notifications.map((n, i) => {
             const icons = {new_deal:"🟢", edit:"✏️", payment_added:"💳", payment_deleted:"🗑", delete_deal:"❌"};
-            const colors = {new_deal:"#10b981", edit:"#0099ff", payment_added:"#10b981", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
+            const colors = {new_deal:"#34c759", edit:"#007aff", payment_added:"#34c759", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
             return (
               <div key={n.id} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:i<notifications.length-1?"1px solid #0a1a2a":"none",opacity:i===0?1:0.5}}>
                 <span style={{fontSize:13}}>{icons[n.type]||"•"}</span>
-                <span style={{fontSize:11,color:colors[n.type]||"#c9d6e8",fontWeight:600,letterSpacing:"0.06em"}}>{n.message}</span>
-                {n.detail&&<span style={{fontSize:11,color:"#557090"}}>— {n.detail}</span>}
-                <span style={{fontSize:10,color:"#304e6a",marginLeft:"auto"}}>{new Date(n.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
-                {i===0&&<button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#304e6a",cursor:"pointer",fontSize:14,padding:"0 4px",lineHeight:1}} title="Dismiss all">×</button>}
+                <span style={{fontSize:11,color:colors[n.type]||"#1c1c1e",fontWeight:600,letterSpacing:"0.06em"}}>{n.message}</span>
+                {n.detail&&<span style={{fontSize:11,color:"#6e6e73"}}>— {n.detail}</span>}
+                <span style={{fontSize:10,color:"#aeaeb2",marginLeft:"auto"}}>{new Date(n.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                {i===0&&<button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:14,padding:"0 4px",lineHeight:1}} title="Dismiss all">×</button>}
               </div>
             );
           })}
@@ -1460,16 +1460,16 @@ function CRM({ role = "admin", setRole }) {
           <div style={{width:420,background:t.bgHeader,borderLeft:`1px solid ${t.border}`,display:"flex",flexDirection:"column",height:"100vh",overflowY:"auto"}}>
             <div style={{padding:"20px 24px",borderBottom:`1px solid ${t.border}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,background:t.bgHeader,zIndex:1}}>
               <div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:700,color:t.textBright}}>Activity History</div>
-                <div style={{fontSize:10,color:"#557090",letterSpacing:"0.1em",marginTop:2}}>{history.length} EVENTS</div>
+                <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:16,fontWeight:700,color:t.textBright}}>Activity History</div>
+                <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",marginTop:2}}>{history.length} EVENTS</div>
               </div>
-              <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",color:"#557090",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
+              <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",color:"#6e6e73",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
             </div>
             <div style={{padding:"16px 24px",flex:1}}>
-              {history.length === 0 && <div style={{color:"#304e6a",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
+              {history.length === 0 && <div style={{color:"#aeaeb2",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
               {history.map(e => {
                 const icons = {new_deal:"🟢", edit:"✏️", payment_added:"💳", payment_deleted:"🗑", delete_deal:"❌"};
-                const colors = {new_deal:"#10b981", edit:"#0099ff", payment_added:"#10b981", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
+                const colors = {new_deal:"#34c759", edit:"#007aff", payment_added:"#34c759", payment_deleted:"#f59e0b", delete_deal:"#ef4444"};
                 const d = new Date(e.ts);
                 const dateStr = d.toLocaleDateString([],{month:"short",day:"numeric"});
                 const timeStr = d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
@@ -1477,9 +1477,9 @@ function CRM({ role = "admin", setRole }) {
                   <div key={e.id} style={{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid #0a1520"}}>
                     <div style={{fontSize:16,minWidth:22,textAlign:"center",marginTop:1}}>{icons[e.type]||"•"}</div>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:12,color:colors[e.type]||"#c9d6e8",fontWeight:600}}>{e.message}</div>
-                      {e.detail&&<div style={{fontSize:11,color:"#557090",marginTop:2}}>{e.detail}</div>}
-                      <div style={{fontSize:10,color:"#304e6a",marginTop:4,letterSpacing:"0.06em"}}>{dateStr} · {timeStr}</div>
+                      <div style={{fontSize:12,color:colors[e.type]||"#1c1c1e",fontWeight:600}}>{e.message}</div>
+                      {e.detail&&<div style={{fontSize:11,color:"#6e6e73",marginTop:2}}>{e.detail}</div>}
+                      <div style={{fontSize:10,color:"#aeaeb2",marginTop:4,letterSpacing:"0.06em"}}>{dateStr} · {timeStr}</div>
                     </div>
                   </div>
                 );
@@ -1489,21 +1489,43 @@ function CRM({ role = "admin", setRole }) {
         </div>
       )}
 
-      {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:t.textDeep}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:13,letterSpacing:"0.12em"}}>CONNECTING TO FIREBASE…</span></div>}
+      {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:t.textDeep}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:13,letterSpacing:"0.03em"}}>CONNECTING TO FIREBASE…</span></div>}
 
       {loadState==="ready"&&(
         <div style={{padding:"28px 32px"}}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:16,marginBottom:28}}>
-            {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
-              <div className="stat-card" key={s.label}>
-                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}{s.label==="30-Day Run Rate"&&<RunRateIcon/>}{s.label==="Active Deals"&&<ActiveDealsIcon/>}</div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:700,color:t.textBright,minHeight:34}}>
-                  {(hideValues&&!s.plain)?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:6,minWidth:100,height:28}}>&nbsp;</span>:s.value}
-                </div>
-              </div>
-            ))}
+          <div style={{display:"grid",gridTemplateColumns:isTech?"1fr 1fr 1fr":"1fr 1.1fr 1fr 1fr",gap:16,marginBottom:28}}>
 
-  
+            {/* Consolidated stats card */}
+            <div className="stat-card" style={{display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
+              {isTech?(
+                <div>
+                  <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.04em",textTransform:"uppercase",marginBottom:8,display:"flex",alignItems:"center"}}>Active Deals<ActiveDealsIcon/></div>
+                  <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:32,fontWeight:700,color:t.textBright}}>{totals.deals}</div>
+                </div>
+              ):(
+                <>
+                  <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:12}}>Overview</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                    {[
+                      {label:"Active Deals", value:String(totals.deals), plain:true,  color:t.textBright, icon:<ActiveDealsIcon/>, sz:22},
+                      {label:"30-Day Run Rate", value:fmtShort(totals.monthly), plain:false, color:"#5ac8fa", icon:<RunRateIcon/>,    sz:20},
+                      {label:"Total Collected", value:fmtShort(totals.collected), plain:false, color:"#34c759", icon:<MoneyBag/>,      sz:20},
+                    ].map(({label,value,plain,color,icon,sz})=>(
+                      <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:8,borderBottom:`1px solid ${t.borderDeep}`}}>
+                        <div style={{display:"flex",alignItems:"center",gap:4}}>
+                          {icon}
+                          <span style={{fontSize:9,color:t.textDim,letterSpacing:"0.02em",textTransform:"uppercase"}}>{label}</span>
+                        </div>
+                        <span style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:sz,fontWeight:700,color}}>
+                          {(hideValues&&!plain)?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:60,height:20}}>&nbsp;</span>:value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
             {/* RPG Character */}
             {!isTech&&<RPGCharWidget
               totalCollected={totals.collected}
@@ -1514,9 +1536,9 @@ function CRM({ role = "admin", setRole }) {
             />}
           {/* Node Utilization */}
             <div className="stat-card">
-              <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:12}}>Node Utilization</div>
+              <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.04em",textTransform:"uppercase",marginBottom:12}}>Node Utilization</div>
               {[
-                {type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#38bdf8",bg:"rgba(56,189,248,0.15)"},
+                {type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#5ac8fa",bg:"rgba(56,189,248,0.15)"},
                 {type:"H200",used:totals.h200Nodes,max:MAX_H200,color:"#a78bfa",bg:"rgba(139,92,246,0.15)"},
               ].map(({type,used,max,color,bg})=>{
                 const repair=repairRma[type]?.repair||0; const rma=repairRma[type]?.rma||0;
@@ -1541,26 +1563,26 @@ function CRM({ role = "admin", setRole }) {
                           </svg>
                         ) : (
                           <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-                            <rect x="6" y="6" width="16" height="16" rx="2.5" fill="#0a1828" stroke="#38bdf8" strokeWidth="1.3"/>
-                            <rect className="sc1" x="9" y="10" width="10" height="1.5" rx=".75" fill="#38bdf8"/>
-                            <rect className="sc2" x="9" y="13.25" width="10" height="1.5" rx=".75" fill="#38bdf8"/>
-                            <rect className="sc3" x="9" y="16.5" width="10" height="1.5" rx=".75" fill="#38bdf8"/>
-                            {[8.5,11.5,14.5,17.5].map(x=><rect key={"t"+x} className="pA" x={x} y="3" width="1.8" height="2.5" rx=".6" fill="#38bdf8"/>)}
-                            {[8.5,11.5,14.5,17.5].map(x=><rect key={"b"+x} className="pA" x={x} y="22.5" width="1.8" height="2.5" rx=".6" fill="#38bdf8"/>)}
-                            {[8.5,11.5,14.5,17.5].map(y=><rect key={"l"+y} className="pA" x="3" y={y} width="2.5" height="1.8" rx=".6" fill="#38bdf8"/>)}
-                            {[8.5,11.5,14.5,17.5].map(y=><rect key={"r"+y} className="pA" x="22.5" y={y} width="2.5" height="1.8" rx=".6" fill="#38bdf8"/>)}
+                            <rect x="6" y="6" width="16" height="16" rx="2.5" fill="#e8e8ed" stroke="#5ac8fa" strokeWidth="1.3"/>
+                            <rect className="sc1" x="9" y="10" width="10" height="1.5" rx=".75" fill="#5ac8fa"/>
+                            <rect className="sc2" x="9" y="13.25" width="10" height="1.5" rx=".75" fill="#5ac8fa"/>
+                            <rect className="sc3" x="9" y="16.5" width="10" height="1.5" rx=".75" fill="#5ac8fa"/>
+                            {[8.5,11.5,14.5,17.5].map(x=><rect key={"t"+x} className="pA" x={x} y="3" width="1.8" height="2.5" rx=".6" fill="#5ac8fa"/>)}
+                            {[8.5,11.5,14.5,17.5].map(x=><rect key={"b"+x} className="pA" x={x} y="22.5" width="1.8" height="2.5" rx=".6" fill="#5ac8fa"/>)}
+                            {[8.5,11.5,14.5,17.5].map(y=><rect key={"l"+y} className="pA" x="3" y={y} width="2.5" height="1.8" rx=".6" fill="#5ac8fa"/>)}
+                            {[8.5,11.5,14.5,17.5].map(y=><rect key={"r"+y} className="pA" x="22.5" y={y} width="2.5" height="1.8" rx=".6" fill="#5ac8fa"/>)}
                           </svg>
                         )}
                         <span style={{background:bg,color,padding:"2px 7px",borderRadius:3,fontSize:10,fontWeight:700}}>{type}</span>
                       </div>
-                      <span style={{fontSize:11,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#3a5a7a",fontWeight:400}}>/{available} avail</span></span>
+                      <span style={{fontSize:11,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#aeaeb2",fontWeight:400}}>/{available} avail</span></span>
                     </div>
                     {/* Stacked bar: used | repair/rma | free */}
-                    <div style={{height:6,background:"#141f2e",borderRadius:3,overflow:"hidden",display:"flex"}}>
+                    <div style={{height:6,background:"#ffffff",borderRadius:3,overflow:"hidden",display:"flex"}}>
                       <div style={{height:"100%",width:`${pctUsed*100}%`,background:barColor,borderRadius:"3px 0 0 3px",transition:"width .4s ease",flexShrink:0}}/>
                       {pctUnavail>0&&<div style={{height:"100%",width:`${pctUnavail*100}%`,background:"rgba(239,68,68,0.5)",transition:"width .4s ease",flexShrink:0}}/>}
                     </div>
-                    <div style={{fontSize:9,color:"#2a4a6a",marginTop:3,letterSpacing:"0.07em",display:"flex",justifyContent:"space-between"}}>
+                    <div style={{fontSize:9,color:"#aeaeb2",marginTop:3,letterSpacing:"0.07em",display:"flex",justifyContent:"space-between"}}>
                       <span style={{color:warn?"#ef4444":"#2a6a8a"}}>{Math.round(pctUsed*100)}% UTILIZED</span>
                       {unavail>0&&<span style={{color:"rgba(239,68,68,0.7)"}}>{repair>0?`${repair} REPAIR`:""}{repair>0&&rma>0?" · ":""}{rma>0?`${rma} RMA`:""}</span>}
                       <span>{available-used>0?`${available-used} FREE`:""}</span>
@@ -1571,10 +1593,10 @@ function CRM({ role = "admin", setRole }) {
             </div>
           {/* Config Breakdown Card */}
           <div className="stat-card">
-            <div style={{fontSize:10,color:"#557090",letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:14}}>Config Breakdown</div>
+            <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.04em",textTransform:"uppercase",marginBottom:14}}>Config Breakdown</div>
             {[
-              {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM", color:"#38bdf8"},
-              {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM", color:"#10b981"},
+              {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM", color:"#5ac8fa"},
+              {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM", color:"#34c759"},
               {label:"IB + BM",      net:"IB",      arch:"BM", color:"#a78bfa"},
             ].map(({label,net,arch,color})=>{
               const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
@@ -1582,10 +1604,10 @@ function CRM({ role = "admin", setRole }) {
               return (
                 <div key={label} style={{marginBottom:10}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                    <span style={{fontSize:10,color:nodes>0?color:"#2a4a6a",fontWeight:nodes>0?600:400,letterSpacing:"0.06em"}}>{label}</span>
-                    <span style={{fontSize:12,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#2a4a6a",fontWeight:400,fontSize:10}}>/193</span></span>
+                    <span style={{fontSize:10,color:nodes>0?color:"#aeaeb2",fontWeight:nodes>0?600:400,letterSpacing:"0.06em"}}>{label}</span>
+                    <span style={{fontSize:12,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#aeaeb2",fontWeight:400,fontSize:10}}>/193</span></span>
                   </div>
-                  <div style={{height:4,background:"#0e1a2a",borderRadius:2,overflow:"hidden"}}>
+                  <div style={{height:4,background:"#e8e8ed",borderRadius:2,overflow:"hidden"}}>
                     <div style={{height:"100%",width:`${pct*100}%`,background:color,borderRadius:2,transition:"width .4s ease",opacity:nodes>0?1:0.3}}/>
                   </div>
                 </div>
@@ -1613,12 +1635,12 @@ function CRM({ role = "admin", setRole }) {
                     ]),
                     ["status","Status"],[null,"Actions"]
                   ].map(([key,label])=>(
-                    <th key={label} onClick={()=>key&&toggleSort(key)} style={{padding:"13px 16px",textAlign:"left",fontSize:10,letterSpacing:"0.12em",textTransform:"uppercase",color:sortKey===key?t.accent:t.textDim,fontWeight:600,whiteSpace:"nowrap"}}>{label}{key&&sortKey===key?(sortDir===1?" ↑":" ↓"):""}</th>
+                    <th key={label} onClick={()=>key&&toggleSort(key)} style={{padding:"13px 16px",textAlign:"left",fontSize:10,letterSpacing:"0.03em",textTransform:"uppercase",color:sortKey===key?t.accent:t.textDim,fontWeight:600,whiteSpace:"nowrap"}}>{label}{key&&sortKey===key?(sortDir===1?" ↑":" ↓"):""}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:48,color:"#2a4a6a",fontSize:13}}>No deals found</td></tr>}
+                {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</td></tr>}
                 {visible.map(deal=>{
                   const allocs=deal.gpuAllocations||[]; const gpu30=calcGPU30Day(allocs); const stor30=Number(deal.storage30Day)||0; const grand30=gpu30+stor30; const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal);
                   const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments";
@@ -1628,24 +1650,24 @@ function CRM({ role = "admin", setRole }) {
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
-                      <td style={{padding:"13px 16px",color:"#8fb8d8",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#304e6a"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#304e6a"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{fontSize:11,color:"#8fb8d8"}}><span style={{color:gs.color,fontWeight:600}}>{a.nodes||0}</span><span style={{color:"#3a5a7a"}}> nodes</span></div>;})}{allocs.length>1&&<div style={{fontSize:10,color:"#3a5a7a",borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={totalNodes} total</div>}</div></td>
-                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:(deal.storageValue||deal.storage30Day)?<div style={{display:"flex",flexDirection:"column",gap:3}}>{deal.storageValue?<span style={{fontSize:11,color:"#c9d6e8"}}>{fmtShort(Number(deal.storageValue))}</span>:null}{deal.storage30Day?<span style={{fontSize:10,color:"#f59e0b"}}>{fmtShort(Number(deal.storage30Day))}<span style={{color:"#4a4020"}}>/30d</span></span>:null}</div>:<span style={{color:"#304e6a",fontSize:11}}>—</span>}</td>}
+                      <td style={{padding:"13px 16px",color:"#48484a",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#aeaeb2"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#aeaeb2"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{fontSize:11,color:"#48484a"}}><span style={{color:gs.color,fontWeight:600}}>{a.nodes||0}</span><span style={{color:"#aeaeb2"}}> nodes</span></div>;})}{allocs.length>1&&<div style={{fontSize:10,color:"#aeaeb2",borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={totalNodes} total</div>}</div></td>
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:(deal.storageValue||deal.storage30Day)?<div style={{display:"flex",flexDirection:"column",gap:3}}>{deal.storageValue?<span style={{fontSize:11,color:"#1c1c1e"}}>{fmtShort(Number(deal.storageValue))}</span>:null}{deal.storage30Day?<span style={{fontSize:10,color:"#f59e0b"}}>{fmtShort(Number(deal.storage30Day))}<span style={{color:"#4a4020"}}>/30d</span></span>:null}</div>:<span style={{color:"#aeaeb2",fontSize:11}}>—</span>}</td>}
                       {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<div style={{display:"flex",flexDirection:"column",gap:3}}>
   {isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.12)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.25)",borderRadius:3,padding:"1px 6px",letterSpacing:"0.06em",fontWeight:700,alignSelf:"flex-start"}}>ON DEMAND{util!=null?` · ${util}%`:""}</span>}
-  {isOD&&effective30>0&&<span style={{color:"#10b981",fontWeight:700,fontSize:12}}>{fmtShort(effective30)}</span>}
+  {isOD&&effective30>0&&<span style={{color:"#34c759",fontWeight:700,fontSize:12}}>{fmtShort(effective30)}</span>}
   {isOD&&grand30>0&&<span style={{fontSize:10,color:"#3a5a3a"}}>max {fmtShort(grand30)}</span>}
-  {!isOD&&allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#10b981"}}>{fmtShort(v)}</span></div>:null;})}
-  {!isOD&&stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#10b981"}}>{fmtShort(stor30)}</span></div>}
-  {!isOD&&grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#10b981",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}
-  {!isOD&&grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#10b981",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}
-  {grand30===0&&<span style={{color:"#304e6a"}}>—</span>}
+  {!isOD&&allocs.map(a=>{const v=calc30DayAlloc(a);const gs=gpuStyle(a.gpuType);return v>0?<div key={a.id} style={{fontSize:11}}><span style={{color:gs.color,fontSize:10,marginRight:4}}>{a.gpuType}</span><span style={{color:"#34c759"}}>{fmtShort(v)}</span></div>:null;})}
+  {!isOD&&stor30>0&&<div style={{fontSize:11}}><span style={{color:"#f59e0b",fontSize:10,marginRight:4}}>STOR</span><span style={{color:"#34c759"}}>{fmtShort(stor30)}</span></div>}
+  {!isOD&&grand30>0&&(allocs.length>1||stor30>0)&&<div style={{fontSize:12,color:"#34c759",fontWeight:700,borderTop:"1px solid #0d1e30",paddingTop:3,marginTop:1}}>={fmtShort(grand30)}</div>}
+  {!isOD&&grand30>0&&allocs.length===1&&stor30===0&&<span style={{color:"#34c759",fontWeight:500,fontSize:12}}>{fmtShort(grand30)}</span>}
+  {grand30===0&&<span style={{color:"#aeaeb2"}}>—</span>}
 </div>}</td>}
-                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#c9d6e8"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>}
-                      {!isTech&&<td style={{padding:"13px 16px",color:"#8fb8d8",fontSize:11}}>{deal.paymentTerms}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#1c1c1e"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>}
+                      {!isTech&&<td style={{padding:"13px 16px",color:"#48484a",fontSize:11}}>{deal.paymentTerms}</td>}
                       <td style={{padding:"13px 16px"}}><span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span></td>
-                      {!isTech&&<td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#10b981":"#557090",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.08em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>}
+                      {!isTech&&<td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#34c759":"#6e6e73",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.01em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>}
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",gap:6}}>{!isTech&&<button className="btn-ghost" onClick={()=>openEdit(deal)}>Edit</button>}<button className="btn-danger" onClick={()=>deleteDeal(deal.id)}>✕</button></div></td>
                     </tr>,
                     isExp&&(
@@ -1659,31 +1681,31 @@ function CRM({ role = "admin", setRole }) {
                             </div>
                             {!isTech&&curTab==="payments"&&(
                               <div>
-                                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:12}}>Payment History — {deal.customer}</div>
-                                {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#304e6a",marginBottom:14,fontStyle:"italic"}}>No payments recorded yet.</div>:<div style={{marginBottom:16}}>
-                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:10,marginBottom:6}}>{["Amount","Date Paid","Period","Utilization",""].map(h=><div key={h} style={{fontSize:9,color:"#32586a",letterSpacing:"0.12em",textTransform:"uppercase"}}>{h}</div>)}</div>
+                                <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.04em",textTransform:"uppercase",marginBottom:12}}>Payment History — {deal.customer}</div>
+                                {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#aeaeb2",marginBottom:14,fontStyle:"italic"}}>No payments recorded yet.</div>:<div style={{marginBottom:16}}>
+                                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:10,marginBottom:6}}>{["Amount","Date Paid","Period","Utilization",""].map(h=><div key={h} style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase"}}>{h}</div>)}</div>
                                   {(deal.payments||[]).map(p=>{
                                     const isEditingThis=editingPayment&&editingPayment.dealId===deal.id&&editingPayment.paymentId===p.id;
                                     if(isEditingThis) return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:8,alignItems:"center",padding:"7px 0",borderTop:`1px solid ${t.borderDeep}`}}><input className="payment-input" type="number" min="0" step="0.01" value={editingPayment.amount} onChange={e=>setEditingPayment(ep=>({...ep,amount:e.target.value}))} autoFocus/><input className="payment-input" type="date" value={editingPayment.datePaid} onChange={e=>setEditingPayment(ep=>({...ep,datePaid:e.target.value}))}/><input className="payment-input" type="text" placeholder="Period" value={editingPayment.period} onChange={e=>setEditingPayment(ep=>({...ep,period:e.target.value}))}/><div/><div style={{display:"flex",gap:4}}><button className="btn-sm" style={{padding:"4px 8px",fontSize:10}} onClick={saveEditPayment}>✓</button><button className="btn-ghost" style={{padding:"4px 8px",fontSize:10}} onClick={cancelEditPayment}>✕</button></div></div>;
                                     return <div key={p.id} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 80px auto",gap:10,alignItems:"center",padding:"7px 0",borderTop:"1px solid #0a1a2a"}}>
-                                      <div style={{color:"#10b981",fontWeight:600,fontSize:12}}>{hideValues?<Redacted w={80}/>:fmt(p.amount)}</div>
-                                      <div style={{color:"#8fb8d8",fontSize:11}}>{p.datePaid}</div>
-                                      <div style={{color:"#8fb8d8",fontSize:11}}>{p.period||"—"}</div>
-                                      {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<div style={{fontSize:11,fontWeight:700,color:util>=90?"#10b981":util>=60?"#f59e0b":"#ef4444"}}>{util}%</div>:<div style={{color:"#304e6a",fontSize:11}}>—</div>;})()}
+                                      <div style={{color:"#34c759",fontWeight:600,fontSize:12}}>{hideValues?<Redacted w={80}/>:fmt(p.amount)}</div>
+                                      <div style={{color:"#48484a",fontSize:11}}>{p.datePaid}</div>
+                                      <div style={{color:"#48484a",fontSize:11}}>{p.period||"—"}</div>
+                                      {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<div style={{fontSize:11,fontWeight:700,color:util>=90?"#34c759":util>=60?"#f59e0b":"#ef4444"}}>{util}%</div>:<div style={{color:"#aeaeb2",fontSize:11}}>—</div>;})()}
                                       <div style={{display:"flex",gap:4}}><button className="btn-ghost" style={{padding:"3px 8px",fontSize:10}} onClick={()=>startEditPayment(deal.id,p)}>✎</button><button className="btn-danger" style={{padding:"3px 8px",fontSize:10}} onClick={()=>deletePayment(deal.id,p.id)}>✕</button></div>
                                     </div>;
                                   })}
                                   <div style={{marginTop:10,paddingTop:10,borderTop:"1px solid #0d2035",display:"flex",justifyContent:"flex-end",gap:8,alignItems:"center"}}>
-                                    <span style={{fontSize:10,color:"#557090",letterSpacing:"0.1em"}}>TOTAL COLLECTED</span>
-                                    <span style={{color:"#10b981",fontWeight:700,fontSize:14,fontFamily:"'Syne',sans-serif"}}>{hideValues?<Redacted w={90}/>:fmt(collected)}</span>
+                                    <span style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em"}}>TOTAL COLLECTED</span>
+                                    <span style={{color:"#34c759",fontWeight:700,fontSize:14,fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif"}}>{hideValues?<Redacted w={90}/>:fmt(collected)}</span>
                                   </div>
                                 </div>}
                                 <div style={{background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:8,padding:"14px 16px"}}>
-                                  <div style={{fontSize:10,color:t.textDeep,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>+ Log New Payment</div>
+                                  <div style={{fontSize:10,color:t.textDeep,letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:10}}>+ Log New Payment</div>
                                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:10,alignItems:"flex-end"}}>
-                                    <div><div style={{fontSize:9,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Amount ($) *</div><input className="payment-input" type="number" min="0" step="0.01" placeholder="e.g. 120000" value={pf.amount} onChange={e=>setPF(deal.id,{...pf,amount:e.target.value})}/></div>
-                                    <div><div style={{fontSize:9,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Date Paid *</div><input className="payment-input" type="date" value={pf.datePaid} onChange={e=>setPF(deal.id,{...pf,datePaid:e.target.value})}/></div>
-                                    <div><div style={{fontSize:9,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:5}}>Period Covered</div><input className="payment-input" type="text" placeholder="e.g. Feb 1–28 2025" value={pf.period} onChange={e=>setPF(deal.id,{...pf,period:e.target.value})}/></div>
+                                    <div><div style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Amount ($) *</div><input className="payment-input" type="number" min="0" step="0.01" placeholder="e.g. 120000" value={pf.amount} onChange={e=>setPF(deal.id,{...pf,amount:e.target.value})}/></div>
+                                    <div><div style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Date Paid *</div><input className="payment-input" type="date" value={pf.datePaid} onChange={e=>setPF(deal.id,{...pf,datePaid:e.target.value})}/></div>
+                                    <div><div style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:5}}>Period Covered</div><input className="payment-input" type="text" placeholder="e.g. Feb 1–28 2025" value={pf.period} onChange={e=>setPF(deal.id,{...pf,period:e.target.value})}/></div>
                                     <button className="btn-sm" onClick={()=>addPayment(deal.id)}>Add</button>
                                   </div>
                                 </div>
@@ -1691,9 +1713,9 @@ function CRM({ role = "admin", setRole }) {
                             )}
                             {curTab==="notes"&&(
                               <div>
-                                <div style={{fontSize:10,color:"#557090",letterSpacing:"0.15em",textTransform:"uppercase",marginBottom:10}}>Notes — {deal.customer}</div>
+                                <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.04em",textTransform:"uppercase",marginBottom:10}}>Notes — {deal.customer}</div>
                                 <textarea className="notes-area" placeholder="Type notes here… saved automatically when you click away." defaultValue={deal.notes||""} onBlur={e=>saveNotes(deal.id,e.target.value)} rows={6}/>
-                                <div style={{fontSize:9,color:"#1a3a50",marginTop:5,letterSpacing:"0.08em"}}>AUTO-SAVED ON BLUR</div>
+                                <div style={{fontSize:9,color:"#1a3a50",marginTop:5,letterSpacing:"0.01em"}}>AUTO-SAVED ON BLUR</div>
                               </div>
                             )}
                           </div>
@@ -1705,14 +1727,14 @@ function CRM({ role = "admin", setRole }) {
               </tbody>
             </table>
           </div>
-          {!isTech && <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.1em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>}
+          {!isTech && <div style={{marginTop:14,fontSize:10,color:t.textDeep,letterSpacing:"0.02em"}}>30-DAY TOTAL = GPU (NODES × 8 × $/GPU/HR × 24 × 30) + STORAGE &nbsp;·&nbsp; {visible.length} DEALS &nbsp;·&nbsp; 🔥 FIREBASE LIVE SYNC</div>}
           {/* ── Inventory Status Module ─────────────────────────────────── */}
           {!isTech&&(
           <div style={{marginTop:28,background:t.bgCard,border:`1px solid ${t.borderSoft}`,borderRadius:12,padding:"20px 24px"}}>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
               <span style={{fontSize:14}}>🔧</span>
-              <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.12em",textTransform:"uppercase"}}>Node Inventory Status</span>
-              <span style={{fontSize:10,color:t.textDeep,marginLeft:"auto",letterSpacing:"0.08em"}}>affects utilization display</span>
+              <span style={{fontSize:11,fontWeight:700,color:t.textBright,letterSpacing:"0.03em",textTransform:"uppercase"}}>Node Inventory Status</span>
+              <span style={{fontSize:10,color:t.textDeep,marginLeft:"auto",letterSpacing:"0.01em"}}>affects utilization display</span>
             </div>
             {["H100","H200"].map(type=>{
               const max=type==="H100"?MAX_H100:MAX_H200;
@@ -1721,14 +1743,14 @@ function CRM({ role = "admin", setRole }) {
               const rma=repairRma[type]?.rma||0;
               const available=max-repair-rma;
               const free=available-used;
-              const color=type==="H100"?"#38bdf8":"#a78bfa";
+              const color=type==="H100"?"#5ac8fa":"#a78bfa";
               return(
                 <div key={type} style={{marginBottom:16,paddingBottom:16,borderBottom:`1px solid ${t.borderDeep}`}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
                     <span style={{fontSize:10,fontWeight:700,color,background:type==="H100"?"rgba(56,189,248,0.12)":"rgba(167,139,250,0.12)",padding:"2px 10px",borderRadius:4,letterSpacing:"0.06em"}}>{type}</span>
                     <div style={{display:"flex",gap:16,marginLeft:"auto",fontSize:10,color:t.textDim}}>
                       <span>Total: <b style={{color:t.textBright}}>{max}</b></span>
-                      <span style={{color:"#10b981"}}>Deployed: <b>{used}</b></span>
+                      <span style={{color:"#34c759"}}>Deployed: <b>{used}</b></span>
                       <span style={{color:free>0?"#f59e0b":"#ef4444"}}>Available: <b>{free}</b></span>
                       {(repair+rma)>0&&<span style={{color:"#ef4444"}}>Unavailable: <b>{repair+rma}</b></span>}
                     </div>
@@ -1741,7 +1763,7 @@ function CRM({ role = "admin", setRole }) {
                       <div key={key} style={{background:bg,border:`1px solid ${border}`,borderRadius:8,padding:"12px 14px"}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:8}}>
                           <span style={{fontSize:12}}>{icon}</span>
-                          <span style={{fontSize:10,fontWeight:600,color:ic,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</span>
+                          <span style={{fontSize:10,fontWeight:600,color:ic,letterSpacing:"0.01em",textTransform:"uppercase"}}>{label}</span>
                         </div>
                         <div style={{display:"flex",alignItems:"center",gap:8}}>
                           <button onClick={()=>{const v=Math.max(0,(repairRma[type]?.[key]||0)-1);saveRepairRma({...repairRma,[type]:{...repairRma[type],[key]:v}});}} style={{width:28,height:28,background:t.bgDeep,border:`1px solid ${t.borderDeep}`,borderRadius:4,color:t.textMid,cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit",lineHeight:1}}>−</button>
@@ -1765,11 +1787,11 @@ function CRM({ role = "admin", setRole }) {
 
           {isTech && history.length>0 && (
             <div style={{marginTop:14,display:"flex",alignItems:"center",gap:10,background:"rgba(16,185,129,0.05)",border:"1px solid #1a3a2a",borderRadius:6,padding:"8px 16px",fontSize:11,color:"#2a8a5a",letterSpacing:"0.06em"}}>
-              <span style={{color:"#10b981"}}>🟢</span>
+              <span style={{color:"#34c759"}}>🟢</span>
               <span>LAST UPDATED&nbsp;·&nbsp;{(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins} MIN AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}H AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}</span>
-              <span style={{color:"#1a5a3a"}}>·</span>
+              <span style={{color:"rgba(52,199,89,0.3)"}}>·</span>
               <span style={{color:"#1a6a4a"}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
-              <span style={{marginLeft:"auto",fontSize:10,color:"#1a4a2a"}}>{visible.length} DEALS · 🔥 FIREBASE LIVE SYNC</span>
+              <span style={{marginLeft:"auto",fontSize:10,color:"rgba(52,199,89,0.3)"}}>{visible.length} DEALS · 🔥 FIREBASE LIVE SYNC</span>
             </div>
           )}
 
@@ -1789,17 +1811,17 @@ function CRM({ role = "admin", setRole }) {
           )}
           {/* Horizon Mode Toggle + View Switcher */}
           <div style={{marginTop:24,display:"flex",justifyContent:"center",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-            <button onClick={special?disableSpecial:toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",transition:"all .3s",boxShadow:horizon?`0 0 12px ${t.accentGlow}`:"none"}}>
+            <button onClick={special?disableSpecial:toggleTheme} style={{display:"flex",alignItems:"center",gap:10,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.01em",transition:"all .3s",boxShadow:"none"}}>
               <HorizonLogo size={18} stop1={t.logoStop1} stop2={t.logoStop2}/>
               {horizon ? "HORIZON MODE ON" : "HORIZON MODE"}
               <div style={{width:32,height:18,background:horizon?t.accent:t.borderSoft,borderRadius:9,position:"relative",transition:"background .3s",flexShrink:0}}>
                 <div style={{position:"absolute",top:3,left:horizon?15:3,width:12,height:12,background:"#fff",borderRadius:"50%",transition:"left .3s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
               </div>
             </button>
-            {!isTech && <button onClick={()=>setShowTechModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
+            {!isTech && <button onClick={()=>setShowTechModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",transition:"all .3s"}}>
               <span style={{fontSize:14}}>👷</span> TECH VIEW
             </button>}
-            {isTech && <button onClick={()=>setShowAdminModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",transition:"all .3s"}}>
+            {isTech && <button onClick={()=>setShowAdminModal(true)} style={{display:"flex",alignItems:"center",gap:8,background:"rgba(52,199,89,0.08)",border:"1px solid #1a4a2a",color:"#34c759",borderRadius:24,padding:"8px 20px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",transition:"all .3s"}}>
               <span style={{fontSize:14}}>⬡</span> ADMIN VIEW
             </button>}
             <button onClick={special?disableSpecial:()=>setShowSpecialModal(true)} style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"1px solid rgba(255,255,255,0.08)",color:special?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.18)",borderRadius:6,padding:"6px 12px",fontFamily:"inherit",fontSize:10,fontWeight:400,cursor:"pointer",letterSpacing:"0.05em",transition:"all .3s"}}>
@@ -1815,15 +1837,15 @@ function CRM({ role = "admin", setRole }) {
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowSpecialModal(false),setSpecialInput(""))}>
           <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,background:"linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Developer Mode</div>
+              <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:700,background:"linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Developer Mode</div>
               <button onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Password</label>
             <input type="password" placeholder="Enter password" value={specialInput} onChange={e=>setSpecialInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryEnableSpecial()} style={{marginBottom:specialError?6:16,borderColor:specialError?t.red:t.borderSoft}} autoFocus/>
             {specialError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
               <button className="btn-ghost" onClick={()=>{setShowSpecialModal(false);setSpecialInput("");}}>Cancel</button>
-              <button onClick={tryEnableSpecial} style={{background:"linear-gradient(135deg,#a21caf,#d946ef)",color:"#fff",border:"none",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}>Unlock ✨</button>
+              <button onClick={tryEnableSpecial} style={{background:"linear-gradient(135deg,#a21caf,#d946ef)",color:"#fff",border:"none",borderRadius:4,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase"}}>Unlock ✨</button>
             </div>
           </div>
         </div>
@@ -1833,10 +1855,10 @@ function CRM({ role = "admin", setRole }) {
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowTechModal(false),setTechInput(""))}>
           <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Tech View</div>
+              <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Tech View</div>
               <button onClick={()=>{setShowTechModal(false);setTechInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Tech View Password</label>
             <input type="password" placeholder="Enter tech password" value={techInput} onChange={e=>setTechInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToTech()} style={{marginBottom:techError?6:16,borderColor:techError?t.red:t.borderSoft}}/>
             {techError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
@@ -1851,10 +1873,10 @@ function CRM({ role = "admin", setRole }) {
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&(setShowAdminModal(false),setAdminInput(""))}>
           <div className="modal" style={{maxWidth:400}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Admin View</div>
+              <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>Switch to Admin View</div>
               <button onClick={()=>{setShowAdminModal(false);setAdminInput("");}} style={{background:"none",border:"none",color:t.textDim,cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
+            <label style={{fontSize:10,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Admin Password</label>
             <input type="password" placeholder="Enter admin password" value={adminInput} onChange={e=>setAdminInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&switchToAdmin()} style={{marginBottom:adminError?6:16,borderColor:adminError?t.red:t.borderSoft}} autoFocus/>
             {adminError&&<div style={{color:t.red,fontSize:11,marginBottom:12,letterSpacing:"0.06em"}}>Incorrect password</div>}
             <div style={{display:"flex",gap:10,justifyContent:"flex-end"}}>
@@ -1869,35 +1891,35 @@ function CRM({ role = "admin", setRole }) {
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&closeModal()}>
           <div className="modal">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>{editingId?"Edit Deal":"New Deal"}</div>
-              <button onClick={closeModal} style={{background:"none",border:"none",color:"#557090",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:700,color:t.textBright}}>{editingId?"Edit Deal":"New Deal"}</div>
+              <button onClick={closeModal} style={{background:"none",border:"none",color:"#6e6e73",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
             </div>
-            <div style={{marginBottom:18}}><label style={{fontSize:10,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
+            <div style={{marginBottom:18}}><label style={{fontSize:10,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
             <div style={{display:"flex",gap:8,marginBottom:18,borderBottom:"1px solid #1a2e45",paddingBottom:12,alignItems:"center"}}>
               {[["gpu","⬡ GPU"],["storage","💾 Storage"],["notes","✎ Notes"]].map(([tab,label])=>(<button key={tab} style={tabBtn(modalTab===tab)} onClick={()=>setModalTab(tab)}>{label}</button>))}
-              {modal30base>0&&<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:10,color:"#32586a"}}>{form.onDemand?"30-DAY (REFERENCE)":"30-DAY TOTAL"}</span><span style={{fontSize:13,color:"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div>}
+              {modal30base>0&&<div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:10,color:"#6e6e73"}}>{form.onDemand?"30-DAY (REFERENCE)":"30-DAY TOTAL"}</span><span style={{fontSize:13,color:"#34c759",fontWeight:700}}>{fmt(modal30)}</span></div>}
             </div>
-            {modalTab==="gpu"&&(<div style={{marginBottom:4}}><div style={{display:"grid",gridTemplateColumns:"110px 1fr 1fr 1fr auto",gap:10,marginBottom:6}}>{["GPU Type","Nodes","$/GPU/Hr","30-Day",""].map(h=><div key={h} style={{fontSize:9,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>)}</div>{form.gpuAllocations.map(alloc=>{const v30=calc30DayAlloc(alloc);return(<div key={alloc.id} className="alloc-row"><select value={alloc.gpuType} onChange={e=>updateAlloc(alloc.id,"gpuType",e.target.value)}>{GPU_TYPES.map(g=><option key={g}>{g}</option>)}</select><input type="number" min="0" placeholder="Nodes" value={alloc.nodes} onChange={e=>updateAlloc(alloc.id,"nodes",e.target.value)}/><input type="number" min="0" step="0.01" placeholder="Rate" value={alloc.ratePerGpuHour} onChange={e=>updateAlloc(alloc.id,"ratePerGpuHour",e.target.value)}/><div style={{background:"#0e1a2a",border:"1px solid #0d2040",borderRadius:4,padding:"9px 10px",fontSize:12,color:v30>0?"#10b981":"#304e6a",fontWeight:600,textAlign:"right"}}>{v30>0?fmtShort(v30):"—"}</div>{form.gpuAllocations.length>1?<button className="btn-icon" onClick={()=>removeAlloc(alloc.id)}>✕</button>:<div/>}</div>);})}<button className="add-alloc-btn" onClick={addAlloc}>+ Add Another GPU Type</button></div>)}
-            {modalTab==="storage"&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:4}}><div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage Contract Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div><div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage 30-Day Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>{(Number(form.storage30Day)||0)>0&&(<div style={{gridColumn:"1 / -1",background:"#0e1a2a",border:"1px solid #0d2040",borderRadius:6,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#3a6060",letterSpacing:"0.1em"}}>STORAGE CONTRIBUTION TO 30-DAY TOTAL</span><span style={{color:"#10b981",fontWeight:700,fontSize:13}}>{fmt(Number(form.storage30Day))}</span></div>)}</div>)}
-            {modalTab==="notes"&&(<div style={{marginBottom:4}}><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Deal Notes</label><textarea rows={7} placeholder="Enter any notes about this deal…" value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>)}
+            {modalTab==="gpu"&&(<div style={{marginBottom:4}}><div style={{display:"grid",gridTemplateColumns:"110px 1fr 1fr 1fr auto",gap:10,marginBottom:6}}>{["GPU Type","Nodes","$/GPU/Hr","30-Day",""].map(h=><div key={h} style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase"}}>{h}</div>)}</div>{form.gpuAllocations.map(alloc=>{const v30=calc30DayAlloc(alloc);return(<div key={alloc.id} className="alloc-row"><select value={alloc.gpuType} onChange={e=>updateAlloc(alloc.id,"gpuType",e.target.value)}>{GPU_TYPES.map(g=><option key={g}>{g}</option>)}</select><input type="number" min="0" placeholder="Nodes" value={alloc.nodes} onChange={e=>updateAlloc(alloc.id,"nodes",e.target.value)}/><input type="number" min="0" step="0.01" placeholder="Rate" value={alloc.ratePerGpuHour} onChange={e=>updateAlloc(alloc.id,"ratePerGpuHour",e.target.value)}/><div style={{background:"#e8e8ed",border:"1px solid #0d2040",borderRadius:4,padding:"9px 10px",fontSize:12,color:v30>0?"#34c759":"#aeaeb2",fontWeight:600,textAlign:"right"}}>{v30>0?fmtShort(v30):"—"}</div>{form.gpuAllocations.length>1?<button className="btn-icon" onClick={()=>removeAlloc(alloc.id)}>✕</button>:<div/>}</div>);})}<button className="add-alloc-btn" onClick={addAlloc}>+ Add Another GPU Type</button></div>)}
+            {modalTab==="storage"&&(<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginBottom:4}}><div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage Contract Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div><div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Storage 30-Day Value ($)</label><input type="number" min="0" step="0.01" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>{(Number(form.storage30Day)||0)>0&&(<div style={{gridColumn:"1 / -1",background:"#e8e8ed",border:"1px solid #0d2040",borderRadius:6,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#3a6060",letterSpacing:"0.02em"}}>STORAGE CONTRIBUTION TO 30-DAY TOTAL</span><span style={{color:"#34c759",fontWeight:700,fontSize:13}}>{fmt(Number(form.storage30Day))}</span></div>)}</div>)}
+            {modalTab==="notes"&&(<div style={{marginBottom:4}}><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Deal Notes</label><textarea rows={7} placeholder="Enter any notes about this deal…" value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>)}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr 1fr",gap:16,marginTop:20}}>
-              <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Full Contract Value ($)</label><input type="number" min="0" placeholder="e.g. 4920000" value={form.fullContractValue} onChange={e=>setForm(f=>({...f,fullContractValue:e.target.value}))}/></div>
-              <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
-              <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>End Date</label><input type="date" value={form.endDate||""} onChange={e=>setForm(f=>({...f,endDate:e.target.value}))}/></div>
-              <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
-              <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
+              <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Full Contract Value ($)</label><input type="number" min="0" placeholder="e.g. 4920000" value={form.fullContractValue} onChange={e=>setForm(f=>({...f,fullContractValue:e.target.value}))}/></div>
+              <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
+              <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>End Date</label><input type="date" value={form.endDate||""} onChange={e=>setForm(f=>({...f,endDate:e.target.value}))}/></div>
+              <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginTop:16}}>
               <div>
-                <label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
+                <label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
                 <div style={{display:"flex",gap:8}}>
-                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#254463"}`,color:active?"#38bdf8":"#557090",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
+                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#007aff":"#c7c7cc"}`,color:active?"#5ac8fa":"#6e6e73",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
               <div>
-                <label style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
+                <label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
                 <div style={{display:"flex",gap:8}}>
-                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#254463"}`,color:active?"#f59e0b":"#557090",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
+                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#c7c7cc"}`,color:active?"#f59e0b":"#6e6e73",borderRadius:6,padding:"8px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
             </div>
@@ -1905,10 +1927,10 @@ function CRM({ role = "admin", setRole }) {
             <div style={{marginTop:16,background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:"14px 16px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div>
-                  <div style={{fontSize:11,color:"#c9d6e8",fontWeight:600,letterSpacing:"0.04em"}}>On Demand</div>
-                  <div style={{fontSize:10,color:"#3a5a7a",marginTop:2}}>30-day values are reference only — actual revenue depends on utilization</div>
+                  <div style={{fontSize:11,color:"#1c1c1e",fontWeight:600,letterSpacing:"0.04em"}}>On Demand</div>
+                  <div style={{fontSize:10,color:"#aeaeb2",marginTop:2}}>30-day values are reference only — actual revenue depends on utilization</div>
                 </div>
-                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#254463",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#c7c7cc",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
                   <div style={{position:"absolute",top:3,left:form.onDemand?21:3,width:18,height:18,background:"#fff",borderRadius:"50%",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
                 </button>
               </div>
@@ -1961,15 +1983,15 @@ function MobileCRM(props) {
   };
   const Redacted = ({w=64}) => <span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:w,height:"0.85em",verticalAlign:"middle"}}>&nbsp;</span>;
   const statusOf = (label) => STATUSES.find(s=>s.label===label)||STATUSES[0];
-  const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#254463"}`,color:active?"#0099ff":"#557090",borderRadius:4,padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
-  const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?"#0099ff":"transparent"}`,color:active?"#0099ff":"#557090",padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s"});
+  const tabBtn=(active)=>({background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#007aff":"#c7c7cc"}`,color:active?"#007aff":"#6e6e73",borderRadius:4,padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s"});
+  const inlineTabBtn=(active)=>({background:"transparent",border:"none",borderBottom:`2px solid ${active?"#007aff":"transparent"}`,color:active?"#007aff":"#6e6e73",padding:"8px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s"});
 
   return (
-    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"'IBM Plex Mono','Courier New',monospace",color:t.text,paddingBottom:70}} className={special?"special-bg-m":""}>
+    <div style={{minHeight:"100vh",background:t.bg,fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",color:t.text,paddingBottom:70}} className={special?"special-bg-m":""}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=SF+Pro+Display:wght@700;800&display=swap');
         *{box-sizing:border-box;}
-        input,select{background:${t.bgInput};border:1px solid ${t.borderSoft};color:${t.text};border-radius:6px;padding:10px 12px;font-family:inherit;font-size:14px;width:100%;outline:none;} input:focus,select:focus{border-color:${t.accent};} select option{background:${t.bgInput};}
+        input,select{background:${t.bgInput};border:1px solid ${t.border};color:${t.text};border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;width:100%;outline:none;transition:border-color .15s;} input:focus,select:focus{border-color:${t.accent};box-shadow:0 0 0 3px ${t.accentGlow};} select option{background:${t.bgCard};}
         textarea{background:${t.bgInput};border:1px solid ${t.borderSoft};color:${t.text};border-radius:6px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;resize:vertical;line-height:1.6;} textarea:focus{border-color:${t.accent};}
         .m-btn-primary{background:linear-gradient(135deg,${t.accentDark},${t.accent});color:#fff;border:none;border-radius:8px;padding:12px 20px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;width:100%;}
         .m-btn-ghost{background:transparent;color:${t.textMid};border:1px solid ${t.borderSoft};border-radius:6px;padding:10px 16px;font-family:inherit;font-size:12px;cursor:pointer;flex:1;}
@@ -1978,7 +2000,7 @@ function MobileCRM(props) {
         .m-pill{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:0.06em;}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}} .pulsing{animation:pulse 1.2s ease-in-out infinite;}
         @keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}} .livepulse{animation:livepulse 2s ease-in-out infinite;}
-        .payment-input{background:${t.bgDeep};border:1px solid ${t.borderDeep};color:${t.text};border-radius:6px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;} .payment-input:focus{border-color:${t.accent};}
+        .payment-input{background:${t.bgInput};border:1px solid ${t.border};color:${t.text};border-radius:6px;padding:10px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;} .payment-input:focus{border-color:${t.accent};}
         .gpu-badge{display:inline-block;padding:3px 8px;border-radius:4px;font-weight:600;font-size:10px;}
         .notes-area{background:${t.bgDeep};border:1px solid ${t.borderDeep};color:${t.textMid};font-family:inherit;font-size:13px;width:100%;outline:none;resize:vertical;line-height:1.7;padding:12px 14px;min-height:120px;border-radius:6px;} .notes-area:focus{border-color:${t.accent};color:${t.text};}
         .alloc-row-m{display:grid;grid-template-columns:90px 1fr 1fr;gap:8px;align-items:flex-end;margin-bottom:10px;}
@@ -1998,16 +2020,16 @@ function MobileCRM(props) {
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <HorizonLogo size={30} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#e8f0fc",letterSpacing:"0.02em"}}>HORIZON<span style={{color:"#0099ff"}}>COMPUTE</span></div>
+            <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:15,fontWeight:800,color:"#e8f0fc",letterSpacing:"0.02em"}}>HORIZON<span style={{color:"#007aff",fontWeight:800}}>COMPUTE</span></div>
           </div>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           {saveBadge&&<span style={{fontSize:10,color:saveBadge.color}} className={saveBadge.pulse?"pulsing":""}>{saveBadge.text}</span>}
-          <span style={{fontSize:9,display:"flex",alignItems:"center",gap:4,color:fbReady?"#10b981":"#f59e0b",background:fbReady?"rgba(16,185,129,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${fbReady?"#1a4a2a":"#4a3000"}`,borderRadius:4,padding:"3px 8px"}}>
+          <span style={{fontSize:9,display:"flex",alignItems:"center",gap:4,color:fbReady?"#34c759":"#f59e0b",background:fbReady?"rgba(52,199,89,0.08)":"rgba(245,158,11,0.08)",border:`1px solid ${fbReady?"rgba(52,199,89,0.3)":"#4a3000"}`,borderRadius:4,padding:"3px 8px"}}>
             <span className={fbReady?"livepulse":""} style={{fontSize:7}}>●</span>
             {fbReady?`${onlineUsers} ONLINE`:"…"}
           </span>
-          {isTech && <span style={{fontSize:9,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"3px 8px",letterSpacing:"0.08em",fontWeight:700}}>👷 TECH</span>}
+          {isTech && <span style={{fontSize:9,background:"rgba(139,92,246,0.12)",border:"1px solid rgba(139,92,246,0.3)",color:"#a78bfa",borderRadius:4,padding:"3px 8px",letterSpacing:"0.01em",fontWeight:700}}>👷 TECH</span>}
           <button onClick={openNew} style={{background:"linear-gradient(135deg,#0066cc,#0099ff)",color:"#fff",border:"none",borderRadius:6,padding:"7px 14px",fontFamily:"inherit",fontSize:12,fontWeight:700,cursor:"pointer"}}>+ Deal</button>
         </div>
       </div>
@@ -2017,19 +2039,19 @@ function MobileCRM(props) {
         <div style={{background:"#060f1a",borderBottom:"1px solid #0d2a45",padding:"0 16px"}}>
           {notifications.slice(0,1).map((n) => {
             const icons = {new_deal:"🟢",edit:"✏️",payment_added:"💳",payment_deleted:"🗑",delete_deal:"❌"};
-            const colors = {new_deal:"#10b981",edit:"#0099ff",payment_added:"#10b981",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
+            const colors = {new_deal:"#34c759",edit:"#007aff",payment_added:"#34c759",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
             return (
               <div key={n.id} style={{display:"flex",alignItems:"center",gap:8,padding:"9px 0"}}>
                 <span>{icons[n.type]||"•"}</span>
-                <span style={{fontSize:11,color:colors[n.type]||"#c9d6e8",fontWeight:600,flex:1}}>{n.message}{n.detail&&` — ${n.detail}`}</span>
-                <button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#557090",cursor:"pointer",fontSize:16,padding:"0 4px"}}>×</button>
+                <span style={{fontSize:11,color:colors[n.type]||"#1c1c1e",fontWeight:600,flex:1}}>{n.message}{n.detail&&` — ${n.detail}`}</span>
+                <button onClick={()=>setNotifications([])} style={{background:"none",border:"none",color:"#6e6e73",cursor:"pointer",fontSize:16,padding:"0 4px"}}>×</button>
               </div>
             );
           })}
         </div>
       )}
 
-      {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:"#2a4a6a"}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:12}}>CONNECTING…</span></div>}
+      {loadState==="loading"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:300,gap:12,color:"#aeaeb2"}}><span className="pulsing" style={{fontSize:20}}>◈</span><span style={{fontSize:12}}>CONNECTING…</span></div>}
 
       {loadState==="ready"&&(<>
 
@@ -2039,8 +2061,8 @@ function MobileCRM(props) {
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
               {(isTech?[{label:"Active Deals",value:String(totals.deals),plain:true}]:[{label:"Active Deals",value:String(totals.deals),plain:true},{label:"30-Day Run Rate",value:fmtShort(totals.monthly)},{label:"Total Collected",value:fmtShort(totals.collected)}]).map(s=>(
                 <div className="m-card" key={s.label} style={{padding:"14px 16px"}}>
-                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}{s.label==="30-Day Run Rate"&&<RunRateIcon/>}{s.label==="Active Deals"&&<ActiveDealsIcon/>}</div>
-                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700,color:t.textBright}}>
+                  <div style={{fontSize:9,color:t.textDim,letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:6,display:"flex",alignItems:"center"}}>{s.label}{s.label==="Total Collected"&&<MoneyBag/>}{s.label==="30-Day Run Rate"&&<RunRateIcon/>}{s.label==="Active Deals"&&<ActiveDealsIcon/>}</div>
+                  <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:22,fontWeight:700,color:t.textBright}}>
                     {hideValues&&!s.plain?<span style={{display:"inline-block",background:"#1e3a50",borderRadius:4,minWidth:80,height:24}}>&nbsp;</span>:s.value}
                   </div>
                 </div>
@@ -2048,8 +2070,8 @@ function MobileCRM(props) {
             </div>
             {/* Node utilization */}
             <div className="m-card">
-              <div style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:14}}>Node Utilization</div>
-              {[{type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#38bdf8",bg:"rgba(56,189,248,0.15)"},{type:"H200",used:totals.h200Nodes,max:MAX_H200,color:"#a78bfa",bg:"rgba(139,92,246,0.15)"}].map(({type,used,max,color,bg})=>{
+              <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:14}}>Node Utilization</div>
+              {[{type:"H100",used:totals.h100Nodes,max:MAX_H100,color:"#5ac8fa",bg:"rgba(56,189,248,0.15)"},{type:"H200",used:totals.h200Nodes,max:MAX_H200,color:"#a78bfa",bg:"rgba(139,92,246,0.15)"}].map(({type,used,max,color,bg})=>{
                 const pct=Math.min(used/max,1); const warn=pct>=0.9; const barColor=warn?"#ef4444":pct>=0.7?"#f59e0b":color;
                 const isH200=type==="H200";
                 return (
@@ -2059,25 +2081,25 @@ function MobileCRM(props) {
                         {isH200?(
                           <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="2.5" fill="#100820" stroke="#a78bfa" strokeWidth="1.3"/><circle className="ri200" cx="14" cy="14" r="4.5" fill="none" stroke="#a78bfa" strokeWidth="1.2" strokeDasharray="8 4" strokeLinecap="round"/><circle className="co200" cx="14" cy="14" r="3.2" fill="#a78bfa"/><circle cx="14" cy="14" r="1.4" fill="#e8d8ff"/></svg>
                         ):(
-                          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="2.5" fill="#0a1828" stroke="#38bdf8" strokeWidth="1.3"/><rect className="sc1" x="9" y="10" width="10" height="1.5" rx=".75" fill="#38bdf8"/><rect className="sc2" x="9" y="13.25" width="10" height="1.5" rx=".75" fill="#38bdf8"/><rect className="sc3" x="9" y="16.5" width="10" height="1.5" rx=".75" fill="#38bdf8"/></svg>
+                          <svg width="22" height="22" viewBox="0 0 28 28" fill="none"><rect x="6" y="6" width="16" height="16" rx="2.5" fill="#e8e8ed" stroke="#5ac8fa" strokeWidth="1.3"/><rect className="sc1" x="9" y="10" width="10" height="1.5" rx=".75" fill="#5ac8fa"/><rect className="sc2" x="9" y="13.25" width="10" height="1.5" rx=".75" fill="#5ac8fa"/><rect className="sc3" x="9" y="16.5" width="10" height="1.5" rx=".75" fill="#5ac8fa"/></svg>
                         )}
                         <span style={{background:bg,color,padding:"2px 8px",borderRadius:3,fontSize:11,fontWeight:700}}>{type}</span>
                       </div>
-                      <span style={{fontSize:13,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#3a5a7a",fontWeight:400}}>/{max}</span></span>
+                      <span style={{fontSize:13,fontWeight:700,color:warn?"#ef4444":color}}>{used}<span style={{color:"#aeaeb2",fontWeight:400}}>/{max}</span></span>
                     </div>
-                    <div style={{height:6,background:"#0e1a2a",borderRadius:3,overflow:"hidden"}}>
+                    <div style={{height:6,background:"#e8e8ed",borderRadius:3,overflow:"hidden"}}>
                       <div style={{height:"100%",width:`${pct*100}%`,background:barColor,borderRadius:3,transition:"width .4s"}}/>
                     </div>
-                    <div style={{fontSize:9,color:warn?"#ef4444":"#2a4a6a",marginTop:3,letterSpacing:"0.08em",textAlign:"right"}}>{Math.round(pct*100)}% · {max-used} FREE</div>
+                    <div style={{fontSize:9,color:warn?"#ef4444":"#aeaeb2",marginTop:3,letterSpacing:"0.01em",textAlign:"right"}}>{Math.round(pct*100)}% · {max-used} FREE</div>
                   </div>
                 );
               })}
             </div>
             <div className="m-card" style={{padding:"14px 16px",marginBottom:10}}>
-              <div style={{fontSize:9,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12}}>Config Breakdown</div>
+              <div style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:12}}>Config Breakdown</div>
               {[
-                {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM",  color:"#38bdf8"},
-                {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#10b981"},
+                {label:"RoCE v2 + VM", net:"RoCE v2", arch:"VM",  color:"#5ac8fa"},
+                {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#34c759"},
                 {label:"IB + BM",      net:"IB",      arch:"BM",  color:"#a78bfa"},
               ].map(({label,net,arch,color})=>{
                 const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
@@ -2085,21 +2107,21 @@ function MobileCRM(props) {
                 return (
                   <div key={label} style={{marginBottom:10}}>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                      <span style={{fontSize:11,color:nodes>0?color:"#2a4a6a",fontWeight:nodes>0?600:400}}>{label}</span>
-                      <span style={{fontSize:13,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#2a4a6a",fontWeight:400,fontSize:11}}>/193</span></span>
+                      <span style={{fontSize:11,color:nodes>0?color:"#aeaeb2",fontWeight:nodes>0?600:400}}>{label}</span>
+                      <span style={{fontSize:13,fontWeight:700,color:nodes>0?color:"#1e3a5a"}}>{nodes}<span style={{color:"#aeaeb2",fontWeight:400,fontSize:11}}>/193</span></span>
                     </div>
-                    <div style={{height:4,background:"#0e1a2a",borderRadius:2,overflow:"hidden"}}>
+                    <div style={{height:4,background:"#e8e8ed",borderRadius:2,overflow:"hidden"}}>
                       <div style={{height:"100%",width:`${pct*100}%`,background:color,borderRadius:2,transition:"width .4s",opacity:nodes>0?1:0.3}}/>
                     </div>
                   </div>
                 );
               })}
             </div>
-            <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.1)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:6,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase",width:"100%",marginTop:4}}>
+            <button onClick={()=>setHideValues(h=>!h)} style={{background:hideValues?"rgba(239,68,68,0.1)":t.accentGlow,border:`1px solid ${hideValues?t.red:t.borderSoft}`,color:hideValues?t.red:t.textDim,borderRadius:6,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:700,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",width:"100%",marginTop:4}}>
               {hideValues?"🔒 Values Hidden":"👁 Hide Values"}
             </button>
             <div style={{display:"flex",gap:8,marginTop:8}}>
-              <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:8,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.08em",flex:1,transition:"all .3s"}}>
+              <button onClick={toggleTheme} style={{display:"flex",alignItems:"center",gap:8,background:t.bgCard,border:`1px solid ${horizon?t.accent:t.borderSoft}`,borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",color:horizon?t.accent:t.textDim,letterSpacing:"0.01em",flex:1,transition:"all .3s"}}>
                 <HorizonLogo size={16} stop1={t.logoStop1} stop2={t.logoStop2}/>
                 {horizon ? "HORIZON ON" : "HORIZON"}
                 <div style={{width:28,height:16,background:horizon?t.accent:t.borderSoft,borderRadius:8,position:"relative",transition:"background .3s",marginLeft:"auto",flexShrink:0}}>
@@ -2109,7 +2131,7 @@ function MobileCRM(props) {
               {!isTech && <button onClick={()=>setShowTechModalM(true)} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(139,92,246,0.08)",border:"1px solid rgba(139,92,246,0.25)",color:"#a78bfa",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",flexShrink:0,transition:"all .3s"}}>
                 <span>👷</span> TECH
               </button>}
-              {isTech && <button onClick={()=>setShowAdminModalM(true)} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",color:"#10b981",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",flexShrink:0,transition:"all .3s"}}>
+              {isTech && <button onClick={()=>setShowAdminModalM(true)} style={{display:"flex",alignItems:"center",gap:6,background:"rgba(52,199,89,0.08)",border:"1px solid #1a4a2a",color:"#34c759",borderRadius:24,padding:"10px 16px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.06em",flexShrink:0,transition:"all .3s"}}>
                 <span>⬡</span> ADMIN
               </button>}
             </div>
@@ -2124,16 +2146,16 @@ function MobileCRM(props) {
           <div style={{padding:"12px 16px"}}>
             {isTech && history.length>0 && (
               <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid #1a3a2a",borderRadius:6,padding:"8px 12px",marginBottom:10,display:"flex",alignItems:"center",gap:8,fontSize:11,color:"#2a8a5a",letterSpacing:"0.06em"}}>
-                <span style={{color:"#10b981"}}>🟢</span>
+                <span style={{color:"#34c759"}}>🟢</span>
                 <span>LAST UPDATED&nbsp;·&nbsp;{(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins} MIN AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}H AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}</span>
-                <span style={{marginLeft:"auto",color:"#1a5a3a",fontSize:10}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
+                <span style={{marginLeft:"auto",color:"rgba(52,199,89,0.3)",fontSize:10}}>{history[0].message}{history[0].detail?` · ${history[0].detail}`:""}</span>
               </div>
             )}
             <input placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:10,fontSize:14}}/>
             <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
-              {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(st?st.color:"#0099ff"):"#254463"}`,color:active?(st?st.color:"#0099ff"):"#557090",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
+              {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(st?st.color:"#007aff"):"#c7c7cc"}`,color:active?(st?st.color:"#007aff"):"#6e6e73",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
             </div>
-            {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#2a4a6a",fontSize:13}}>No deals found</div>}
+            {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</div>}
             {visible.map(deal=>{
               const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
               return (
@@ -2149,18 +2171,18 @@ function MobileCRM(props) {
                     </div>
                     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                       <div>
-                        {!hideValues&&grand30>0&&<div style={{fontSize:12,color:"#10b981",fontWeight:600}}>{fmtShort(grand30)}<span style={{color:"#2a5040",fontWeight:400,fontSize:10}}>/30d</span></div>}
+                        {!hideValues&&grand30>0&&<div style={{fontSize:12,color:"#34c759",fontWeight:600}}>{fmtShort(grand30)}<span style={{color:"#2a5040",fontWeight:400,fontSize:10}}>/30d</span></div>}
                         {hideValues&&<Redacted w={70}/>}
                       </div>
                       <div style={{textAlign:"right"}}>
-                        {!isTech&&collected>0&&<div style={{fontSize:11,color:collected>0?"#10b981":"#557090",fontWeight:600}}>{hideValues?<Redacted w={60}/>:fmtShort(collected)}<span style={{fontSize:9,color:"#2a5040",marginLeft:3}}>collected</span></div>}
+                        {!isTech&&collected>0&&<div style={{fontSize:11,color:collected>0?"#34c759":"#6e6e73",fontWeight:600}}>{hideValues?<Redacted w={60}/>:fmtShort(collected)}<span style={{fontSize:9,color:"#2a5040",marginLeft:3}}>collected</span></div>}
                       </div>
                     </div>
                   </div>
 
                   {/* Expanded */}
                   {isExp&&(
-                    <div style={{borderTop:"1px solid #0d2035",background:"#060e1a"}}>
+                    <div style={{borderTop:"1px solid #0d2035",background:"#f9f9fb"}}>
                       {/* Tabs */}
                       <div style={{display:"flex",borderBottom:"1px solid #0d2035"}}>
                         {(isTech?[["notes","✎ Notes"]]:[["payments","💳 Payments"],["notes","✎ Notes"]]).map(([tab,label])=>(
@@ -2174,7 +2196,7 @@ function MobileCRM(props) {
 
                       {!isTech&&curTab==="payments"&&(
                         <div style={{padding:"14px 16px"}}>
-                          {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#304e6a",marginBottom:12,fontStyle:"italic"}}>No payments yet.</div>:(
+                          {(deal.payments||[]).length===0?<div style={{fontSize:11,color:"#aeaeb2",marginBottom:12,fontStyle:"italic"}}>No payments yet.</div>:(
                             <div style={{marginBottom:14}}>
                               {(deal.payments||[]).map(p=>{
                                 const isEditingThis=editingPayment&&editingPayment.dealId===deal.id&&editingPayment.paymentId===p.id;
@@ -2185,17 +2207,17 @@ function MobileCRM(props) {
                                       <input className="payment-input" type="date" value={editingPayment.datePaid} onChange={e=>setEditingPayment(ep=>({...ep,datePaid:e.target.value}))}/>
                                     </div>
                                     <input className="payment-input" type="text" placeholder="Period" value={editingPayment.period} onChange={e=>setEditingPayment(ep=>({...ep,period:e.target.value}))} style={{marginBottom:8}}/>
-                                    <div style={{display:"flex",gap:8}}><button className="m-btn-ghost" onClick={saveEditPayment} style={{flex:1,background:"rgba(16,185,129,0.1)",color:"#10b981",border:"1px solid #1a4a2a"}}>✓ Save</button><button className="m-btn-ghost" onClick={cancelEditPayment} style={{flex:1}}>Cancel</button></div>
+                                    <div style={{display:"flex",gap:8}}><button className="m-btn-ghost" onClick={saveEditPayment} style={{flex:1,background:"rgba(16,185,129,0.1)",color:"#34c759",border:"1px solid #1a4a2a"}}>✓ Save</button><button className="m-btn-ghost" onClick={cancelEditPayment} style={{flex:1}}>Cancel</button></div>
                                   </div>
                                 );
                                 return (
                                   <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #0a1a2a"}}>
                                     <div style={{flex:1}}>
                                       <div style={{display:"flex",alignItems:"center",gap:8}}>
-                                        <div style={{color:"#10b981",fontWeight:600,fontSize:13}}>{hideValues?<Redacted w={70}/>:fmt(p.amount)}</div>
-                                        {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<span style={{fontSize:10,fontWeight:700,color:util>=90?"#10b981":util>=60?"#f59e0b":"#ef4444",background:util>=90?"rgba(16,185,129,0.1)":util>=60?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)",borderRadius:4,padding:"2px 6px"}}>{util}%</span>:null;})()}
+                                        <div style={{color:"#34c759",fontWeight:600,fontSize:13}}>{hideValues?<Redacted w={70}/>:fmt(p.amount)}</div>
+                                        {(()=>{const rate=calcGrand30Day(deal);const util=rate>0?Math.round((p.amount/rate)*100):null;return util!=null?<span style={{fontSize:10,fontWeight:700,color:util>=90?"#34c759":util>=60?"#f59e0b":"#ef4444",background:util>=90?"rgba(16,185,129,0.1)":util>=60?"rgba(245,158,11,0.1)":"rgba(239,68,68,0.1)",borderRadius:4,padding:"2px 6px"}}>{util}%</span>:null;})()}
                                       </div>
-                                      <div style={{fontSize:10,color:"#557090",marginTop:2}}>{p.datePaid}{p.period&&` · ${p.period}`}</div>
+                                      <div style={{fontSize:10,color:"#6e6e73",marginTop:2}}>{p.datePaid}{p.period&&` · ${p.period}`}</div>
                                     </div>
                                     <div style={{display:"flex",gap:6}}>
                                       <button className="m-btn-ghost" style={{padding:"5px 10px",fontSize:11,flex:"none"}} onClick={()=>startEditPayment(deal.id,p)}>✎</button>
@@ -2205,19 +2227,19 @@ function MobileCRM(props) {
                                 );
                               })}
                               <div style={{display:"flex",justifyContent:"flex-end",gap:8,alignItems:"center",marginTop:10,paddingTop:10,borderTop:"1px solid #0d2035"}}>
-                                <span style={{fontSize:10,color:"#557090"}}>TOTAL</span>
-                                <span style={{color:"#10b981",fontWeight:700,fontSize:15}}>{hideValues?<Redacted w={80}/>:fmt(collected)}</span>
+                                <span style={{fontSize:10,color:"#6e6e73"}}>TOTAL</span>
+                                <span style={{color:"#34c759",fontWeight:700,fontSize:15}}>{hideValues?<Redacted w={80}/>:fmt(collected)}</span>
                               </div>
                             </div>
                           )}
                           {/* Add payment form */}
                           <div style={{background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:14}}>
-                            <div style={{fontSize:10,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10}}>+ Log New Payment</div>
+                            <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",marginBottom:10}}>+ Log New Payment</div>
                             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-                              <div><div style={{fontSize:9,color:"#32586a",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Amount ($) *</div><input className="payment-input" type="number" min="0" placeholder="e.g. 50000" value={pf.amount} onChange={e=>setPF(deal.id,{...pf,amount:e.target.value})}/></div>
-                              <div><div style={{fontSize:9,color:"#32586a",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Date Paid *</div><input className="payment-input" type="date" value={pf.datePaid} onChange={e=>setPF(deal.id,{...pf,datePaid:e.target.value})}/></div>
+                              <div><div style={{fontSize:9,color:"#6e6e73",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.01em"}}>Amount ($) *</div><input className="payment-input" type="number" min="0" placeholder="e.g. 50000" value={pf.amount} onChange={e=>setPF(deal.id,{...pf,amount:e.target.value})}/></div>
+                              <div><div style={{fontSize:9,color:"#6e6e73",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.01em"}}>Date Paid *</div><input className="payment-input" type="date" value={pf.datePaid} onChange={e=>setPF(deal.id,{...pf,datePaid:e.target.value})}/></div>
                             </div>
-                            <div style={{marginBottom:10}}><div style={{fontSize:9,color:"#32586a",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.08em"}}>Period Covered</div><input className="payment-input" type="text" placeholder="e.g. Feb 1–28 2025" value={pf.period} onChange={e=>setPF(deal.id,{...pf,period:e.target.value})}/></div>
+                            <div style={{marginBottom:10}}><div style={{fontSize:9,color:"#6e6e73",marginBottom:4,textTransform:"uppercase",letterSpacing:"0.01em"}}>Period Covered</div><input className="payment-input" type="text" placeholder="e.g. Feb 1–28 2025" value={pf.period} onChange={e=>setPF(deal.id,{...pf,period:e.target.value})}/></div>
                             <button className="m-btn-primary" onClick={()=>addPayment(deal.id)}>Add Payment</button>
                           </div>
                         </div>
@@ -2225,9 +2247,9 @@ function MobileCRM(props) {
 
                       {curTab==="notes"&&(
                         <div style={{padding:"14px 16px"}}>
-                          <div style={{fontSize:10,color:"#557090",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>Notes — {deal.customer}</div>
+                          <div style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.03em",textTransform:"uppercase",marginBottom:10}}>Notes — {deal.customer}</div>
                           <textarea className="notes-area" placeholder="Type notes here…" defaultValue={deal.notes||""} onBlur={e=>saveNotes(deal.id,e.target.value)} rows={5}/>
-                          <div style={{fontSize:9,color:"#1a3a50",marginTop:4,letterSpacing:"0.08em"}}>AUTO-SAVED ON BLUR</div>
+                          <div style={{fontSize:9,color:"#1a3a50",marginTop:4,letterSpacing:"0.01em"}}>AUTO-SAVED ON BLUR</div>
                         </div>
                       )}
                     </div>
@@ -2243,20 +2265,20 @@ function MobileCRM(props) {
           <div style={{padding:"16px"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <div style={{fontSize:13,fontWeight:600,color:"#e8f0fc"}}>Activity History</div>
-              <div style={{fontSize:10,color:"#557090"}}>{history.length} EVENTS</div>
+              <div style={{fontSize:10,color:"#6e6e73"}}>{history.length} EVENTS</div>
             </div>
-            {history.length===0&&<div style={{color:"#304e6a",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
+            {history.length===0&&<div style={{color:"#aeaeb2",fontSize:12,textAlign:"center",marginTop:40}}>No activity yet.</div>}
             {history.map(e=>{
               const icons={new_deal:"🟢",edit:"✏️",payment_added:"💳",payment_deleted:"🗑",delete_deal:"❌"};
-              const colors={new_deal:"#10b981",edit:"#0099ff",payment_added:"#10b981",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
+              const colors={new_deal:"#34c759",edit:"#007aff",payment_added:"#34c759",payment_deleted:"#f59e0b",delete_deal:"#ef4444"};
               const d=new Date(e.ts);
               return (
                 <div key={e.id} className="m-card" style={{display:"flex",gap:12,padding:"12px 14px"}}>
                   <div style={{fontSize:18,minWidth:24,textAlign:"center"}}>{icons[e.type]||"•"}</div>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,color:colors[e.type]||"#c9d6e8",fontWeight:600}}>{e.message}</div>
-                    {e.detail&&<div style={{fontSize:11,color:"#557090",marginTop:2}}>{e.detail}</div>}
-                    <div style={{fontSize:10,color:"#304e6a",marginTop:4}}>{d.toLocaleDateString([],{month:"short",day:"numeric"})} · {d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+                    <div style={{fontSize:12,color:colors[e.type]||"#1c1c1e",fontWeight:600}}>{e.message}</div>
+                    {e.detail&&<div style={{fontSize:11,color:"#6e6e73",marginTop:2}}>{e.detail}</div>}
+                    <div style={{fontSize:10,color:"#aeaeb2",marginTop:4}}>{d.toLocaleDateString([],{month:"short",day:"numeric"})} · {d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
                   </div>
                 </div>
               );
@@ -2279,17 +2301,17 @@ function MobileCRM(props) {
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&closeModal()}>
           <div className="modal-sheet">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:700,color:"#e8f0fc"}}>{editingId?"Edit Deal":"New Deal"}</div>
-              <button onClick={closeModal} style={{background:"none",border:"none",color:"#557090",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
+              <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:17,fontWeight:700,color:"#e8f0fc"}}>{editingId?"Edit Deal":"New Deal"}</div>
+              <button onClick={closeModal} style={{background:"none",border:"none",color:"#6e6e73",cursor:"pointer",fontSize:22,lineHeight:1}}>×</button>
             </div>
-            <div style={{marginBottom:14}}><label style={{fontSize:10,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
+            <div style={{marginBottom:14}}><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Customer Name *</label><input placeholder="e.g. Hyperion AI" value={form.customer} onChange={e=>setForm(f=>({...f,customer:e.target.value}))}/></div>
             <div style={{display:"flex",gap:8,marginBottom:14,borderBottom:"1px solid #1a2e45",paddingBottom:12}}>
               {[["gpu","⬡ GPU"],["storage","💾 Storage"],["notes","✎ Notes"]].map(([tab,label])=>(<button key={tab} style={tabBtn(modalTab===tab)} onClick={()=>setModalTab(tab)}>{label}</button>))}
             </div>
-            {modal30base>0&&<div style={{background:"rgba(16,185,129,0.08)",border:"1px solid #1a4a2a",borderRadius:6,padding:"8px 14px",marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#32586a"}}>{form.onDemand?"30-DAY (REFERENCE)":"30-DAY TOTAL"}</span><span style={{fontSize:14,color:"#10b981",fontWeight:700}}>{fmt(modal30)}</span></div></div>}
+            {modal30base>0&&<div style={{background:"rgba(52,199,89,0.08)",border:"1px solid #1a4a2a",borderRadius:6,padding:"8px 14px",marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontSize:10,color:"#6e6e73"}}>{form.onDemand?"30-DAY (REFERENCE)":"30-DAY TOTAL"}</span><span style={{fontSize:14,color:"#34c759",fontWeight:700}}>{fmt(modal30)}</span></div></div>}
             {modalTab==="gpu"&&(
               <div style={{marginBottom:4}}>
-                <div style={{display:"grid",gridTemplateColumns:"90px 1fr 1fr",gap:8,marginBottom:6}}>{["GPU","Nodes","$/GPU/Hr"].map(h=><div key={h} style={{fontSize:9,color:"#32586a",letterSpacing:"0.1em",textTransform:"uppercase"}}>{h}</div>)}</div>
+                <div style={{display:"grid",gridTemplateColumns:"90px 1fr 1fr",gap:8,marginBottom:6}}>{["GPU","Nodes","$/GPU/Hr"].map(h=><div key={h} style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase"}}>{h}</div>)}</div>
                 {form.gpuAllocations.map(alloc=>{
                   const v30=calc30DayAlloc(alloc);
                   return (
@@ -2300,7 +2322,7 @@ function MobileCRM(props) {
                         <input type="number" min="0" step="0.01" placeholder="Rate" value={alloc.ratePerGpuHour} onChange={e=>updateAlloc(alloc.id,"ratePerGpuHour",e.target.value)}/>
                       </div>
                       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                        {v30>0&&<span style={{fontSize:11,color:"#10b981",fontWeight:600}}>30d: {fmtShort(v30)}</span>}
+                        {v30>0&&<span style={{fontSize:11,color:"#34c759",fontWeight:600}}>30d: {fmtShort(v30)}</span>}
                         {form.gpuAllocations.length>1&&<button onClick={()=>removeAlloc(alloc.id)} style={{background:"none",border:"1px solid #3a1a1a",color:"#ef4444",borderRadius:4,padding:"3px 10px",fontFamily:"inherit",fontSize:11,cursor:"pointer"}}>Remove</button>}
                       </div>
                     </div>
@@ -2311,30 +2333,30 @@ function MobileCRM(props) {
             )}
             {modalTab==="storage"&&(
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:4}}>
-                <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Contract Value ($)</label><input type="number" min="0" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div>
-                <div><label style={{fontSize:10,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>30-Day Value ($)</label><input type="number" min="0" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>
+                <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Contract Value ($)</label><input type="number" min="0" placeholder="e.g. 50000" value={form.storageValue} onChange={e=>setForm(f=>({...f,storageValue:e.target.value}))}/></div>
+                <div><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>30-Day Value ($)</label><input type="number" min="0" placeholder="e.g. 5000" value={form.storage30Day} onChange={e=>setForm(f=>({...f,storage30Day:e.target.value}))}/></div>
               </div>
             )}
             {modalTab==="notes"&&(
-              <div style={{marginBottom:4}}><label style={{fontSize:10,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Deal Notes</label><textarea rows={5} placeholder="Enter any notes…" value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
+              <div style={{marginBottom:4}}><label style={{fontSize:10,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Deal Notes</label><textarea rows={5} placeholder="Enter any notes…" value={form.notes||""} onChange={e=>setForm(f=>({...f,notes:e.target.value}))}/></div>
             )}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:16}}>
-              <div><label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Full Contract ($)</label><input type="number" min="0" placeholder="e.g. 4920000" value={form.fullContractValue} onChange={e=>setForm(f=>({...f,fullContractValue:e.target.value}))}/></div>
-              <div><label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
-              <div><label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
-              <div><label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
+              <div><label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Full Contract ($)</label><input type="number" min="0" placeholder="e.g. 4920000" value={form.fullContractValue} onChange={e=>setForm(f=>({...f,fullContractValue:e.target.value}))}/></div>
+              <div><label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Payment Terms</label><select value={form.paymentTerms} onChange={e=>setForm(f=>({...f,paymentTerms:e.target.value}))}>{PAYMENT_TERMS.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div><label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Start Date</label><input type="date" value={form.startDate||""} onChange={e=>setForm(f=>({...f,startDate:e.target.value}))}/></div>
+              <div><label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:6}}>Status</label><select value={form.status} onChange={e=>setForm(f=>({...f,status:e.target.value}))}>{STATUSES.map(s=><option key={s.label}>{s.label}</option>)}</select></div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:12}}>
               <div>
-                <label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
+                <label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:8}}>🔗 Networking</label>
                 <div style={{display:"flex",gap:6}}>
-                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#0099ff":"#254463"}`,color:active?"#38bdf8":"#557090",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
+                  {["RoCE v2","IB"].map(opt=>{const active=form.networking===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,networking:active?"":opt}))} style={{flex:1,background:active?"rgba(0,153,255,0.15)":"transparent",border:`1px solid ${active?"#007aff":"#c7c7cc"}`,color:active?"#5ac8fa":"#6e6e73",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
               <div>
-                <label style={{fontSize:9,color:"#557090",letterSpacing:"0.1em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
+                <label style={{fontSize:9,color:"#6e6e73",letterSpacing:"0.02em",textTransform:"uppercase",display:"block",marginBottom:8}}>🖥 Architecture</label>
                 <div style={{display:"flex",gap:6}}>
-                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#254463"}`,color:active?"#f59e0b":"#557090",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
+                  {["VM","BM"].map(opt=>{const active=form.architecture===opt;return <button key={opt} onClick={()=>setForm(f=>({...f,architecture:active?"":opt}))} style={{flex:1,background:active?"rgba(245,158,11,0.12)":"transparent",border:`1px solid ${active?"#f59e0b":"#c7c7cc"}`,color:active?"#f59e0b":"#6e6e73",borderRadius:6,padding:"9px 4px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{opt}</button>;})}
                 </div>
               </div>
             </div>
@@ -2342,10 +2364,10 @@ function MobileCRM(props) {
             <div style={{marginTop:14,background:"#080f1c",border:"1px solid #0d2035",borderRadius:8,padding:"12px 14px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div>
-                  <div style={{fontSize:12,color:"#c9d6e8",fontWeight:600}}>On Demand</div>
-                  <div style={{fontSize:10,color:"#3a5a7a",marginTop:2}}>30-day is reference — utilization calculated from payments</div>
+                  <div style={{fontSize:12,color:"#1c1c1e",fontWeight:600}}>On Demand</div>
+                  <div style={{fontSize:10,color:"#aeaeb2",marginTop:2}}>30-day is reference — utilization calculated from payments</div>
                 </div>
-                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#254463",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
+                <button onClick={()=>setForm(f=>({...f,onDemand:!f.onDemand}))} style={{width:44,height:24,borderRadius:12,background:form.onDemand?"#f59e0b":"#c7c7cc",border:"none",cursor:"pointer",position:"relative",transition:"background .2s",flexShrink:0}}>
                   <div style={{position:"absolute",top:3,left:form.onDemand?21:3,width:18,height:18,background:"#fff",borderRadius:"50%",transition:"left .2s",boxShadow:"0 1px 3px rgba(0,0,0,0.3)"}}/>
                 </button>
               </div>
