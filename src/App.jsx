@@ -793,9 +793,7 @@ function InvoiceTracker({ invoices, deals, t, updateInvoices, markInvoicePaid, h
 }
 
 
-// ─── RPG CHARACTER WIDGET ─────────────────────────────────────────────────────
-// XP tiers: each payment = XP based on amount ($1 = 1 XP, capped at 500k per payment)
-// Level thresholds: 1→2: 50k, 2→3: 150k, 3→4: 350k, 4→5: 700k, 5→6: 1.2M, 6→7: 2M, 7→8: 3.2M, 8→9: 5M, 9→10: 8M, 10+: 12M each
+// ─── RPG / ACHIEVEMENTS SYSTEM ───────────────────────────────────────────────
 const XP_THRESHOLDS = [0,50000,150000,350000,700000,1200000,2000000,3200000,5000000,8000000,12000000];
 function calcXP(totalCollected) {
   const xp = Math.min(totalCollected, 999999999);
@@ -810,287 +808,367 @@ function calcXP(totalCollected) {
 }
 
 const CLASS_DATA = [
-  { min:1,  max:2,  name:"Intern",      color:"#48484a", title:"GPU Intern" },
-  { min:3,  max:4,  name:"Analyst",     color:"#5ac8fa", title:"Deal Analyst" },
-  { min:5,  max:6,  name:"Dealer",      color:"#34c759", title:"GPU Dealer" },
-  { min:7,  max:8,  name:"Executive",   color:"#f59e0b", title:"GPU Executive" },
-  { min:9,  max:10, name:"Tycoon",      color:"#f97316", title:"GPU Tycoon" },
-  { min:11, max:99, name:"Overlord",    color:"#a78bfa", title:"GPU Overlord" },
+  { min:1,  max:2,  name:"Little Leaguer",  color:"#60a5fa", title:"Little Leaguer"  },
+  { min:3,  max:4,  name:"High Schooler",   color:"#34d399", title:"High School Star" },
+  { min:5,  max:6,  name:"College Player",  color:"#fbbf24", title:"College Prospect" },
+  { min:7,  max:8,  name:"Minor Leaguer",   color:"#f97316", title:"Minor Leaguer"    },
+  { min:9,  max:10, name:"MLB Pro",         color:"#a78bfa", title:"MLB Pro"          },
+  { min:11, max:99, name:"Legend",          color:"#ffd700", title:"⭐ Legend"         },
 ];
 function getClass(level) {
   return CLASS_DATA.find(c=>level>=c.min&&level<=c.max)||CLASS_DATA[CLASS_DATA.length-1];
 }
 
-// Pixel art frames: 16×24 grid, each row is a hex string (0=transparent,1=skin,2=hair,3=shirt,4=pants,5=shoes,6=eyes,7=mouth,8=armor,9=cape,A=crown/hat,B=sword,C=shine)
-// Character evolves visually at levels 1, 3, 5, 7, 9, 11+
-function getCharFrames(level) {
-  // Base palette per tier
-  const palettes = {
-    1: { '1':'#e8b87a','2':'#4a3020','3':'#5585c5','4':'#3a6a9a','5':'#2a2a2a','6':'#1a3a6a','7':'#cc4444','8':'transparent','9':'transparent','A':'transparent','B':'transparent','C':'#ffffff' },
-    3: { '1':'#e8b87a','2':'#2a1a10','3':'#10b981','4':'#0a7a52','5':'#1a1a1a','6':'#0a4a2a','7':'#cc4444','8':'#c8a820','9':'transparent','A':'transparent','B':'#8ab8d8','C':'#ffffff' },
-    5: { '1':'#e8b87a','2':'#1a1a1a','3':'#f59e0b','4':'#6a3a10','5':'#0a0a0a','6':'#4a2a08','7':'#cc4444','8':'#e8c840','9':'#c0392b','A':'transparent','B':'#d4a820','C':'#ffffff' },
-    7: { '1':'#f0c080','2':'#ffe080','3':'#a78bfa','4':'#6a3aa0','5':'#0a0a0a','6':'#3a1a7a','7':'#ff6688','8':'#c084fc','9':'#7c3aed','A':'#fcd34d','B':'#e8c840','C':'#ffffff' },
-    9: { '1':'#f0c080','2':'#ff9900','3':'#ef4444','4':'#991b1b','5':'#0a0a0a','6':'#6a0000','7':'#ff6688','8':'#f97316','9':'#c2410c','A':'#fcd34d','B':'#fbbf24','C':'#ffffff' },
-    11:{ '1':'#f0d0a0','2':'#c084fc','3':'#0d1520','4':'#1a0a40','5':'#0a0a0a','6':'#2a0060','7':'#ff6688','8':'#a78bfa','9':'#7c3aed','A':'#ffd700','B':'#ffd700','C':'#ffffff' },
-  };
-  const tier = level>=11?11:level>=9?9:level>=7?7:level>=5?5:level>=3?3:1;
-  const p = palettes[tier];
+// Achievements — unlocked by milestone conditions
+const ACHIEVEMENTS = [
+  { id:"first_blood",   icon:"⚾", label:"First Pitch",    desc:"Log your first payment",            check:(d)=>d.totalPayments>=1 },
+  { id:"century",       icon:"💯", label:"Century Club",   desc:"Collect $100K total",               check:(d)=>d.totalCollected>=100000 },
+  { id:"half_mil",      icon:"💰", label:"Half a Mill",    desc:"Collect $500K total",               check:(d)=>d.totalCollected>=500000 },
+  { id:"millionaire",   icon:"🤑", label:"Millionaire",    desc:"Collect $1M total",                 check:(d)=>d.totalCollected>=1000000 },
+  { id:"five_mil",      icon:"💎", label:"Diamond Club",   desc:"Collect $5M total",                 check:(d)=>d.totalCollected>=5000000 },
+  { id:"ten_mil",       icon:"🏆", label:"Hall of Fame",   desc:"Collect $10M total",               check:(d)=>d.totalCollected>=10000000 },
+  { id:"deal_maker",    icon:"🤝", label:"Deal Maker",     desc:"Close 5 active deals",             check:(d)=>d.activeDeals>=5 },
+  { id:"closer",        icon:"🔒", label:"The Closer",     desc:"Close 10 active deals",            check:(d)=>d.activeDeals>=10 },
+  { id:"hot_streak",    icon:"🔥", label:"Hot Streak",     desc:"3 payments in one week",            check:(d)=>d.recentPayments>=3 },
+  { id:"h200_boss",     icon:"🟣", label:"H200 Boss",      desc:"64+ H200 nodes deployed",          check:(d)=>d.h200Nodes>=64 },
+  { id:"full_rack",     icon:"🖥️",  label:"Full Rack",     desc:"100+ H100 nodes deployed",         check:(d)=>d.h100Nodes>=100 },
+  { id:"gpu_king",      icon:"👑", label:"GPU King",       desc:"190+ total nodes deployed",        check:(d)=>d.totalNodes>=190 },
+  { id:"on_demand",     icon:"⚡", label:"On Demand",      desc:"Have an active OD deal",            check:(d)=>d.hasOD },
+  { id:"level5",        icon:"🌟", label:"Rising Star",    desc:"Reach Level 5",                    check:(d)=>d.level>=5 },
+  { id:"level10",       icon:"🚀", label:"To The Moon",    desc:"Reach Level 10",                   check:(d)=>d.level>=10 },
+  { id:"speedrun",      icon:"⏱️",  label:"Speed Runner",  desc:"Log a payment within 24hrs of a deal", check:(d)=>d.fastPay },
+];
 
-  // Frame 0: idle stance
-  // Frame 1: idle slight shift
-  // Frame 2: walk1
-  // Frame 3: walk2
-  // Frame 4: celebrate (arms up on level-up)
-
-  const base = [
-    // Row 0-2: hat/hair
-    "0000AAAA00000000",
-    "000AAAAAA0000000",
-    "00AA2222AA000000",
-    // Row 3-7: head
-    "00A11111A0000000",
-    "00A161610A000000",
-    "00A11711A0000000",
-    "00A11111A0000000",
-    "000AAAAA00000000",
-    // Row 8-13: torso
-    "0033333330000000",
-    "B833333338000000",
-    "B833333338000000",
-    "B833333338000000",
-    "BB3333333BB00000",
-    "003333333300000000",
-    // Row 14-18: legs
-    "004444444400000",
-    "009444444900000",
-    "009444444900000",
-    "004444444400000",
-    "004400044400000",
-    // Row 19-23: feet
-    "005500055000000",
-    "005500055000000",
-    "000000000000000",
-    "000000000000000",
-    "000000000000000",
-  ];
-
-  // Build actual pixel arrays (simplified — generate 3 walk frames)
-  return { palette: p, base };
+function getAchievements({ totalCollected, totalPayments, activeDeals, h100Nodes, h200Nodes, level, recentPayments, hasOD, fastPay }) {
+  const totalNodes = h100Nodes + h200Nodes;
+  const ctx = { totalCollected, totalPayments, activeDeals, h100Nodes, h200Nodes, totalNodes, level, recentPayments, hasOD, fastPay };
+  return ACHIEVEMENTS.filter(a=>a.check(ctx));
 }
 
-function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt }) {
+// Baseball pixel art — 6 tiers, 20×28 grid, SCALE=2px → 40×56px rendered
+// Row encoding: hex chars, 0=transparent
+// Colors per tier evolve from little league → legend
+const BB_FRAMES = {
+  // tier key → [idle0, idle1, walk0, walk1]
+  // Each frame is array of 28 row-strings, 20 chars each
+};
+
+// Build frames programmatically per tier
+function buildBBFrames(tier) {
+  // Color palette per tier
+  const P = {
+    1:  {hat:'#1a3a7a',brim:'#122860',jersey:'#f5f5f5',stripe:'#1a3a7a',pants:'#f5f5f5',sock:'#cc2222',shoe:'#2a1a0a',skin:'#e8b87a',eye:'#2a1a0a',glove:'#c87840',bat:'#8a5a30',num:'#1a3a7a'},
+    3:  {hat:'#1a5a2a',brim:'#0a3a18',jersey:'#f8f0e0',stripe:'#1a5a2a',pants:'#f8f0e0',sock:'#e8a020',shoe:'#1a0a0a',skin:'#e8b87a',eye:'#1a1a1a',glove:'#a86830',bat:'#7a4820',num:'#1a5a2a'},
+    5:  {hat:'#8a1a1a',brim:'#5a0808',jersey:'#f8f8f8',stripe:'#8a1a1a',pants:'#f0f0f0',sock:'#1a3a8a',shoe:'#0a0a0a',skin:'#ecc080',eye:'#0a0a0a',glove:'#b87838',bat:'#8a5828',num:'#8a1a1a'},
+    7:  {hat:'#1a1a6a',brim:'#080830',jersey:'#ffffff',stripe:'#c8a820',pants:'#eeeef8',sock:'#c8a820',shoe:'#0a0a1a',skin:'#ecc080',eye:'#0a0a2a',glove:'#c88840',bat:'#d4aa48',num:'#c8a820'},
+    9:  {hat:'#1a1a1a',brim:'#0a0a0a',jersey:'#e8e8e8',stripe:'#c82020',pants:'#f0f0f0',sock:'#c82020',shoe:'#0a0808',skin:'#f0c888',eye:'#0a0808',glove:'#d09050',bat:'#e8b840',num:'#c82020'},
+    11: {hat:'#ffd700',brim:'#c8a820',jersey:'#ffffff',stripe:'#ffd700',pants:'#f8f8ff',sock:'#ffd700',shoe:'#1a1a0a',skin:'#f0c888',eye:'#1a1a0a',glove:'#d4a050',bat:'#ffd700',num:'#ff6600'},
+  }[tier] || {hat:'#1a3a7a',brim:'#122860',jersey:'#f5f5f5',stripe:'#1a3a7a',pants:'#f5f5f5',sock:'#cc2222',shoe:'#2a1a0a',skin:'#e8b87a',eye:'#2a1a0a',glove:'#c87840',bat:'#8a5a30',num:'#1a3a7a'};
+
+  // 0=transp,H=hat,B=brim,J=jersey,S=sock,E=shoe,K=skin,I=eye,G=glove,T=bat,N=num stripe,P=pants,R=red detail
+  // Frame data: idle stance holding bat — 20 wide × 26 tall
+  const idle0 = [
+    "00000HHHHHH000000000",  // 0  hat top
+    "0000HHHHHHHH00000000",  // 1
+    "0000BBBBBBBB00000000",  // 2  brim
+    "000BBBBBBBBB00000000",  // 3  brim wider
+    "0000KKKKKKK000000000",  // 4  face
+    "000KKIxxxxIKK0000000",  // 5  eyes (I=eye white, x=pupil)
+    "000KKKKxKKKKK0000000",  // 6  nose area
+    "000KKKNNNNKKK0000000",  // 7  mouth/smile
+    "000KKKKKKKKKK0000000",  // 8  chin
+    "000JJJJJJJJJ0T000000",  // 9  jersey + bat tip
+    "00GJJNNNNJJJGTT00000",  // 10 jersey w stripe + glove + bat
+    "00GJJJJJJJJJGTT00000",  // 11 jersey
+    "00GJJJJJJJJJGTT00000",  // 12 jersey
+    "000JJJJJJJJJ0TT00000",  // 13 jersey bottom
+    "000PPPPPPPPP0TT00000",  // 14 pants
+    "000PPPPPPPPP0TT00000",  // 15 pants
+    "000PPPPPPPPP0T000000",  // 16 pants
+    "000PSSSSSSSP00000000",  // 17 socks
+    "000ESSSSSSEP00000000",  // 18 shoes
+    "000EEEEEEEEE0000000",   // 19 shoes
+    "0000EEE0EEE00000000",   // 20 shoe gap
+  ];
+
+  const idle1 = [  // very slight weight shift
+    "00000HHHHHH000000000",
+    "0000HHHHHHHH00000000",
+    "0000BBBBBBBB00000000",
+    "000BBBBBBBBB00000000",
+    "0000KKKKKKK000000000",
+    "000KKIxxxxIKK0000000",
+    "000KKKKxKKKKK0000000",
+    "000KKKNNNNKKK0000000",
+    "000KKKKKKKKKK0000000",
+    "000JJJJJJJJJ0T000000",
+    "00GJJNNNNJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "000JJJJJJJJJ0TT00000",
+    "000PPPPPPPPP0TT00000",
+    "000PPPPPPPPP0TT00000",
+    "000PPPPPPPP00T000000",  // slight shift
+    "000PSSSSSSSP00000000",
+    "000ESSSSSSEP00000000",
+    "000EEEEEEEEE0000000",
+    "00000EE0EEEE0000000",  // shoe shift
+  ];
+
+  // Walk frames — stride animation
+  const walk0 = [
+    "00000HHHHHH000000000",
+    "0000HHHHHHHH00000000",
+    "0000BBBBBBBB00000000",
+    "000BBBBBBBBB00000000",
+    "0000KKKKKKK000000000",
+    "000KKIxxxxIKK0000000",
+    "000KKKKxKKKKK0000000",
+    "000KKKNNNNKKK0000000",
+    "000KKKKKKKKKK0000000",
+    "000JJJJJJJJJ0T000000",
+    "00GJJNNNNJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "000JJJJJJJJJ0TT00000",
+    "00PPPPPPPPPP0TT00000",  // forward lean
+    "000PPPPPPPP00TT00000",
+    "000PPPPPPPP00T000000",
+    "000PSSSSSSSP00000000",
+    "00ESSSSSSEP000000000",  // stride
+    "00EEEEEEEEE00000000",
+    "000EEE000EEE0000000",  // mid-stride
+  ];
+
+  const walk1 = [
+    "00000HHHHHH000000000",
+    "0000HHHHHHHH00000000",
+    "0000BBBBBBBB00000000",
+    "000BBBBBBBBB00000000",
+    "0000KKKKKKK000000000",
+    "000KKIxxxxIKK0000000",
+    "000KKKKxKKKKK0000000",
+    "000KKKNNNNKKK0000000",
+    "000KKKKKKKKKK0000000",
+    "000JJJJJJJJJ0T000000",
+    "00GJJNNNNJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "00GJJJJJJJJJGTT00000",
+    "000JJJJJJJJJ0TT00000",
+    "000PPPPPPPPPP0TT0000",
+    "000PPPPPPPP00TT00000",
+    "000PPPPPPPP00T000000",
+    "000PSSSSSSSP00000000",
+    "000ESSSSSSEP00000000",
+    "000EEEEEEEEE0000000",
+    "0000EE00EEE00000000",
+  ];
+
+  // Swing frame — bat raised, celebrating
+  const swing = [
+    "000THHHHHHH00000000",   // bat going up + hat
+    "00TTHHHHHHHHH000000",
+    "000TBBBBBBBB0000000",
+    "000TBBBBBBBBB000000",
+    "0TTTKKKKKKK0000000",
+    "0T0KKIxxxxIKK000000",
+    "000KKKKxKKKKK000000",
+    "000KKKNNNNKKK000000",
+    "000KKKKKKKKKK000000",
+    "000JJJJJJJJJ0000000",
+    "00GJJNNNNJJJG000000",
+    "00GJJJJJJJJJG000000",
+    "00GJJJJJJJJJG000000",
+    "000JJJJJJJJJ0000000",
+    "000PPPPPPPPP0000000",
+    "000PPPPPPPPP0000000",
+    "000PPPPPPPPP0000000",
+    "000PSSSSSSSP0000000",
+    "000ESSSSSSEP0000000",
+    "000EEEEEEEEE0000000",
+    "0000EEE0EEE00000000",
+  ];
+
+  // Color map: char → P[key]
+  const colorMap = {
+    'H':P.hat,'B':P.brim,'J':P.jersey,'N':P.stripe,'P':P.pants,
+    'S':P.sock,'E':P.shoe,'K':P.skin,'I':'#ffffff','x':P.eye,
+    'G':P.glove,'T':P.bat,'R':'#cc2222',
+    '0':'transparent',
+  };
+
+  return { frames:{idle0,idle1,walk0,walk1,swing}, colorMap };
+}
+
+function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt, deals }) {
   const { xp, level, pct, nextXp } = calcXP(totalCollected);
   const cls = getClass(level);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [frame, setFrame] = useState(0);
-  const [celebrating, setCelebrating] = useState(false);
+  const [swinging, setSwinging] = useState(false);
   const [floatingXP, setFloatingXP] = useState(null);
+  const [newAchievement, setNewAchievement] = useState(null);
   const prevLevel = useRef(level);
   const prevCollected = useRef(totalCollected);
   const animRef = useRef(null);
+  const prevAchievements = useRef(null);
+
+  const SCALE = 2;
+  const tier = level>=11?11:level>=9?9:level>=7?7:level>=5?5:level>=3?3:1;
+  const { frames, colorMap } = buildBBFrames(tier);
+
+  // Compute achievement context
+  const activeDeals = (deals||[]).filter(d=>["Testing","In Production"].includes(d.status));
+  const totalPayments = (deals||[]).reduce((s,d)=>s+(d.payments||[]).length,0);
+  const h100Nodes = activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0);
+  const h200Nodes = activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0);
+  const hasOD = activeDeals.some(d=>d.onDemand);
+  const now = Date.now();
+  const recentPayments = (deals||[]).reduce((s,d)=>{
+    const recent = (d.payments||[]).filter(p=>{ const pd=new Date(p.datePaid); return (now-pd.getTime())<7*24*3600*1000; });
+    return s+recent.length;
+  },0);
+
+  const earned = getAchievements({totalCollected,totalPayments,activeDeals:activeDeals.length,h100Nodes,h200Nodes,level,recentPayments,hasOD,fastPay:false});
+  const earnedIds = earned.map(a=>a.id);
+
+  // Detect new achievement
+  useEffect(()=>{
+    if(prevAchievements.current===null){ prevAchievements.current=earnedIds; return; }
+    const newOnes = earnedIds.filter(id=>!prevAchievements.current.includes(id));
+    if(newOnes.length>0){
+      const a = ACHIEVEMENTS.find(x=>x.id===newOnes[0]);
+      if(a){ setNewAchievement(a); setTimeout(()=>setNewAchievement(null),3500); }
+    }
+    prevAchievements.current = earnedIds;
+  },[earnedIds.join(',')]);
 
   // Walk animation
   useEffect(()=>{
-    animRef.current = setInterval(()=>setFrame(f=>(f+1)%4), 220);
+    animRef.current = setInterval(()=>setFrame(f=>(f+1)%4), 240);
     return ()=>clearInterval(animRef.current);
   },[]);
 
-  // Detect level up or new payment
+  // Level up
   useEffect(()=>{
-    if(level > prevLevel.current) {
+    if(level > prevLevel.current){
       setShowLevelUp(true);
-      setCelebrating(true);
-      setTimeout(()=>{ setShowLevelUp(false); setCelebrating(false); }, 3200);
+      setSwinging(true);
+      setTimeout(()=>{ setShowLevelUp(false); setSwinging(false); }, 3200);
       prevLevel.current = level;
     }
   },[level]);
 
+  // Payment XP popup
   useEffect(()=>{
-    if(lastPaymentAmount && lastPaymentAmount !== prevCollected.current) {
-      const gained = Math.min(lastPaymentAmount, 500000);
-      setFloatingXP(gained);
-      setTimeout(()=>setFloatingXP(null), 1800);
+    if(lastPaymentAmount && lastPaymentAmount !== prevCollected.current){
+      setFloatingXP(Math.min(lastPaymentAmount,500000));
+      setSwinging(true);
+      setTimeout(()=>{ setFloatingXP(null); setSwinging(false); }, 1800);
       prevCollected.current = totalCollected;
     }
   },[lastPaymentAmount, totalCollected]);
 
-  const tier = level>=11?11:level>=9?9:level>=7?7:level>=5?5:level>=3?3:1;
-
-  // Pixel art: 16 cols × 22 rows, drawn with divs
-  // Each frame slightly shifts body/arms
-  const SCALE = 3;
-  const W = 14, H = 22;
-
-  // Encode the character as a compact pixel grid per tier+frame
-  // Colors: 0=transp, 1=skin, 2=hair, 3=shirt, 4=pants, 5=shoe, 6=eye, 7=mouth, 8=accent, 9=cape, A=hat, B=weapon, C=shine
-  const frames = {
-    // [tier][frame] = array of row strings
-    idle0: [
-      "00AAAA0000000",  // hat
-      "0AAAAAA000000",
-      "022222200000",
-      "0A1111A000000",
-      "0A1661A000000",  // eyes
-      "0A1171A000000",  // mouth
-      "0A1111A000000",
-      "00AAAA0000000",
-      "0333333000000",  // shirt
-      "8333333800000",
-      "8333333800000",
-      "0333333000000",
-      "0444444000000",  // pants
-      "9444444900000",
-      "0440044000000",
-      "0550055000000",  // shoes
-    ],
-    idle1: [
-      "00AAAA0000000",
-      "0AAAAAA000000",
-      "022222200000",
-      "0A1111A000000",
-      "0A1661A000000",
-      "0A1171A000000",
-      "0A1111A000000",
-      "00AAAA0000000",
-      "0333333000000",
-      "8333333800000",
-      "8333333800000",
-      "0333333000000",
-      "0444444000000",
-      "9444444900000",
-      "0440044000000",
-      "0055500000000",  // slight foot shift
-    ],
-    walk0: [
-      "00AAAA0000000",
-      "0AAAAAA000000",
-      "022222200000",
-      "0A1111A000000",
-      "0A1661A000000",
-      "0A1171A000000",
-      "0A1111A000000",
-      "00AAAA0000000",
-      "0333333000000",
-      "8333333800000",
-      "8333333800000",
-      "0333333000000",
-      "0044440000000",  // leg swing
-      "9044449000000",
-      "0400044000000",
-      "0500055000000",
-    ],
-    walk1: [
-      "00AAAA0000000",
-      "0AAAAAA000000",
-      "022222200000",
-      "0A1111A000000",
-      "0A1661A000000",
-      "0A1171A000000",
-      "0A1111A000000",
-      "00AAAA0000000",
-      "0333333000000",
-      "8333333800000",
-      "8333333800000",
-      "0333333000000",
-      "0444440000000",
-      "0944449000000",
-      "0044004000000",
-      "0055005000000",
-    ],
-  };
-
-  const palettes = {
-    1:  {'1':'#e8b87a','2':'#4a3020','3':'#4a7fd4','4':'#2a5a8a','5':'#1a1a2a','6':'#0a2a5a','7':'#cc5544','8':'#7ab8e8','9':'transparent','A':'#4a3020','B':'transparent','C':'#ffffff'},
-    3:  {'1':'#e8b87a','2':'#1a1208','3':'#10b981','4':'#0a6a44','5':'#0a0a14','6':'#0a3a1a','7':'#cc5544','8':'#6de0b8','9':'#c0392b','A':'#1a1208','B':'#8ab8d8','C':'#ffffff'},
-    5:  {'1':'#ecc080','2':'#1a1010','3':'#f59e0b','4':'#7a4010','5':'#0a0a0a','6':'#4a2a08','7':'#ff7755','8':'#fbbf24','9':'#c0392b','A':'#4a3010','B':'#d4a820','C':'#fffacd'},
-    7:  {'1':'#f0c888','2':'#ffe090','3':'#a78bfa','4':'#5a2a90','5':'#0a0a0a','6':'#2a0a6a','7':'#ff8899','8':'#c084fc','9':'#7c3aed','A':'#fcd34d','B':'#e8c840','C':'#fffacd'},
-    9:  {'1':'#f0c888','2':'#ff9900','3':'#ef4444','4':'#7a1010','5':'#0a0a0a','6':'#500000','7':'#ff8899','8':'#f97316','9':'#c2410c','A':'#fcd34d','B':'#fbbf24','C':'#fff8dc'},
-    11: {'1':'#f8d8a8','2':'#d084fc','3':'#1a0a30','4':'#0a0020','5':'#0a0a0a','6':'#200060','7':'#ff88aa','8':'#a78bfa','9':'#6d28d9','A':'#ffd700','B':'#ffd700','C':'#fff8dc'},
-  };
-
-  const pal = palettes[tier];
-  const frameKeys = celebrating ? ['walk0','walk1','walk0','walk1'] : ['idle0','idle1','idle0','idle1'];
-  const currentFrame = frames[frameKeys[frame % 4]];
-
-  const renderPixelRow = (row, y) =>
-    row.split('').map((ch, x) => {
-      if(ch==='0') return null;
-      const color = pal[ch] || 'transparent';
-      if(color==='transparent') return null;
-      return <div key={x} style={{position:'absolute',left:x*SCALE,top:y*SCALE,width:SCALE,height:SCALE,background:color,imageRendering:'pixelated'}}/>;
-    });
-
-  const barW = 180;
-  const filledW = Math.round(barW * pct / 100);
-
-  // XP bar segment colors by level
+  const frameKeys = swinging ? ['swing','swing','swing','swing'] : ['idle0','idle1','walk0','walk1'];
+  const currentFrame = frames[frameKeys[frame%4]] || frames.idle0;
   const barColor = cls.color;
 
-  return (
-    <div style={{display:'flex',alignItems:'flex-start',gap:12,background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:'14px 16px',position:'relative',overflow:'hidden',height:'100%',boxSizing:'border-box',boxShadow:'0 1px 3px rgba(0,0,0,0.06)'}}>
+  const renderFrame = (frameData) => {
+    if(!frameData) return null;
+    return frameData.map((row,y)=>
+      row.split('').map((ch,x)=>{
+        const color = colorMap[ch];
+        if(!color||color==='transparent') return null;
+        return <div key={`${x}-${y}`} style={{position:'absolute',left:x*SCALE,top:y*SCALE,width:SCALE,height:SCALE,background:color}}/>;
+      })
+    );
+  };
 
-      {/* Level-up flash overlay */}
+  const charW = 20*SCALE, charH = 21*SCALE;
+
+  return (
+    <div style={{background:t.bgCard,border:`1px solid ${t.border}`,borderRadius:12,padding:'14px 16px',position:'relative',overflow:'hidden',height:'100%',boxSizing:'border-box',boxShadow:'0 1px 3px rgba(0,0,0,0.06)'}}>
+
+      {/* Level-up flash */}
       {showLevelUp&&(
-        <div style={{position:'absolute',inset:0,background:'rgba(255,215,0,0.12)',borderRadius:10,pointerEvents:'none',animation:'lvlFlash 0.4s ease-out forwards',zIndex:10}}>
-          <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:800,color:'#ffd700',letterSpacing:'0.1em',textShadow:'0 0 20px #ffd700',whiteSpace:'nowrap'}}>
-            ⬆ LEVEL UP! {level}
-          </div>
+        <div style={{position:'absolute',inset:0,background:'rgba(255,215,0,0.15)',borderRadius:12,pointerEvents:'none',animation:'lvlFlash 3.2s ease-out forwards',zIndex:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div style={{fontSize:15,fontWeight:800,color:'#b8860b',letterSpacing:'0.06em',textShadow:'0 1px 4px rgba(0,0,0,0.1)',whiteSpace:'nowrap'}}>⬆ LEVEL UP · LV.{level}</div>
         </div>
       )}
 
-      {/* Pixel character */}
-      <div style={{position:'relative',width:W*SCALE,height:H*SCALE,flexShrink:0}}>
-        {currentFrame.map((row,y)=>renderPixelRow(row,y))}
-        {/* Floating XP popup */}
-        {floatingXP&&(
-          <div style={{position:'absolute',left:'50%',top:-8,transform:'translateX(-50%)',fontSize:10,fontWeight:700,color:'#ffd700',whiteSpace:'nowrap',animation:'xpFloat 1.8s ease-out forwards',pointerEvents:'none',textShadow:'0 0 6px #ffd700',letterSpacing:'0.06em'}}>
-            +{floatingXP>=1000000?(floatingXP/1000000).toFixed(1)+'M':floatingXP>=1000?(floatingXP/1000).toFixed(0)+'K':floatingXP} XP
-          </div>
-        )}
-        {/* Shadow under feet */}
-        <div style={{position:'absolute',bottom:-3,left:'50%',transform:'translateX(-50%)',width:W*SCALE*0.7,height:4,background:'rgba(0,0,0,0.35)',borderRadius:'50%'}}/>
-      </div>
+      {/* New achievement toast */}
+      {newAchievement&&(
+        <div style={{position:'absolute',top:8,right:8,background:'#1c1c1e',color:'#fff',borderRadius:8,padding:'7px 12px',fontSize:10,fontWeight:600,zIndex:20,animation:'xpFloat 3.5s ease-out forwards',boxShadow:'0 4px 12px rgba(0,0,0,0.2)',maxWidth:160}}>
+          <div style={{fontSize:14,marginBottom:2}}>{newAchievement.icon}</div>
+          <div style={{color:'#ffd700',fontWeight:700}}>{newAchievement.label}</div>
+          <div style={{color:'#aaa',fontSize:9,marginTop:1}}>{newAchievement.desc}</div>
+        </div>
+      )}
 
-      {/* Stats panel */}
-      <div style={{flex:1,minWidth:0,overflow:'hidden'}}>
-        {/* Name + class */}
-        <div style={{display:'flex',alignItems:'baseline',gap:8,marginBottom:4}}>
-          <span style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:12,fontWeight:800,color:cls.color,letterSpacing:'0.03em',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{cls.title}</span>
-          <span style={{fontSize:9,color:t.textDeep,letterSpacing:'0.1em',textTransform:'uppercase'}}>Lv.{level}</span>
+      <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+        {/* Pixel character */}
+        <div style={{position:'relative',width:charW,height:charH,flexShrink:0}}>
+          {renderFrame(currentFrame)}
+          {floatingXP&&(
+            <div style={{position:'absolute',left:'50%',top:-10,transform:'translateX(-50%)',fontSize:10,fontWeight:700,color:'#b8860b',whiteSpace:'nowrap',animation:'xpFloat 1.8s ease-out forwards',pointerEvents:'none'}}>
+              +{floatingXP>=1000000?(floatingXP/1000000).toFixed(1)+'M':floatingXP>=1000?(floatingXP/1000).toFixed(0)+'K':floatingXP} XP
+            </div>
+          )}
+          <div style={{position:'absolute',bottom:-3,left:'50%',transform:'translateX(-50%)',width:charW*0.7,height:4,background:'rgba(0,0,0,0.12)',borderRadius:'50%'}}/>
         </div>
 
-        {/* XP bar */}
-        <div style={{marginBottom:6}}>
-          <div style={{display:'flex',justifyContent:'space-between',marginBottom:3}}>
-            <span style={{fontSize:9,color:t.textDim,letterSpacing:'0.1em',textTransform:'uppercase'}}>XP</span>
-            <span style={{fontSize:9,color:t.textDim,letterSpacing:'0.06em'}}>
-              {level<XP_THRESHOLDS.length ? `${(xp/1000).toFixed(0)}K / ${(nextXp/1000).toFixed(0)}K` : 'MAX'}
-            </span>
+        {/* Stats */}
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:3}}>
+            <span style={{fontSize:13,fontWeight:700,color:cls.color}}>{cls.title}</span>
+            <span style={{fontSize:10,color:t.textDim,fontWeight:500}}>Lv.{level}</span>
           </div>
-          <div style={{height:7,background:'#e8e8ed',borderRadius:4,overflow:'hidden',position:'relative'}}>
-            <div style={{height:'100%',width:`${pct}%`,background:`linear-gradient(90deg, ${barColor}88, ${barColor})`,borderRadius:4,transition:'width 0.6s ease',position:'relative'}}>
-              {pct>15&&<div style={{position:'absolute',right:4,top:'50%',transform:'translateY(-50%)',width:4,height:4,background:'rgba(255,255,255,0.5)',borderRadius:'50%'}}/>}
-            </div>
-          </div>
-        </div>
 
-        {/* Mini stats */}
-        <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:4}}>
-          {[
-            {label:'COLLECTED', value:hideValues?'•••':fmt(totalCollected), color:'#10b981'},
-            {label:'LEVEL',     value:String(level),                         color:cls.color},
-            {label:'CLASS',     value:cls.name,                               color:cls.color},
-          ].map(({label,value,color})=>(
-            <div key={label} style={{background:'rgba(255,255,255,0.03)',border:`1px solid ${t.borderDeep}`,borderRadius:4,padding:'3px 7px'}}>
-              <div style={{fontSize:7,color:t.textDeep,letterSpacing:'0.1em',textTransform:'uppercase'}}>{label}</div>
-              <div style={{fontSize:10,fontWeight:700,color,marginTop:1}}>{value}</div>
+          {/* XP bar */}
+          <div style={{marginBottom:8}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:2}}>
+              <span style={{fontSize:9,color:t.textDim,textTransform:'uppercase',letterSpacing:'0.06em'}}>XP</span>
+              <span style={{fontSize:9,color:t.textDim}}>{level<XP_THRESHOLDS.length?`${(xp/1000).toFixed(0)}K / ${(nextXp/1000).toFixed(0)}K`:'MAX'}</span>
             </div>
-          ))}
+            <div style={{height:6,background:t.bgDeep,borderRadius:3,overflow:'hidden'}}>
+              <div style={{height:'100%',width:`${pct}%`,background:barColor,borderRadius:3,transition:'width 0.6s ease'}}/>
+            </div>
+          </div>
+
+          {/* Stat pills */}
+          <div style={{display:'flex',gap:6,marginBottom:8,flexWrap:'wrap'}}>
+            {[
+              {label:'Collected', value:hideValues?'•••':fmt(totalCollected), color:'#34c759'},
+              {label:'Level',     value:String(level),                         color:cls.color},
+            ].map(({label,value,color})=>(
+              <div key={label} style={{background:t.bgDeep,border:`1px solid ${t.border}`,borderRadius:6,padding:'4px 8px'}}>
+                <div style={{fontSize:8,color:t.textDim,textTransform:'uppercase',letterSpacing:'0.05em'}}>{label}</div>
+                <div style={{fontSize:11,fontWeight:700,color,marginTop:1}}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Achievements */}
+          <div>
+            <div style={{fontSize:8,color:t.textDim,textTransform:'uppercase',letterSpacing:'0.06em',marginBottom:5}}>Achievements · {earned.length}/{ACHIEVEMENTS.length}</div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+              {ACHIEVEMENTS.map(a=>{
+                const unlocked = earnedIds.includes(a.id);
+                return (
+                  <div key={a.id} title={unlocked?`${a.label}: ${a.desc}`:`Locked: ${a.desc}`}
+                    style={{width:26,height:26,borderRadius:6,background:unlocked?'rgba(0,0,0,0.06)':t.bgDeep,border:`1px solid ${unlocked?t.borderSoft:t.border}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,cursor:'default',filter:unlocked?'none':'grayscale(1) opacity(0.3)',transition:'all .2s'}}>
+                    {a.icon}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 
 export default function App() {
   const [authed, setAuthed] = useState(() => {
@@ -1118,6 +1196,8 @@ function CRM({ role = "admin", setRole }) {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [invoices, setInvoices] = useState([]);
   const [lastPaymentAmt, setLastPaymentAmt] = useState(0);
+  const [dismissedExpiry, setDismissedExpiry] = useState(()=>{ try{return JSON.parse(localStorage.getItem("nexus-dismissed-expiry")||"[]");}catch{return [];} });
+  const dismissExpiry = (id) => { const next=[...new Set([...dismissedExpiry,id])]; setDismissedExpiry(next); localStorage.setItem("nexus-dismissed-expiry",JSON.stringify(next)); };
   const localInvOp = useRef(false);
   const [repairRma, setRepairRma] = useState(()=>{
     try { const s=localStorage.getItem("nexus-repair-rma"); return s?JSON.parse(s):{H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; } catch(e){ return {H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; }
@@ -1303,6 +1383,22 @@ function CRM({ role = "admin", setRole }) {
   const MAX_H100=128,MAX_H200=65;
   const totals=useMemo(()=>{ const activeDeals=deals.filter(d=>["Testing","In Production"].includes(d.status)); const h100=activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const allCollected=deals.reduce((s,d)=>s+totalCollected(d),0); const allMonthly=activeDeals.reduce((s,d)=>s+calcEffective30Day(d),0); return{deals:activeDeals.length,pipeline:activeDeals.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:allCollected,monthly:allMonthly,h100Nodes:h100,h200Nodes:h200}; },[deals]);
   const statusOf=(label)=>STATUSES.find(s=>s.label===label)||STATUSES[0];
+  const expiringDeals = useMemo(()=>{
+    const now = new Date(); now.setHours(0,0,0,0);
+    return deals.filter(d=>{
+      if(!["Testing","In Production"].includes(d.status)) return false;
+      if(!d.endDate) return false;
+      if(dismissedExpiry.includes(d.id)) return false;
+      const end = new Date(d.endDate); end.setHours(0,0,0,0);
+      const days = Math.round((end-now)/(1000*60*60*24));
+      return days>=0 && days<=10;
+    }).map(d=>{
+      const end = new Date(d.endDate); end.setHours(0,0,0,0);
+      const now2 = new Date(); now2.setHours(0,0,0,0);
+      const days = Math.round((end-now2)/(1000*60*60*24));
+      return {...d, daysLeft:days};
+    });
+  },[deals,dismissedExpiry]);
   const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#34c759",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
   const modal30base=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
   const modal30=useMemo(()=>modal30base,[modal30base]);
@@ -1534,6 +1630,7 @@ function CRM({ role = "admin", setRole }) {
               t={t}
               hideValues={hideValues}
               fmt={fmt}
+              deals={deals}
             />}
           {/* Node Utilization */}
             <div className="stat-card">
@@ -1600,7 +1697,7 @@ function CRM({ role = "admin", setRole }) {
               {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM", color:"#34c759"},
               {label:"IB + BM",      net:"IB",      arch:"BM", color:"#a78bfa"},
             ].map(({label,net,arch,color})=>{
-              const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
+              const nodes = deals.filter(d=>["Testing","In Production"].includes(d.status)&&d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
               const pct = Math.min(nodes/193,1);
               return (
                 <div key={label} style={{marginBottom:10}}>
@@ -1617,6 +1714,25 @@ function CRM({ role = "admin", setRole }) {
           </div>
           </div>
 
+
+          {/* ── Expiring Deals Banner ──────────────────────────────────── */}
+          {expiringDeals.length>0&&(
+            <div style={{marginBottom:16}}>
+              {expiringDeals.map(d=>(
+                <div key={d.id} style={{display:'flex',alignItems:'center',gap:12,background:'rgba(255,149,0,0.08)',border:'1px solid rgba(255,149,0,0.35)',borderRadius:8,padding:'9px 14px',marginBottom:6}}>
+                  <span style={{fontSize:16,flexShrink:0}}>{d.daysLeft===0?'🔴':d.daysLeft<=3?'🟠':'🟡'}</span>
+                  <div style={{flex:1,minWidth:0}}>
+                    <span style={{fontWeight:600,color:'#1c1c1e',fontSize:12}}>{d.customer}</span>
+                    <span style={{color:'#ff9500',fontSize:11,marginLeft:8,fontWeight:500}}>
+                      {d.daysLeft===0?'Ends today':d.daysLeft===1?'Ends tomorrow':`Ends in ${d.daysLeft} days`}
+                    </span>
+                    <span style={{color:'#6e6e73',fontSize:10,marginLeft:6}}>{d.endDate}</span>
+                  </div>
+                  <button onClick={()=>dismissExpiry(d.id)} title="Dismiss" style={{background:'none',border:'none',color:'#aeaeb2',cursor:'pointer',fontSize:16,padding:'0 2px',lineHeight:1,flexShrink:0}}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
             <input style={{width:220}} placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)}/>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
@@ -1644,12 +1760,12 @@ function CRM({ role = "admin", setRole }) {
                 {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</td></tr>}
                 {visible.map(deal=>{
                   const allocs=deal.gpuAllocations||[]; const gpu30=calcGPU30Day(allocs); const stor30=Number(deal.storage30Day)||0; const grand30=gpu30+stor30; const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal);
-                  const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments";
+                  const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const isExpiring=expiringDeals&&expiringDeals.some(e=>e.id===deal.id); const daysLeftDeal=isExpiring?(expiringDeals.find(e=>e.id===deal.id)?.daysLeft??null):null;
                   const pf=getPF(deal.id); const totalNodes=allocs.reduce((s,a)=>s+(Number(a.nodes)||0),0); const hasNotes=!!(deal.notes&&deal.notes.trim());
                   return [
                     <tr key={deal.id} className={special?"special-row-hover row-hover":"row-hover"} style={{borderBottom:isExp?"none":`1px solid ${t.borderDeep}`,transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}{isExpiring&&<span title={daysLeftDeal===0?'Ends today':`${daysLeftDeal}d left`} style={{fontSize:9,background:daysLeftDeal===0?'rgba(255,59,48,0.12)':'rgba(255,149,0,0.12)',color:daysLeftDeal===0?'#ff3b30':'#ff9500',border:`1px solid ${daysLeftDeal===0?'rgba(255,59,48,0.3)':'rgba(255,149,0,0.3)'}`,borderRadius:4,padding:'1px 5px',fontWeight:700}}>⚠ {daysLeftDeal===0?'TODAY':`${daysLeftDeal}D`}</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
                       <td style={{padding:"13px 16px",color:"#48484a",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#aeaeb2"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
@@ -1950,6 +2066,7 @@ function MobileCRM(props) {
     deals, visible, totals, loadState, fbReady, onlineUsers, saveBadge,
     t, horizon, toggleTheme,
     hideValues, setHideValues, search, setSearch, filterStatus, setFilterStatus,
+  expiringDeals, dismissExpiry,
     expandedId, toggleExpand, expandTab, setExpandTab,
     paymentForms, setPF, getPF, addPayment, deletePayment,
     editingPayment, startEditPayment, cancelEditPayment, saveEditPayment, setEditingPayment,
@@ -2103,7 +2220,7 @@ function MobileCRM(props) {
                 {label:"RoCE v2 + BM", net:"RoCE v2", arch:"BM",  color:"#34c759"},
                 {label:"IB + BM",      net:"IB",      arch:"BM",  color:"#a78bfa"},
               ].map(({label,net,arch,color})=>{
-                const nodes = deals.filter(d=>d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
+                const nodes = deals.filter(d=>["Testing","In Production"].includes(d.status)&&d.networking===net&&d.architecture===arch).reduce((s,d)=>(d.gpuAllocations||[]).reduce((ss,a)=>ss+(Number(a.nodes)||0),s),0);
                 const pct = Math.min(nodes/193,1);
                 return (
                   <div key={label} style={{marginBottom:10}}>
