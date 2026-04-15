@@ -1144,7 +1144,7 @@ function CRM({ role = "admin", setRole }) {
   const [showModal, setShowModal]       = useState(false);
   const [modalTab, setModalTab]         = useState("gpu");
   const [form, setForm]                 = useState(emptyDeal());
-  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("Active");
   const [search, setSearch]             = useState("");
   const [sortKey, setSortKey]           = useState(null);
   const [sortDir, setSortDir]           = useState(1);
@@ -1298,9 +1298,10 @@ function CRM({ role = "admin", setRole }) {
   const saveEditPayment=()=>{ if(!editingPayment||!editingPayment.amount) return; const{dealId,paymentId,amount,datePaid,period}=editingPayment; updateDeals(d=>d.map(x=>x.id===dealId?{...x,payments:(x.payments||[]).map(p=>p.id===paymentId?{...p,amount:Number(amount),datePaid,period}:p)}:x)); setEditingPayment(null); };
   const toggleSort=(key)=>{ if(sortKey===key) setSortDir(d=>-d); else{setSortKey(key);setSortDir(1);} };
 
-  const visible=useMemo(()=>{ let list=deals.filter(d=>(filterStatus==="All"||d.status===filterStatus)&&d.customer.toLowerCase().includes(search.toLowerCase())); if(sortKey) list=[...list].sort((a,b)=>{ let av=sortKey==="totalCollected"?totalCollected(a):sortKey==="grand30"?calcEffective30Day(a):a[sortKey]; let bv=sortKey==="totalCollected"?totalCollected(b):sortKey==="grand30"?calcEffective30Day(b):b[sortKey]; if(typeof av==="string"){av=av.toLowerCase();bv=bv.toLowerCase();} return av<bv?-sortDir:av>bv?sortDir:0; }); return list; },[deals,filterStatus,search,sortKey,sortDir]);
+  const ACTIVE_DEALS=["Testing","In Production"];
+  const visible=useMemo(()=>{ let list=deals.filter(d=>((filterStatus==="All"&&true)||(filterStatus==="Active"&&ACTIVE_DEALS.includes(d.status))||(filterStatus!=="All"&&filterStatus!=="Active"&&d.status===filterStatus))&&d.customer.toLowerCase().includes(search.toLowerCase())); if(sortKey) list=[...list].sort((a,b)=>{ let av=sortKey==="totalCollected"?totalCollected(a):sortKey==="grand30"?calcEffective30Day(a):a[sortKey]; let bv=sortKey==="totalCollected"?totalCollected(b):sortKey==="grand30"?calcEffective30Day(b):b[sortKey]; if(typeof av==="string"){av=av.toLowerCase();bv=bv.toLowerCase();} return av<bv?-sortDir:av>bv?sortDir:0; }); return list; },[deals,filterStatus,search,sortKey,sortDir]);
   const MAX_H100=128,MAX_H200=65;
-  const totals=useMemo(()=>{ const ACTIVE_STATUSES=["Testing","In Production"]; const h100=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=deals.filter(d=>ACTIVE_STATUSES.includes(d.status)).reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); return{deals:visible.length,pipeline:visible.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:visible.reduce((s,d)=>s+totalCollected(d),0),monthly:visible.reduce((s,d)=>s+calcEffective30Day(d),0),h100Nodes:h100,h200Nodes:h200}; },[visible,deals]);
+  const totals=useMemo(()=>{ const activeDeals=deals.filter(d=>["Testing","In Production"].includes(d.status)); const h100=activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H100").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const h200=activeDeals.reduce((s,d)=>s+(d.gpuAllocations||[]).filter(a=>a.gpuType==="H200").reduce((ss,a)=>ss+(Number(a.nodes)||0),0),0); const allCollected=deals.reduce((s,d)=>s+totalCollected(d),0); const allMonthly=activeDeals.reduce((s,d)=>s+calcEffective30Day(d),0); return{deals:activeDeals.length,pipeline:activeDeals.reduce((s,d)=>s+(d.fullContractValue||0),0),collected:allCollected,monthly:allMonthly,h100Nodes:h100,h200Nodes:h200}; },[deals]);
   const statusOf=(label)=>STATUSES.find(s=>s.label===label)||STATUSES[0];
   const saveBadge={saving:{color:"#f59e0b",text:"● Saving…",pulse:true},saved:{color:"#34c759",text:"✓ Saved",pulse:false},error:{color:"#ef4444",text:"✕ Save failed",pulse:false}}[saveState];
   const modal30base=useMemo(()=>calcGPU30Day(form.gpuAllocations)+(Number(form.storage30Day)||0),[form.gpuAllocations,form.storage30Day]);
@@ -1619,7 +1620,7 @@ function CRM({ role = "admin", setRole }) {
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
             <input style={{width:220}} placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)}/>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} className="filter-pill" onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:t.accentGlow):"transparent",borderColor:active?(st?st.color:t.accent):t.borderSoft,color:active?(st?st.color:t.accent):t.textDim}}>{s}</button>; })}
+              {["Active","All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); const isActive=s==="Active"; return <button key={s} className="filter-pill" onClick={()=>setFilterStatus(s)} style={{background:active?(isActive?"rgba(0,122,255,0.1)":st?st.bg:t.accentGlow):"transparent",borderColor:active?(isActive?t.accent:st?st.color:t.accent):t.borderSoft,color:active?(isActive?t.accent:st?st.color:t.accent):t.textDim}}>{s}</button>; })}
             </div>
           </div>
 
@@ -2153,7 +2154,7 @@ function MobileCRM(props) {
             )}
             <input placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)} style={{marginBottom:10,fontSize:14}}/>
             <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
-              {["All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(st?st.color:"#007aff"):"#c7c7cc"}`,color:active?(st?st.color:"#007aff"):"#6e6e73",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
+              {["Active","All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); const isActive=s==="Active"; return <button key={s} onClick={()=>setFilterStatus(s)} style={{background:active?(isActive?"rgba(0,122,255,0.1)":st?st.bg:"rgba(0,153,255,0.15)"):"transparent",border:`1px solid ${active?(isActive?"#007aff":st?st.color:"#007aff"):"#c7c7cc"}`,color:active?(isActive?"#007aff":st?st.color:"#007aff"):"#6e6e73",borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{s}</button>; })}
             </div>
             {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</div>}
             {visible.map(deal=>{
