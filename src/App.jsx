@@ -1,3 +1,4 @@
+// v2025.04.29-ux
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
 function useIsMobile() {
