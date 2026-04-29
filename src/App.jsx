@@ -127,34 +127,34 @@ const HORIZON_THEME = {
 };
 
 const SPECIAL_THEME = {
-  bg:         "#1a0020",
-  bgCard:     "#2a0535",
-  bgHeader:   "#1f0028",
-  bgInput:    "#2a0535",
-  bgDeep:     "#130018",
-  bgRow:      "#1f0030",
-  bgTable:    "#220030",
-  border:     "#c026d3",
-  borderSoft: "#a21caf",
-  borderDeep: "#7e22ce",
-  text:       "#f9d4ff",
-  textBright: "#ffeeff",
-  textMid:    "#e879f9",
-  textDim:    "#c026d3",
-  textDeep:   "#7e22ce",
-  accent:     "#f0abfc",
-  accentDark: "#d946ef",
-  accentGlow: "rgba(240,171,252,0.25)",
-  green:      "#f472b6",
-  greenBg:    "rgba(244,114,182,0.1)",
-  greenBorder:"#be185d",
-  amber:      "#fb7185",
-  red:        "#f43f5e",
-  logoStop1:  "#d946ef",
-  logoStop2:  "#f9a8d4",
-  scrollThumb:"#a21caf",
-  scrollTrack:"#1a0020",
-  rowHover:   "rgba(240,171,252,0.06)",
+  bg:         "#f2f2f7",
+  bgCard:     "#ffffff",
+  bgHeader:   "#ffffff",
+  bgInput:    "#f2f2f7",
+  bgDeep:     "#e8e8ed",
+  bgRow:      "#f9f9fb",
+  bgTable:    "#ffffff",
+  border:     "#d1d1d6",
+  borderSoft: "#c7c7cc",
+  borderDeep: "#e5e5ea",
+  text:       "#1c1c1e",
+  textBright: "#000000",
+  textMid:    "#48484a",
+  textDim:    "#6e6e73",
+  textDeep:   "#aeaeb2",
+  accent:     "#007aff",
+  accentDark: "#0055cc",
+  accentGlow: "rgba(0,122,255,0.15)",
+  green:      "#34c759",
+  greenBg:    "rgba(52,199,89,0.08)",
+  greenBorder:"rgba(52,199,89,0.3)",
+  amber:      "#ff9500",
+  red:        "#ff3b30",
+  logoStop1:  "#007aff",
+  logoStop2:  "#5ac8fa",
+  scrollThumb:"#c7c7cc",
+  scrollTrack:"#f2f2f7",
+  rowHover:   "rgba(0,0,0,0.025)",
 };
 
 function useTheme() {
@@ -361,7 +361,7 @@ function SparkleEmitter({ active }) {
   const [sparks, setSparks] = useState([]);
   useEffect(() => {
     if (!active) { setSparks([]); return; }
-    const EMOJIS = ["✨","💖","🌸","💫","⭐","🦋","🌺","💕","🎀","💗","🌷","💝","❤️‍🩹","❤️‍🩹","❤️‍🩹"];
+    const EMOJIS = []; // dev mode — no sparkles
     const interval = setInterval(() => {
       const id = Math.random().toString(36).slice(2);
       const x = Math.random() * window.innerWidth;
@@ -389,7 +389,8 @@ function SparkleEmitter({ active }) {
 
 
 // ─── SCROLL-AWARE WRAPPER ─────────────────────────────────────────────────────
-function AaronJudgeAtBottom({ active }) {
+function AaronJudgeAtBottom({ active }) { return null; // removed
+  return null;
   const [nearBottom, setNearBottom] = useState(false);
   useEffect(() => {
     if (!active) { setNearBottom(false); return; }
@@ -1199,6 +1200,18 @@ function CRM({ role = "admin", setRole }) {
   const [dismissedExpiry, setDismissedExpiry] = useState(()=>{ try{return JSON.parse(localStorage.getItem("nexus-dismissed-expiry")||"[]");}catch{return [];} });
   const dismissExpiry = (id) => { const next=[...new Set([...dismissedExpiry,id])]; setDismissedExpiry(next); localStorage.setItem("nexus-dismissed-expiry",JSON.stringify(next)); };
   const localInvOp = useRef(false);
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────
+  useEffect(()=>{
+    const handler=(e)=>{
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+      if(e.key==='n'||e.key==='N'){ e.preventDefault(); setShowModal(true); }
+      if(e.key==='Escape'){ setShowModal(false); setEditId(null); setQuickPayId(null); }
+    };
+    window.addEventListener('keydown',handler);
+    return ()=>window.removeEventListener('keydown',handler);
+  },[]);
+
   const [repairRma, setRepairRma] = useState(()=>{
     try { const s=localStorage.getItem("nexus-repair-rma"); return s?JSON.parse(s):{H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; } catch(e){ return {H100:{repair:0,rma:0},H200:{repair:0,rma:0}}; }
   });
@@ -1227,6 +1240,8 @@ function CRM({ role = "admin", setRole }) {
   const [filterStatus, setFilterStatus] = useState("Active");
   const [search, setSearch]             = useState("");
   const [sortKey, setSortKey]           = useState(null);
+  const [allExpanded, setAllExpanded]   = useState(false);
+  const [quickPayId, setQuickPayId]     = useState(null);
   const [sortDir, setSortDir]           = useState(1);
   const [expandedId, setExpandedId]     = useState(null);
   const [expandTab, setExpandTab]       = useState({});
@@ -1372,6 +1387,11 @@ function CRM({ role = "admin", setRole }) {
     pushNotif("invoice_paid","Invoice paid",`$${Number(inv.amount).toLocaleString()} · ${inv.customerName}`);
   };
 
+  const copyDeal=(deal)=>{
+    const newDeal={...deal,id:uid(),customer:deal.customer+" (copy)",payments:[],startDate:"",endDate:"",notes:"",createdAt:Date.now()};
+    updateDeals(d=>[...d,newDeal]);
+    pushNotif("copy","Deal duplicated",`${deal.customer} copied`);
+  };
   const saveNotes=(dealId,notes)=>updateDeals(d=>d.map(x=>x.id===dealId?{...x,notes}:x));
   const startEditPayment=(dealId,p)=>setEditingPayment({dealId,paymentId:p.id,amount:String(p.amount),datePaid:p.datePaid,period:p.period||""});
   const cancelEditPayment=()=>setEditingPayment(null);
@@ -1472,9 +1492,9 @@ function CRM({ role = "admin", setRole }) {
         @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
         @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
         .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
-        .special-bg-m{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020);background-size:400% 400%;animation:shimmer 6s ease infinite;}
-        .special-header-m{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028);animation:shimmer 4s ease infinite;}
-        .special-text-m{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
+        .special-bg-m{/* dev mode — same bg */}
+        .special-header-m{/* dev mode — same header */}
+        .special-text-m{color:inherit;}
         @keyframes pinA{0%,100%{opacity:.3}50%{opacity:1}} @keyframes core200{0%,100%{opacity:.2}50%{opacity:1}}
         @keyframes ring200{from{transform:rotate(0deg)}to{transform:rotate(360deg)}} @keyframes pinB{0%,100%{opacity:.25}60%{opacity:1}}
         @keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
@@ -1491,12 +1511,12 @@ function CRM({ role = "admin", setRole }) {
         @keyframes rainbowBorder{0%{border-color:#f9a8d4}25%{border-color:#c084fc}50%{border-color:#fb7185}75%{border-color:#f0abfc}100%{border-color:#f9a8d4}}
         @keyframes floatUp{0%{opacity:0;transform:translateY(10px) scale(0)}10%{opacity:1}90%{opacity:0.8}100%{opacity:0;transform:translateY(-80px) scale(1.5)}}
         .special-sparkle{position:fixed;pointer-events:none;z-index:9999;font-size:18px;animation:floatUp 3s ease-in forwards;}
-        .special-bg{background:linear-gradient(135deg,#1a0020,#2d0040,#1a0035,#2a0020) !important;background-size:400% 400% !important;animation:shimmer 6s ease infinite !important;cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
+        .special-bg{/* dev mode — same bg as regular */ cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
         .special-bg *{cursor:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDQwIDU2Ij4KICA8IS0tIFdyaXN0IC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjUwIiByeD0iMTAiIHJ5PSI2IiBmaWxsPSIjM2E4MGNjIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgPCEtLSBQYWxtIC0tPgogIDxlbGxpcHNlIGN4PSIyMCIgY3k9IjM4IiByeD0iMTMiIHJ5PSIxMiIgZmlsbD0iIzRhOWFlMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gUGFsbSBzaGVlbiAtLT4KICA8ZWxsaXBzZSBjeD0iMTciIGN5PSIzNSIgcng9IjYiIHJ5PSI0IiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMTQpIi8+CgogIDwhLS0gUGlua3kgKGZhciBsZWZ0LCBzaG9ydCwgYW5nbGVkKSAtLT4KICA8cmVjdCB4PSIyIiB5PSIyMiIgd2lkdGg9IjciIGhlaWdodD0iMTYiIHJ4PSIzLjUiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjMiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1LjUgMzApIi8+CiAgPGVsbGlwc2UgY3g9IjMuMiIgY3k9IjIwLjUiIHJ4PSIzLjgiIHJ5PSI0LjUiIGZpbGw9IiM1YWFhZjAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjEiLz4KICA8ZWxsaXBzZSBjeD0iMy4yIiBjeT0iMTcuNSIgcng9IjIuNSIgcnk9IjMuMiIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOCIvPgoKICA8IS0tIEluZGV4IChsZWZ0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKC02IDE0IDIxKSIvPgogIDxlbGxpcHNlIGN4PSIxMiIgY3k9IjkiIHJ4PSI0LjIiIHJ5PSI1IiBmaWxsPSIjNWFhYWYwIiBzdHJva2U9IiMxYTNhNmEiIHN0cm9rZS13aWR0aD0iMS4xIi8+CiAgPGVsbGlwc2UgY3g9IjEyIiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gTWlkZGxlICh0YWxsZXN0LCBjZW50ZXIpIC0tPgogIDxyZWN0IHg9IjE5IiB5PSI2IiB3aWR0aD0iOCIgaGVpZ2h0PSIyNCIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiLz4KICA8ZWxsaXBzZSBjeD0iMjMiIGN5PSI2IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjIuMiIgcng9IjIuOCIgcnk9IjMuNSIgZmlsbD0iIzFhM2E3YSIgc3Ryb2tlPSIjMGExYTRhIiBzdHJva2Utd2lkdGg9IjAuOSIvPgoKICA8IS0tIFJpbmcgKHJpZ2h0IG9mIGNlbnRlcikgLS0+CiAgPHJlY3QgeD0iMjgiIHk9IjEwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyMiIgcng9IjQiIGZpbGw9IiM0YTlhZTAiIHN0cm9rZT0iIzFhM2E2YSIgc3Ryb2tlLXdpZHRoPSIxLjQiIHRyYW5zZm9ybT0icm90YXRlKDYgMzIgMjEpIi8+CiAgPGVsbGlwc2UgY3g9IjMzLjUiIGN5PSI5IiByeD0iNC4yIiByeT0iNSIgZmlsbD0iIzVhYWFmMCIgc3Ryb2tlPSIjMWEzYTZhIiBzdHJva2Utd2lkdGg9IjEuMSIvPgogIDxlbGxpcHNlIGN4PSIzMy44IiBjeT0iNS4yIiByeD0iMi44IiByeT0iMy41IiBmaWxsPSIjMWEzYTdhIiBzdHJva2U9IiMwYTFhNGEiIHN0cm9rZS13aWR0aD0iMC45Ii8+CgogIDwhLS0gS251Y2tsZSBoaWdobGlnaHRzIC0tPgogIDxlbGxpcHNlIGN4PSIxMy41IiBjeT0iMTkiIHJ4PSIxLjgiIHJ5PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMjgpIiB0cmFuc2Zvcm09InJvdGF0ZSgtNiAxMy41IDE5KSIvPgogIDxlbGxpcHNlIGN4PSIyMyIgY3k9IjE1IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIvPgogIDxlbGxpcHNlIGN4PSIzMiIgY3k9IjE5IiByeD0iMS44IiByeT0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjI4KSIgdHJhbnNmb3JtPSJyb3RhdGUoNiAzMiAxOSkiLz4KPC9zdmc+') 23 2, auto !important;}
-        .special-header{background:linear-gradient(90deg,#1f0028,#3b0050,#1f0028) !important;animation:shimmer 4s ease infinite !important;}
-        .special-glow{box-shadow:0 0 20px rgba(240,171,252,0.3),0 0 40px rgba(217,70,239,0.15) !important;}
-        .special-text{background:linear-gradient(90deg,#f9a8d4,#c084fc,#f0abfc,#fb7185);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s ease infinite;background-size:300% 300%;}
-        .special-row-hover:hover{background:rgba(240,171,252,0.08) !important;}
+        .special-header{/* dev mode — same header */}
+        .special-glow{/* no glow in dev mode */}
+        .special-text{color:inherit;}
+        .special-row-hover:hover{background:rgba(0,0,0,0.025) !important;}
       `}</style>
 
       {/* Header */}
@@ -1504,7 +1524,7 @@ function CRM({ role = "admin", setRole }) {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <HorizonLogo size={36} stop1={t.logoStop1} stop2={t.logoStop2}/>
           <div>
-            <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}>{!special&&<span style={{color:t.textBright}}>HORIZON<span style={{color:"#007aff",fontWeight:800}}>COMPUTE</span></span>}{special&&"✨ HORIZONCOMPUTE ✨"}</div>
+            <div style={{fontFamily:"-apple-system,BlinkMacSystemFont,'Inter','Helvetica Neue',sans-serif",fontSize:18,fontWeight:800,letterSpacing:"0.02em"}} className={special?"special-text":""}><span style={{color:t.textBright}}>HORIZON<span style={{color:"#007aff",fontWeight:800}}>COMPUTE</span></span></div>
             <div style={{fontSize:10,color:t.textDim,letterSpacing:"0.04em",textTransform:"uppercase"}}>Sales Intelligence Platform</div>
           </div>
         </div>
@@ -1590,7 +1610,7 @@ function CRM({ role = "admin", setRole }) {
 
       {loadState==="ready"&&(
         <div style={{padding:"28px 32px"}}>
-          <div style={{display:"grid",gridTemplateColumns:isTech?"1fr 1fr 1fr":"1fr 1.1fr 1fr 1fr",gap:16,marginBottom:28}}>
+          <div style={{display:"grid",gridTemplateColumns:isTech?"1fr 1fr 1fr":special?"1fr 1.1fr 1fr 1fr":"1fr 1fr 1fr",gap:16,marginBottom:28}}>
 
             {/* Consolidated stats card */}
             <div className="stat-card" style={{display:"flex",flexDirection:"column",justifyContent:"space-between"}}>
@@ -1623,8 +1643,8 @@ function CRM({ role = "admin", setRole }) {
               )}
             </div>
 
-            {/* RPG Character */}
-            {!isTech&&<RPGCharWidget
+            {/* RPG Character — developer mode only */}
+            {special&&!isTech&&<RPGCharWidget
               totalCollected={totals.collected}
               lastPaymentAmount={lastPaymentAmt}
               t={t}
@@ -1734,8 +1754,12 @@ function CRM({ role = "admin", setRole }) {
             </div>
           )}
           <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
-            <input style={{width:220}} placeholder="Search customer…" value={search} onChange={e=>setSearch(e.target.value)}/>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <input style={{width:220}} placeholder="Search customer… (N = new deal)" value={search} onChange={e=>setSearch(e.target.value)}/>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
+              <button onClick={allExpanded?collapseAll:expandAll} style={{background:"transparent",border:`1px solid ${t.border}`,color:t.textDim,borderRadius:20,padding:"5px 12px",fontFamily:"inherit",fontSize:10,fontWeight:500,cursor:"pointer",letterSpacing:"0.02em"}}>
+                {allExpanded?"Collapse all":"Expand all"}
+              </button>
+              <div style={{width:1,height:16,background:t.border}}/>
               {["Active","All",...STATUSES.map(s=>s.label)].map(s=>{ const active=filterStatus===s; const st=STATUSES.find(x=>x.label===s); const isActive=s==="Active"; return <button key={s} className="filter-pill" onClick={()=>setFilterStatus(s)} style={{background:active?(isActive?"rgba(0,122,255,0.1)":st?st.bg:t.accentGlow):"transparent",borderColor:active?(isActive?t.accent:st?st.color:t.accent):t.borderSoft,color:active?(isActive?t.accent:st?st.color:t.accent):t.textDim}}>{s}</button>; })}
             </div>
           </div>
@@ -1757,15 +1781,20 @@ function CRM({ role = "admin", setRole }) {
                 </tr>
               </thead>
               <tbody>
-                {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</td></tr>}
+                {visible.length===0&&<tr><td colSpan={13} style={{textAlign:"center",padding:"48px 24px",color:"#aeaeb2"}}> 
+                  <div style={{fontSize:24,marginBottom:8}}>{filterStatus==="Active"?"🤝":filterStatus==="Finished"?"✅":filterStatus==="Terminated"?"🚫":filterStatus==="Testing"?"🧪":"📋"}</div>
+                  <div style={{fontSize:13,fontWeight:500,color:"#48484a",marginBottom:4}}>{filterStatus==="Active"?"No active deals yet":filterStatus==="All"?"No deals found":`No ${filterStatus.toLowerCase()} deals`}</div>
+                  {filterStatus==="Active"&&!isTech&&<button onClick={()=>setShowModal(true)} style={{marginTop:8,background:"#007aff",color:"#fff",border:"none",borderRadius:6,padding:"8px 18px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer"}}>+ New Deal</button>}
+                </td></tr>}
                 {visible.map(deal=>{
                   const allocs=deal.gpuAllocations||[]; const gpu30=calcGPU30Day(allocs); const stor30=Number(deal.storage30Day)||0; const grand30=gpu30+stor30; const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal);
-                  const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const isExpiring=expiringDeals&&expiringDeals.some(e=>e.id===deal.id); const daysLeftDeal=isExpiring?(expiringDeals.find(e=>e.id===deal.id)?.daysLeft??null):null;
+                  const st=statusOf(deal.status); const collected=totalCollected(deal); const isExp=allExpanded||expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const isExpiring=expiringDeals&&expiringDeals.some(e=>e.id===deal.id); const daysLeftDeal=isExpiring?(expiringDeals.find(e=>e.id===deal.id)?.daysLeft??null):null;
                   const pf=getPF(deal.id); const totalNodes=allocs.reduce((s,a)=>s+(Number(a.nodes)||0),0); const hasNotes=!!(deal.notes&&deal.notes.trim());
                   return [
                     <tr key={deal.id} className={special?"special-row-hover row-hover":"row-hover"} style={{borderBottom:isExp?"none":`1px solid ${t.borderDeep}`,transition:"background .1s",background:isExp?"rgba(0,100,200,0.04)":"transparent"}}>
                       <td style={{padding:"13px 8px 13px 16px"}}><button className="btn-expand" onClick={()=>toggleExpand(deal.id,curTab)}><span style={{fontSize:10,display:"inline-block",transition:"transform .2s",transform:isExp?"rotate(90deg)":"rotate(0deg)"}}>▶</span></button></td>
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}{isExpiring&&<span title={daysLeftDeal===0?'Ends today':`${daysLeftDeal}d left`} style={{fontSize:9,background:daysLeftDeal===0?'rgba(255,59,48,0.12)':'rgba(255,149,0,0.12)',color:daysLeftDeal===0?'#ff3b30':'#ff9500',border:`1px solid ${daysLeftDeal===0?'rgba(255,59,48,0.3)':'rgba(255,149,0,0.3)'}`,borderRadius:4,padding:'1px 5px',fontWeight:700}}>⚠ {daysLeftDeal===0?'TODAY':`${daysLeftDeal}D`}</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
+                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><span style={{color:t.textBright,fontWeight:500}}>{deal.customer||"—"}</span>{hasNotes&&<span style={{fontSize:11,color:"#f59e0b"}}>✎</span>}{deal.startDate&&(()=>{const days=Math.round((Date.now()-new Date(deal.startDate))/(1000*60*60*24));return days>0?<span style={{fontSize:9,color:"#aeaeb2",marginLeft:2}}>{days}d</span>:null;})()}
+                          {isExpiring&&<span title={daysLeftDeal===0?'Ends today':`${daysLeftDeal}d left`} style={{fontSize:9,background:daysLeftDeal===0?'rgba(255,59,48,0.12)':'rgba(255,149,0,0.12)',color:daysLeftDeal===0?'#ff3b30':'#ff9500',border:`1px solid ${daysLeftDeal===0?'rgba(255,59,48,0.3)':'rgba(255,149,0,0.3)'}`,borderRadius:4,padding:'1px 5px',fontWeight:700}}>⚠ {daysLeftDeal===0?'TODAY':`${daysLeftDeal}D`}</span>}<NetworkingBadge value={deal.networking}/><ArchitectureBadge value={deal.architecture}/>{isOD&&<span style={{fontSize:9,background:"rgba(245,158,11,0.1)",color:"#f59e0b",border:"1px solid rgba(245,158,11,0.2)",borderRadius:3,padding:"1px 6px",fontWeight:700,letterSpacing:"0.04em"}}>OD</span>}</div></td>
                       <td style={{padding:"13px 16px",color:t.textMid,fontSize:11,whiteSpace:"nowrap"}}>{deal.startDate||"—"}</td>
                       <td style={{padding:"13px 16px",color:"#48484a",fontSize:11,whiteSpace:"nowrap"}}>{deal.endDate||"—"}</td>
                       <td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:4}}>{allocs.length===0?<span style={{color:"#aeaeb2"}}>—</span>:allocs.map(a=>{const gs=gpuStyle(a.gpuType);return <div key={a.id} style={{display:"flex",alignItems:"center",gap:6}}><span className="gpu-badge" style={{background:gs.bg,color:gs.color}}>{a.gpuType}</span>{!hideValues&&!isTech&&<span style={{color:"#5a7a9a",fontSize:11}}>${Number(a.ratePerGpuHour||0).toFixed(2)}/hr</span>}</div>;})}</div></td>
@@ -1783,9 +1812,39 @@ function CRM({ role = "admin", setRole }) {
 </div>}</td>}
                       {!isTech&&<td style={{padding:"13px 16px"}}>{hideValues?<Redacted/>:<span style={{color:"#1c1c1e"}}>{deal.fullContractValue?fmtShort(deal.fullContractValue):"—"}</span>}</td>}
                       {!isTech&&<td style={{padding:"13px 16px",color:"#48484a",fontSize:11}}>{deal.paymentTerms}</td>}
-                      <td style={{padding:"13px 16px"}}><span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span></td>
-                      {!isTech&&<td style={{padding:"13px 16px"}}><div style={{display:"flex",flexDirection:"column",gap:2}}>{hideValues?<Redacted/>:<span style={{color:collected>0?"#34c759":"#6e6e73",fontWeight:600}}>{collected>0?fmtShort(collected):"$0"}</span>}{(deal.payments||[]).length>0&&<span style={{fontSize:9,color:"#2a5a3a",letterSpacing:"0.01em"}}>{deal.payments.length} PMT{deal.payments.length!==1?"S":""}</span>}</div></td>}
-                      <td style={{padding:"13px 16px"}}><div style={{display:"flex",gap:6}}>{!isTech&&<button className="btn-ghost" onClick={()=>openEdit(deal)}>Edit</button>}<button className="btn-danger" onClick={()=>deleteDeal(deal.id)}>✕</button></div></td>
+                      <td style={{padding:"8px 16px"}}>
+                        {isTech ? (
+                          <span style={{background:st.bg,color:st.color,padding:"4px 10px",borderRadius:4,fontSize:11,fontWeight:600}}>{deal.status}</span>
+                        ) : (
+                          <select value={deal.status} onChange={e=>updateDeals(d=>d.map(x=>x.id===deal.id?{...x,status:e.target.value}:x))}
+                            style={{background:st.bg,color:st.color,border:"none",borderRadius:4,fontSize:11,fontWeight:600,padding:"4px 8px",cursor:"pointer",outline:"none",width:"auto",appearance:"auto"}}>
+                            {STATUSES.map(s=><option key={s.label} value={s.label}>{s.label}</option>)}
+                          </select>
+                        )}
+                      </td>
+                      {!isTech&&<td style={{padding:"13px 16px"}}>
+                        {hideValues?<Redacted/>:(()=>{
+                          const pmts=(deal.payments||[]).slice().sort((a,b)=>new Date(a.datePaid)-new Date(b.datePaid));
+                          const maxAmt=Math.max(...pmts.map(p=>Number(p.amount)||0),1);
+                          return <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                            <span style={{color:collected>0?"#34c759":"#6e6e73",fontWeight:600,fontSize:12}}>{collected>0?fmtShort(collected):"$0"}</span>
+                            {pmts.length>0&&<div style={{display:"flex",alignItems:"flex-end",gap:1.5,height:16}} title={`${pmts.length} payment${pmts.length!==1?"s":""}`}>
+                              {pmts.slice(-10).map((p,i)=>{
+                                const h=Math.max(3,Math.round(14*((Number(p.amount)||0)/maxAmt)));
+                                return <div key={i} style={{width:3,height:h,background:"#34c759",borderRadius:1.5,opacity:0.7+(i/pmts.length)*0.3}}/>;
+                              })}
+                            </div>}
+                          </div>;
+                        })()}
+                      </td>}
+                      <td style={{padding:"8px 16px"}}>
+                        <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                          {!isTech&&<button className="btn-ghost" title="Quick pay (log payment)" onClick={e=>{e.stopPropagation();setQuickPayId(deal.id);}} style={{fontSize:10,padding:"4px 8px",color:"#34c759",borderColor:"rgba(52,199,89,0.3)"}}>+ Pay</button>}
+                          {!isTech&&<button className="btn-ghost" title="Edit deal" onClick={()=>openEdit(deal)} style={{fontSize:10,padding:"4px 8px"}}>Edit</button>}
+                          {!isTech&&<button className="btn-ghost" title="Duplicate deal" onClick={()=>copyDeal(deal)} style={{fontSize:10,padding:"4px 8px"}}>⧉</button>}
+                          <button className="btn-danger" title="Delete deal" onClick={()=>deleteDeal(deal.id)} style={{fontSize:10,padding:"4px 8px"}}>✕</button>
+                        </div>
+                      </td>
                     </tr>,
                     isExp&&(
                       <tr key={`${deal.id}-exp`} className="expand-row">
@@ -1946,7 +2005,6 @@ function CRM({ role = "admin", setRole }) {
             </button>
           </div>
           <SparkleEmitter active={special}/>
-          <AaronJudgeAtBottom active={special}/>
         </div>
       )}
 
@@ -2275,7 +2333,7 @@ function MobileCRM(props) {
             </div>
             {visible.length===0&&<div style={{textAlign:"center",padding:48,color:"#aeaeb2",fontSize:13}}>No deals found</div>}
             {visible.map(deal=>{
-              const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal); const isExp=expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
+              const allocs=deal.gpuAllocations||[]; const st=statusOf(deal.status); const collected=totalCollected(deal); const grand30=calcGrand30Day(deal); const effective30=calcEffective30Day(deal); const isOD=deal.onDemand; const util=calcPaymentUtil(deal); const isExp=allExpanded||expandedId===deal.id; const curTab=expandTab[deal.id]||"payments"; const pf=getPF(deal.id);
               return (
                 <div key={deal.id} className="m-card" style={{padding:0,overflow:"hidden"}}>
                   {/* Card Header */}
@@ -2415,6 +2473,40 @@ function MobileCRM(props) {
       </div>
 
       {/* New/Edit Deal Modal (bottom sheet) */}
+
+      {/* Quick Pay Popover */}
+      {quickPayId&&(()=>{
+        const deal=deals.find(d=>d.id===quickPayId);
+        if(!deal) return null;
+        const pf=getPF(quickPayId);
+        return (
+          <div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.18)"}} onClick={()=>setQuickPayId(null)}>
+            <div onClick={e=>e.stopPropagation()} style={{background:"#ffffff",border:`1px solid ${t.border}`,borderRadius:14,padding:"22px 24px",width:320,boxShadow:"0 8px 40px rgba(0,0,0,0.14)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:"#1c1c1e"}}>{deal.customer}</div>
+                  <div style={{fontSize:10,color:"#6e6e73",marginTop:2,textTransform:"uppercase",letterSpacing:"0.04em"}}>Quick Pay</div>
+                </div>
+                <button onClick={()=>setQuickPayId(null)} style={{background:"none",border:"none",color:"#aeaeb2",cursor:"pointer",fontSize:20,lineHeight:1}}>×</button>
+              </div>
+              <div style={{marginBottom:10}}>
+                <label style={{fontSize:10,color:"#6e6e73",textTransform:"uppercase",letterSpacing:"0.04em",display:"block",marginBottom:5}}>Amount ($)</label>
+                <input type="number" autoFocus placeholder="e.g. 480000" value={pf.amount} onChange={e=>setPF(quickPayId,"amount",e.target.value)}/>
+              </div>
+              <div style={{marginBottom:16}}>
+                <label style={{fontSize:10,color:"#6e6e73",textTransform:"uppercase",letterSpacing:"0.04em",display:"block",marginBottom:5}}>Date Paid</label>
+                <input type="date" value={pf.datePaid} onChange={e=>setPF(quickPayId,"datePaid",e.target.value)}/>
+              </div>
+              <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+                <button className="btn-ghost" onClick={()=>setQuickPayId(null)}>Cancel</button>
+                <button onClick={()=>{addPayment(quickPayId);setQuickPayId(null);}} style={{background:"#34c759",color:"#fff",border:"none",borderRadius:6,padding:"9px 20px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:"pointer"}}>Log Payment</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+
       {showModal&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&closeModal()}>
           <div className="modal-sheet">
