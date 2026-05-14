@@ -1388,8 +1388,6 @@ function CRM({ role = "admin", setRole }) {
     pushNotif("invoice_paid","Invoice paid",`$${Number(inv.amount).toLocaleString()} · ${inv.customerName}`);
   };
 
-  const expandAll=()=>{ setAllExpanded(true); };
-  const collapseAll=()=>{ setAllExpanded(false); setExpandedId(null); };
   const copyDeal=(deal)=>{
     const newDeal={...deal,id:uid(),customer:deal.customer+" (copy)",payments:[],startDate:"",endDate:"",notes:"",createdAt:Date.now()};
     updateDeals(d=>[...d,newDeal]);
