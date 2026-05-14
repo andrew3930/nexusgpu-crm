@@ -1,4 +1,4 @@
-// v2025.04.29-ux
+// v1778801884
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
 function useIsMobile() {
@@ -1172,6 +1172,383 @@ function RPGCharWidget({ totalCollected, lastPaymentAmount, t, hideValues, fmt, 
 }
 
 
+// ─── GPU MARKET TERMINAL ──────────────────────────────────────────────────────
+const PROVIDERS = [
+  { id:"runpod",     name:"RunPod",        url:"https://www.runpod.io/gpu-instance/pricing",    color:"#6366f1" },
+  { id:"hyperbolic", name:"Hyperbolic",    url:"https://hyperbolic.xyz/compute",                 color:"#8b5cf6" },
+  { id:"sfcompute",  name:"SF Compute",    url:"https://sfcompute.com",                           color:"#06b6d4" },
+  { id:"coreweave",  name:"CoreWeave",     url:"https://www.coreweave.com/gpu-cloud-compute",     color:"#0ea5e9" },
+  { id:"lambda",     name:"Lambda Labs",   url:"https://lambdalabs.com/service/gpu-cloud",        color:"#f59e0b" },
+  { id:"vast",       name:"Vast.ai",       url:"https://vast.ai/pricing",                         color:"#10b981" },
+  { id:"tensordock", name:"TensorDock",    url:"https://tensordock.com",                          color:"#ef4444" },
+  { id:"together",   name:"Together AI",  url:"https://www.together.ai/pricing",                 color:"#f97316" },
+];
+
+const MARKET_GPU_TYPES = ["H100 SXM", "H200", "H100 PCIe", "B300"];
+const MARKET_TERM_TYPES = ["On-Demand", "1-Month", "3-Month", "6-Month+"];
+
+function GPUMarketTerminal({ onClose, t }) {
+  const [prices, setPrices]           = useState({});        // { providerId: { gpuType: { term: price } } }
+  const [loading, setLoading]         = useState(false);
+  const [loadingProvider, setLP]      = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [selectedGPU, setSelectedGPU] = useState("H100 SXM");
+  const [selectedTerm, setSelectedTerm] = useState("On-Demand");
+  const [analysis, setAnalysis]       = useState("");
+  const [loadingAnalysis, setLA]      = useState(false);
+  const [log, setLog]                 = useState([]);
+  const [liveListings, setLiveListings] = useState([]);
+  const [liveSummary, setLiveSummary]   = useState({});
+  const [myFloorH100, setMyFloorH100] = useState(1.35);
+  const [myFloorH200, setMyFloorH200] = useState(1.70);
+  const logRef = useRef(null);
+  const refreshTimer = useRef(null);
+
+  // Auto-refresh every 20 min to stay in sync with cron
+  useEffect(()=>{
+    refreshTimer.current = setInterval(()=>{ if(!loading) fetchAllPrices(); }, 20*60*1000);
+    return ()=>clearInterval(refreshTimer.current);
+  },[]);
+
+  const addLog = (msg, type="info") => setLog(l => [...l, { msg, type, ts: Date.now() }]);
+
+  // ── Load live prices from Firebase (written by /api/fetch-prices cron) ──────
+  const loadFromFirebase = async () => {
+    addLog("Loading live prices from Firebase…", "system");
+    try {
+      const resp = await fetch("https://nexusgpu-crm-default-rtdb.firebaseio.com/market_prices.json");
+      const data = await resp.json();
+      if (!data || !data.listings) {
+        addLog("No live data in Firebase yet — triggering fresh fetch…", "system");
+        await triggerServerFetch();
+        return;
+      }
+      const age = Date.now() - (data.updatedAtMs || 0);
+      const ageMin = Math.round(age / 60000);
+      addLog(`✓ Firebase data loaded (${ageMin}m old, ${data.listings.length} listings)`, "success");
+      if (data.errors?.length) data.errors.forEach(e => addLog(`⚠ ${e.provider}: ${e.error}`, "error"));
+      return data;
+    } catch(e) {
+      addLog(`✗ Firebase load failed: ${e.message}`, "error");
+      return null;
+    }
+  };
+
+  const triggerServerFetch = async () => {
+    addLog("Triggering server-side price fetch…", "fetch");
+    try {
+      const resp = await fetch("/api/fetch-prices?trigger=manual");
+      const data = await resp.json();
+      addLog(`✓ Server fetch complete — ${data.listingsCount} listings from ${data.gpusFound?.length} GPU types`, "success");
+      if (data.errors?.length) data.errors.forEach(e => addLog(`⚠ ${e.provider}: ${e.error}`, "error"));
+    } catch(e) {
+      addLog(`✗ Server fetch failed: ${e.message}`, "error");
+    }
+  };
+
+  // Convert flat listings array → per-provider price map for the UI
+  const buildPriceMap = (listings) => {
+    const map = {};
+    for (const listing of listings) {
+      if (!map[listing.providerId]) map[listing.providerId] = {};
+      if (listing.priceOD) {
+        map[listing.providerId][listing.gpu] = {
+          "On-Demand": listing.priceOD,
+          "1-Month":   null,
+          "3-Month":   null,
+          "6-Month+":  null,
+        };
+      }
+    }
+    return map;
+  };
+
+  const fetchAllPrices = async () => {
+    setLoading(true);
+    setPrices({});
+    setAnalysis("");
+    setLog([]);
+    setLastUpdated(null);
+    addLog("── GPU Market Terminal ──", "system");
+
+    // 1. Try loading cached Firebase data first
+    const fbData = await loadFromFirebase();
+
+    // 2. If stale (>25 min) or missing, trigger a fresh server fetch then reload
+    const age = fbData ? Date.now() - (fbData.updatedAtMs || 0) : Infinity;
+    if (age > 25 * 60 * 1000) {
+      addLog("Data is stale — refreshing from providers…", "system");
+      await triggerServerFetch();
+      // Wait a moment then reload
+      await new Promise(r => setTimeout(r, 2500));
+      const fresh = await loadFromFirebase();
+      if (fresh?.listings) {
+        const priceMap = buildPriceMap(fresh.listings);
+        setPrices(priceMap);
+        setLastUpdated(new Date(fresh.updatedAt));
+        setLiveListings(fresh.listings);
+        setLiveSummary(fresh.summary || {});
+        addLog(`─── Done: ${fresh.listings.length} live listings ───`, "system");
+        await fetchAnalysis(priceMap);
+      }
+    } else if (fbData?.listings) {
+      const priceMap = buildPriceMap(fbData.listings);
+      setPrices(priceMap);
+      setLastUpdated(new Date(fbData.updatedAt));
+      setLiveListings(fbData.listings);
+      setLiveSummary(fbData.summary || {});
+      addLog(`─── Loaded ${fbData.listings.length} live listings ───`, "system");
+      await fetchAnalysis(priceMap);
+    }
+
+    setLoading(false);
+    setLP(null);
+  };
+
+  const fetchAnalysis = async (priceData) => {
+    setLA(true);
+    addLog("Running market analysis…", "system");
+    try {
+      const summary = PROVIDERS.map(p => {
+        const d = priceData[p.id];
+        if (!d) return `${p.name}: no data`;
+        return `${p.name}: H100 SXM OD=$${d["H100 SXM"]?.["On-Demand"]||"?"}/hr, H200 OD=$${d["H200"]?.["On-Demand"]||"?"}/hr`;
+      }).join("\n");
+
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 500,
+          messages: [{
+            role: "user",
+            content: `You are a GPU cloud pricing analyst advising a GPU compute supplier (neocloud) who rents H100 and H200 nodes wholesale and resells compute. Here is current market pricing:\n\n${summary}\n\nProvide a concise 3-4 sentence analysis covering: (1) where market rates are right now, (2) recommended sell-side pricing for H100 SXM and H200 on-demand vs monthly, (3) which providers are cheapest/most expensive so the supplier knows the competitive landscape. Be direct and specific with dollar amounts.`
+          }]
+        })
+      });
+      const data = await resp.json();
+      const text = data.content?.find(c=>c.type==="text")?.text || "";
+      setAnalysis(text);
+      addLog("✓ Analysis complete", "success");
+    } catch(e) {
+      addLog(`✗ Analysis failed: ${e.message}`, "error");
+    }
+    setLA(false);
+  };
+
+  // Auto-scroll log
+  useEffect(()=>{ if(logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; },[log]);
+
+  // Build comparison table for selected GPU + term
+  const tableData = PROVIDERS.map(p => ({
+    ...p,
+    price: prices[p.id]?.[selectedGPU]?.[selectedTerm] ?? null,
+    available: prices[p.id] !== null && prices[p.id] !== undefined,
+  })).filter(p => p.available).sort((a,b) => {
+    if(a.price===null) return 1;
+    if(b.price===null) return -1;
+    return a.price - b.price;
+  });
+
+  const validPrices = tableData.filter(p=>p.price!==null).map(p=>p.price);
+  const minPrice = validPrices.length ? Math.min(...validPrices) : null;
+  const maxPrice = validPrices.length ? Math.max(...validPrices) : null;
+  const avgPrice = validPrices.length ? validPrices.reduce((a,b)=>a+b,0)/validPrices.length : null;
+
+  const myPrice = selectedGPU.includes("H200") ? myFloorH200 : myFloorH100;
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:300,display:"flex",alignItems:"stretch",justifyContent:"flex-end",background:"rgba(0,0,0,0.5)"}} onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div style={{width:"min(960px,95vw)",background:"#f2f2f7",display:"flex",flexDirection:"column",height:"100vh",overflowY:"auto",boxShadow:"-8px 0 40px rgba(0,0,0,0.15)"}}>
+
+        {/* Header */}
+        <div style={{background:"#ffffff",borderBottom:"1px solid #d1d1d6",padding:"18px 24px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:10}}>
+          <div>
+            <div style={{fontSize:17,fontWeight:700,color:"#1c1c1e",letterSpacing:"0.01em"}}>📡 GPU Market Terminal</div>
+            <div style={{fontSize:11,color:"#6e6e73",marginTop:2}}>
+              {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : "Live pricing from major GPU cloud providers"}
+            </div>
+          </div>
+          <div style={{display:"flex",gap:10,alignItems:"center"}}>
+            <button onClick={fetchAllPrices} disabled={loading} style={{background:loading?"#e8e8ed":"#007aff",color:"#fff",border:"none",borderRadius:8,padding:"9px 18px",fontFamily:"inherit",fontSize:12,fontWeight:600,cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",gap:6}}>
+              {loading ? <>⏳ Scanning…</> : <>🔄 Refresh Prices</>}
+            </button>
+            <button onClick={onClose} style={{background:"none",border:"none",color:"#6e6e73",cursor:"pointer",fontSize:22,lineHeight:1,padding:"4px"}}>×</button>
+          </div>
+        </div>
+
+        <div style={{padding:"20px 24px",flex:1}}>
+
+          {/* My floor prices */}
+          <div style={{background:"#ffffff",border:"1px solid #d1d1d6",borderRadius:12,padding:"16px 20px",marginBottom:20,display:"flex",gap:24,alignItems:"center",flexWrap:"wrap"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#1c1c1e",letterSpacing:"0.04em",textTransform:"uppercase",flexShrink:0}}>My Floor Prices</div>
+            {[{label:"H100 /hr",val:myFloorH100,set:setMyFloorH100},{label:"H200 /hr",val:myFloorH200,set:setMyFloorH200}].map(({label,val,set})=>(
+              <div key={label} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:11,color:"#6e6e73"}}>{label}</span>
+                <span style={{color:"#34c759",fontWeight:700,fontSize:13}}>$</span>
+                <input type="number" step="0.01" min="0" value={val} onChange={e=>set(Number(e.target.value))}
+                  style={{width:70,background:"#f2f2f7",border:"1px solid #d1d1d6",borderRadius:6,padding:"5px 8px",fontFamily:"inherit",fontSize:13,fontWeight:700,color:"#34c759",textAlign:"center"}}/>
+              </div>
+            ))}
+            <div style={{fontSize:10,color:"#aeaeb2",marginLeft:"auto"}}>Used to show your position vs market</div>
+          </div>
+
+          {/* GPU + Term selector */}
+          <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap"}}>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {MARKET_GPU_TYPES.map(g=>(
+                <button key={g} onClick={()=>setSelectedGPU(g)} style={{background:selectedGPU===g?"#1c1c1e":"#ffffff",color:selectedGPU===g?"#ffffff":"#48484a",border:"1px solid #d1d1d6",borderRadius:8,padding:"7px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{g}</button>
+              ))}
+            </div>
+            <div style={{width:1,background:"#d1d1d6",flexShrink:0}}/>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {MARKET_TERM_TYPES.map(t=>(
+                <button key={t} onClick={()=>setSelectedTerm(t)} style={{background:selectedTerm===t?"#007aff":"#ffffff",color:selectedTerm===t?"#ffffff":"#48484a",border:"1px solid #d1d1d6",borderRadius:8,padding:"7px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",transition:"all .15s"}}>{t}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Price table */}
+          {Object.keys(prices).length > 0 ? (
+            <div style={{background:"#ffffff",border:"1px solid #d1d1d6",borderRadius:12,overflow:"hidden",marginBottom:20}}>
+              {/* Summary bar */}
+              {validPrices.length > 0 && (
+                <div style={{background:"#f9f9fb",borderBottom:"1px solid #e5e5ea",padding:"12px 20px",display:"flex",gap:24,flexWrap:"wrap"}}>
+                  {[
+                    {label:"Lowest",  val:`$${minPrice?.toFixed(2)}/hr`, color:"#34c759"},
+                    {label:"Average", val:`$${avgPrice?.toFixed(2)}/hr`,  color:"#007aff"},
+                    {label:"Highest", val:`$${maxPrice?.toFixed(2)}/hr`, color:"#ff3b30"},
+                    {label:"My Price",val:`$${myPrice?.toFixed(2)}/hr`,   color:"#ff9500"},
+                    {label:"vs Avg",  val:avgPrice?`${myPrice<avgPrice?`$${(avgPrice-myPrice).toFixed(2)} below`:`$${(myPrice-avgPrice).toFixed(2)} above`} avg`:"—", color:myPrice<(avgPrice||0)?"#34c759":"#ff9500"},
+                  ].map(({label,val,color})=>(
+                    <div key={label}>
+                      <div style={{fontSize:9,color:"#aeaeb2",textTransform:"uppercase",letterSpacing:"0.06em",marginBottom:2}}>{label}</div>
+                      <div style={{fontSize:14,fontWeight:700,color}}>{val}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <thead>
+                  <tr style={{background:"#f2f2f7"}}>
+                    {["Provider","Price/GPU/hr","vs My Price","Avail. Nodes","Link"].map(h=>(
+                      <th key={h} style={{padding:"10px 16px",textAlign:"left",fontSize:10,color:"#6e6e73",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",borderBottom:"1px solid #e5e5ea"}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {tableData.map((p,i)=>{
+                    const isBest = p.price===minPrice && p.price!==null;
+                    const diff = p.price!==null ? p.price - myPrice : null;
+                    return (
+                      <tr key={p.id} style={{borderBottom:"1px solid #f2f2f7",background:isBest?"rgba(52,199,89,0.04)":"transparent"}}>
+                        <td style={{padding:"12px 16px"}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <div style={{width:8,height:8,borderRadius:"50%",background:p.color,flexShrink:0}}/>
+                            <span style={{fontSize:13,fontWeight:600,color:"#1c1c1e"}}>{p.name}</span>
+                            {isBest&&<span style={{fontSize:9,background:"rgba(52,199,89,0.12)",color:"#34c759",border:"1px solid rgba(52,199,89,0.3)",borderRadius:4,padding:"1px 6px",fontWeight:700}}>LOWEST</span>}
+                          </div>
+                        </td>
+                        <td style={{padding:"12px 16px"}}>
+                          {p.price!==null
+                            ? <span style={{fontSize:15,fontWeight:700,color:"#1c1c1e"}}>${p.price.toFixed(2)}<span style={{fontSize:10,color:"#aeaeb2",fontWeight:400}}>/hr</span></span>
+                            : <span style={{fontSize:11,color:"#aeaeb2"}}>Not offered</span>}
+                        </td>
+                        <td style={{padding:"12px 16px"}}>
+                          {diff!==null
+                            ? <span style={{fontSize:12,fontWeight:600,color:diff>0?"#34c759":diff<0?"#ff3b30":"#6e6e73"}}>
+                                {diff>0?`+$${diff.toFixed(2)} margin`:diff<0?`-$${Math.abs(diff).toFixed(2)} below`:"Even"}
+                              </span>
+                            : "—"}
+                        </td>
+                        <td style={{padding:"12px 16px"}}>
+                          {(()=>{ const listing=liveListings.find(l=>l.providerId===p.id&&l.gpu===selectedGPU); const cnt=listing?.count; const avail=listing?.available; return avail===false ? <span style={{fontSize:11,color:"#ff3b30"}}>✗ Unavailable</span> : cnt ? <span style={{fontSize:11,color:"#34c759",fontWeight:600}}>● {cnt} GPU{cnt!==1?"s":""}</span> : <span style={{fontSize:11,color:"#34c759"}}>● Available</span>; })()}
+                        </td>
+                        <td style={{padding:"12px 16px"}}>
+                          <a href={p.url} target="_blank" rel="noopener noreferrer" style={{fontSize:11,color:"#007aff",textDecoration:"none"}}>Visit →</a>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div style={{background:"#ffffff",border:"1px solid #d1d1d6",borderRadius:12,padding:"48px 24px",textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:32,marginBottom:12}}>📡</div>
+              <div style={{fontSize:15,fontWeight:600,color:"#1c1c1e",marginBottom:6}}>No pricing data yet</div>
+              <div style={{fontSize:12,color:"#6e6e73",marginBottom:20}}>Click "Refresh Prices" to pull live GPU rental rates from major providers</div>
+              <button onClick={fetchAllPrices} disabled={loading} style={{background:"#007aff",color:"#fff",border:"none",borderRadius:8,padding:"11px 24px",fontFamily:"inherit",fontSize:13,fontWeight:600,cursor:"pointer"}}>
+                🔄 Load Market Prices
+              </button>
+            </div>
+          )}
+
+          {/* Analysis */}
+          {(analysis||loadingAnalysis) && (
+            <div style={{background:"#ffffff",border:"1px solid #d1d1d6",borderRadius:12,padding:"18px 20px",marginBottom:20}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#6e6e73",textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:10}}>📊 Market Analysis</div>
+              {loadingAnalysis
+                ? <div style={{color:"#aeaeb2",fontSize:12,fontStyle:"italic"}}>Generating analysis…</div>
+                : <div style={{fontSize:13,color:"#1c1c1e",lineHeight:1.7}}>{analysis}</div>}
+            </div>
+          )}
+
+          {/* All GPU types grid */}
+          {Object.keys(prices).length > 0 && (
+            <div style={{marginBottom:20}}>
+              <div style={{fontSize:11,fontWeight:700,color:"#6e6e73",textTransform:"uppercase",letterSpacing:"0.04em",marginBottom:12}}>Full Price Matrix</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:12}}>
+                {PROVIDERS.filter(p=>prices[p.id]).map(p=>(
+                  <div key={p.id} style={{background:"#ffffff",border:"1px solid #d1d1d6",borderRadius:10,padding:"14px 16px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+                      <div style={{width:8,height:8,borderRadius:"50%",background:p.color}}/>
+                      <span style={{fontSize:12,fontWeight:700,color:"#1c1c1e"}}>{p.name}</span>
+                    </div>
+                    {MARKET_GPU_TYPES.map(gpu=>{
+                      const gpuData = prices[p.id]?.[gpu];
+                      if(!gpuData) return null;
+                      const od = gpuData["On-Demand"];
+                      const mo = gpuData["1-Month"];
+                      if(!od && !mo) return null;
+                      return (
+                        <div key={gpu} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0",borderBottom:"1px solid #f2f2f7"}}>
+                          <span style={{fontSize:10,color:"#6e6e73"}}>{gpu}</span>
+                          <div style={{display:"flex",gap:8}}>
+                            {od&&<span style={{fontSize:11,fontWeight:600,color:"#1c1c1e"}}>${od.toFixed(2)}</span>}
+                            {mo&&<span style={{fontSize:10,color:"#007aff"}}>${mo.toFixed(2)}/mo</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Terminal Log */}
+          {log.length > 0 && (
+            <div style={{background:"#1c1c1e",borderRadius:10,padding:"14px 16px"}}>
+              <div style={{fontSize:10,color:"#6e6e73",fontFamily:"monospace",marginBottom:8,letterSpacing:"0.06em"}}>TERMINAL LOG</div>
+              <div ref={logRef} style={{maxHeight:160,overflowY:"auto",fontFamily:"monospace"}}>
+                {log.map((l,i)=>(
+                  <div key={i} style={{fontSize:11,marginBottom:3,color:l.type==="error"?"#ff3b30":l.type==="success"?"#34c759":l.type==="fetch"?"#5ac8fa":"#aeaeb2"}}>
+                    <span style={{color:"#48484a",marginRight:8}}>{new Date(l.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</span>
+                    {l.msg}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [authed, setAuthed] = useState(() => {
     const a = localStorage.getItem("nexus-auth");
@@ -1252,6 +1629,7 @@ function CRM({ role = "admin", setRole }) {
   const [onlineUsers, setOnlineUsers]   = useState(1);
   const [notifications, setNotifications] = useState([]);
   const [showHistory, setShowHistory]   = useState(false);
+  const [showMarket, setShowMarket]     = useState(false);
   const [history, setHistory]           = useState([]);
   const fbLib   = useRef(null);
   const localOp = useRef(false);
@@ -1388,6 +1766,8 @@ function CRM({ role = "admin", setRole }) {
     pushNotif("invoice_paid","Invoice paid",`$${Number(inv.amount).toLocaleString()} · ${inv.customerName}`);
   };
 
+  const expandAll=()=>{ setAllExpanded(true); };
+  const collapseAll=()=>{ setAllExpanded(false); setExpandedId(null); };
   const copyDeal=(deal)=>{
     const newDeal={...deal,id:uid(),customer:deal.customer+" (copy)",payments:[],startDate:"",endDate:"",notes:"",createdAt:Date.now()};
     updateDeals(d=>[...d,newDeal]);
@@ -1548,6 +1928,9 @@ function CRM({ role = "admin", setRole }) {
               🟢 UPDATED {(()=>{const d=new Date(history[0].ts);const now=new Date();const mins=Math.floor((now-d)/60000);if(mins<1)return"JUST NOW";if(mins<60)return`${mins}m AGO`;const hrs=Math.floor(mins/60);if(hrs<24)return`${hrs}h AGO`;return d.toLocaleDateString([],{month:"short",day:"numeric"});})()}
             </span>
           )}
+          <button onClick={()=>setShowMarket(true)} style={{background:"rgba(52,199,89,0.08)",border:"1px solid rgba(52,199,89,0.3)",color:"#34c759",borderRadius:4,padding:"6px 14px",fontFamily:"inherit",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:"0.01em",textTransform:"uppercase",transition:"all .15s"}} onMouseOver={e=>e.currentTarget.style.borderColor="#34c759"} onMouseOut={e=>e.currentTarget.style.borderColor="rgba(52,199,89,0.3)"}>
+            📡 Market
+          </button>
           <button className="btn-primary" onClick={openNew}>+ New Deal</button>
         </div>
       </div>
@@ -2475,6 +2858,9 @@ function MobileCRM(props) {
 
       {/* New/Edit Deal Modal (bottom sheet) */}
 
+
+      {/* ── GPU Market Terminal ──────────────────────────────────────────── */}
+      {showMarket && <GPUMarketTerminal onClose={()=>setShowMarket(false)} t={t}/>}
       {/* Quick Pay Popover */}
       {quickPayId&&(()=>{
         const deal=deals.find(d=>d.id===quickPayId);
